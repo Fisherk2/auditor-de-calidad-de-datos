@@ -1,0 +1,7 @@
+id,nombre,apellido,edad,salario,activo,email
+1,Juan,Pérez,treinta,50000.50,true,juan.perez@empresa.com
+2,,González,25,60000.00,falso,maria.gonzalez@empresa.com
+3,Carlos,Ramírez,-5,45000.75,si,carlos.ramirez@empresa.com
+4,Laura,Sánchez,28,abc75.50,true,laura.sanchez@empresa.com
+5,Pedro,López,35,75000.00,verdadero,
+6,Ana,,22,35000.00,true,ana@empresa.com
