@@ -13,7 +13,7 @@ class ErrorReporter:
     Generador de mensajes de error consistentes para el validador CSV
     """
 
-    def generateFieldError(self, row_num: int, field_name: str, error_type: str, details: str) -> List[str]:
+    def generate_field_error(self, row_num: int, field_name: str, error_type: str, details: str) -> List[str]:
         """
         Genera un mensaje de error para un campo específico
         :param row_num: numero de fila donde ocurrio el error
@@ -42,7 +42,7 @@ class ErrorReporter:
             errors.append(errorMsg)
         return errors
 
-    def generateHeaderError(self, missing_headers: List[str], unexpected_headers: List[str]) -> List[str]:
+    def generate_header_error(self, missing_headers: List[str], unexpected_headers: List[str]) -> List[str]:
         """
         Genera mensajes de error para problemas con encabezados
         :param unexpected_headers: Encabezados defectuosos
@@ -51,7 +51,7 @@ class ErrorReporter:
         errors = list()
 
         for header in missing_headers:
-            errors.extend(self.generateFieldError(
+            errors.extend(self.generate_field_error(
                 row_num=0,
                 field_name=header,
                 error_type="campo_faltante",
@@ -63,7 +63,7 @@ class ErrorReporter:
             errors.append(errorMsg)
         return errors
 
-    def generateFileError(self, file_name: str, error_type: str, details: str) -> List[str]:
+    def generate_file_error(self, file_name: str, error_type: str, details: str) -> List[str]:
         """
         Genera mensajes de error relacionados con el archivo en sí
         :param file_name: Nombre del fichero

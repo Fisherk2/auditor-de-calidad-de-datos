@@ -16,7 +16,7 @@ class CSVReader:
     Componente responsable de leer archivos CSV de forma segura
     """
 
-    def validateFileExist(self, filepath: str) -> bool:
+    def validate_file_exist(self, filepath: str) -> bool:
         """
         Verifica si el archivo existe en la ruta especificada
         :param filepath: Ruta absoluta o relativa del fichero
@@ -24,13 +24,13 @@ class CSVReader:
         """
         return os.path.exists(filepath)
 
-    def readHeaders(self, filepath: str) -> List[str]:
+    def read_headers(self, filepath: str) -> List[str]:
         """
         Lee solo los encabezados del archivo CSV
         :param filepath: Ruta absoluta o relativa del fichero
         :return: Lista de encabezados
         """
-        if not self.validateFileExist(filepath):
+        if not self.validate_file_exist(filepath):
             return []
 
         headers = []
@@ -51,13 +51,13 @@ class CSVReader:
             return []
         return headers
 
-    def readRows(self, filepath: str) -> Iterator[Dict[str, str]]:
+    def read_rows(self, filepath: str) -> Iterator[Dict[str, str]]:
         """
         Lee las filas del archivo CSV como diccionarios
         :param filepath: Ruta absoluta o relativa del fichero
         :return: Iterador para procesar las filas eficientemente
         """
-        if not self.validateFileExist(filepath):
+        if not self.validate_file_exist(filepath):
             raise FileNotFoundError(f"El archivo no existe: {filepath}")
 
         try:
@@ -81,7 +81,7 @@ class CSVReader:
         :param filepath: Ruta absoluta o relativo del fichero
         :return: Numero total de filas del fichero.
         """
-        if not self.validateFileExist(filepath):
+        if not self.validate_file_exist(filepath):
             return 0
 
         count = 0
