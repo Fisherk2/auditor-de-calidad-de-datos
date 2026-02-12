@@ -1,84 +1,68 @@
-# CSV Validator for Data Pipelines
+# Validador de CSV para Pipelines de Datos
 
-## Overview
-A lightweight Python component that validates CSV files against a predefined schema, ensuring data integrity before processing in data pipelines. The validator detects and reports common issues in structure, data types, and missing values.
+Validador robusto que verifica la integridad de archivos CSV contra un esquema predefinido, ideal para pipelines de datos automatizados.
 
-## Features
-- Schema-based CSV validation
-- Data type verification (int, float, string, boolean)
-- Required field validation
-- Detailed error reporting with specific row and column locations
-- Support for flexible schema definitions using dictionaries
+## Descripción
 
-## Requirements
+Esta herramienta permite validar archivos CSV verificando:
+- Presencia de encabezados esperados
+- Tipos de datos correctos por columna
+- Valores nulos en campos requeridos
+- Generación de reportes detallados de errores
+
+
+## Requisitos
 - Python 3.6+
-- Standard libraries only (no external dependencies)
+- Solo librerías estándar de Python 
 
-## Installation
+## Instalación
 ```bash
 # Clone the repository
 git clone https://github.com/Fisherk2/auditor-de-calidad-de-datos
 cd csv-validator
 ```
 
-## Usage Example
+## Uso
 ```python
 from src.validators.csv_validator import CSVValidator
 
-# Define expected schema
-schema = {
-    "id": {"type": "integer", "required": True},
-    "name": {"type": "string", "required": True},
-    "income": {"type": "float", "required": False}
+esquema = {
+    "id": {"tipo": "entero", "requerido": True},
+    "nombre": {"tipo": "cadena", "requerido": True},
+    "ingresos": {"tipo": "flotante", "requerido": False}
 }
 
-# Validate CSV file
 validator = CSVValidator()
-errors = validator.validate_file("path/to/file.csv", schema)
+errores = validator.validate_file("ruta/al/archivo.csv", esquema)
 
-if errors:
-    for error in errors:
-        print(f"Error: {error}")
-else:
-    print("CSV validation passed!")
+for error in errores:
+    print(error)
 ```
 
-## Project Structure
-```bash
-.
-├── CHANGELOG.md
-├── CONTRIBUTING.md
-├── LICENSE
-├── README.md
-├── requirements.txt
-├── samples/
-│   ├── valid_sample.csv
-│   └── invalid_sample.csv
-├── schemas/
-│   └── default_schema.yaml
-├── src/
-│   ├── __init__.py
-│   ├── validators/
-│   │   ├── __init__.py
-│   │   ├── csv_validator.py
-│   │   ├── type_validator.py
-│   │   └── schema_validator.py
-│   ├── readers/
-│   │   ├── __init__.py
-│   │   └── csv_reader.py
-│   └── utils/
-│       ├── __init__.py
-│       └── error_reporter.py
-└── tests/
-    ├── __init__.py
-    └── test_csv_validator.py
-```
+## Formato del Esquema
+El esquema define las expectativas para cada columna:
 
-## Schema Definition
-The schema defines expected columns with their types and required status:
+    tipo: "entero", "flotante", "cadena", "booleano"
+    requerido: True o False
 
-- `type`: Expected data type ("integer", "float", "string", "boolean")
-- `required`: Boolean indicating if the field is mandatory
+## Salida de Errores
+La función retorna una lista de strings con mensajes de error en formato:
+
+    "fila X: campo 'nombre_campo' - mensaje_de_error"
+
+Ejemplo de Error:
+
+    "fila 12: valor no numérico en columna 'ingresos'"
+    "fila 5: campo requerido 'nombre' está vacío"
+    "archivo: campo 'apellido' no encontrado en esquema"
+
+## Características
+
+* ✅ Validación de tipos de datos 
+* ✅ Manejo seguro de valores nulos 
+* ✅ Reporte detallado con ubicación de errores 
+* ✅ Compatible con pipelines automatizados 
+* ✅ Uso de bibliotecas estándar de Python
 
 ## License
-MIT License - See LICENSE file for details
+MIT License - Ver LICENSE para más detalles
