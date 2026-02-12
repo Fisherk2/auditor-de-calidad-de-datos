@@ -8,7 +8,7 @@ DESCRIPCIÓN: Lector de ficheros CSV que valida la existencia del fichero y su f
 """
 import os
 import csv
-from typing import List, Dict, Iterator, Optional
+from typing import List
 
 class CSVReader:
     """
@@ -22,42 +22,35 @@ class CSVReader:
         """
         return os.path.exists(filepath)
 
+    def readHeaders(self, filepath: str) -> List[str]:
+        """
+        Lee solo los encabezados del archivo CSV
+        :param filepath: Ruta absoluta o relativa del fichero
+        :return: Lista de encabezados
+        """
+        if not self.validateFileExist(filepath):
+            return []
+
+        headers = []
+        try:
+            with open(filepath, 'r', newline='') as file:
+                reader = csv.reader(file)
+                firstRow = next(reader)
+
+                # ■■■■■■■■■■■■■ En caso de que la primera fila pueda estar vacia ■■■■■■■■■■■■■
+                if firstRow is not None:
+                    headers = firstRow
+        except(IOError):
+            print(f"Error leyendo encabezados en el fichero {filepath}")
+            return []
+        except(UnicodeDecodeError):
+            print(f"Error decodificando archivo {filepath}")
+            return []
+        return headers
+
 
 # ▏▎▍▌▋▊▉▉▉▉▉▉▉▉ Pseudocodigo ▉▉▉▉▉▉▉▉▉▊▋▌▍▎▏
 
-
-public
-List < String > readHeaders(String
-filePath)
-"""
-Lee solo los encabezados del archivo CSV
-"""
-if !this.validateFileExists(filePath)
-return list()
-
-var
-headers = list()
-
-try
-    with open(filePath, 'r', newline='') as file
-        var
-        reader = csv.reader(file)
-        var
-        firstRow = next(reader, None)
-        if firstRow != null
-            headers = firstRow
-catch
-IOError
-e
-print("Error leyendo encabezados: " + str(e))
-return list()
-catch
-UnicodeDecodeError
-e
-print("Error decodificando archivo: " + str(e))
-return list()
-
-return headers
 
 public
 Iterator < Dict < String, String >> readRows(String
