@@ -8,13 +8,15 @@ DESCRIPCIÓN: Lector de ficheros CSV que valida la existencia del fichero y su f
 """
 import os
 import csv
-from typing import List
+from typing import List, Iterator, Dict
+
 
 class CSVReader:
     """
     Componente responsable de leer archivos CSV de forma segura
     """
-    def validateFileExist (self, filepath: str) -> bool:
+
+    def validateFileExist(self, filepath: str) -> bool:
         """
         Verifica si el archivo existe en la ruta especificada
         :param filepath: Ruta absoluta o relativa del fichero
@@ -40,6 +42,7 @@ class CSVReader:
                 # ■■■■■■■■■■■■■ En caso de que la primera fila pueda estar vacia ■■■■■■■■■■■■■
                 if firstRow is not None:
                     headers = firstRow
+
         except(IOError):
             print(f"Error leyendo encabezados en el fichero {filepath}")
             return []
@@ -48,67 +51,53 @@ class CSVReader:
             return []
         return headers
 
+    def readRows(self, filepath: str) -> Iterator[Dict[str, str]]:
+        """
+        Lee las filas del archivo CSV como diccionarios
+        :param filepath: Ruta absoluta o relativa del fichero
+        :return: Iterador para procesar las filas eficientemente
+        """
+        if not self.validateFileExist(filepath):
+            raise FileNotFoundError(f"El archivo no existe: {filepath}")
 
-# ▏▎▍▌▋▊▉▉▉▉▉▉▉▉ Pseudocodigo ▉▉▉▉▉▉▉▉▉▊▋▌▍▎▏
+        try:
+            with open(filepath, 'r', newline='') as file:
+                reader = csv.DictReader(file)
 
+                # TODO: ■■■■■■■■■■■■■ Procesar fila por fila usando yield simulado con generador ■■■■■■■■■■■■■
+                for row in reader:
+                    yield row
 
-public
-Iterator < Dict < String, String >> readRows(String
-filePath)
-"""
-Lee las filas del archivo CSV como diccionarios
-Retorna un iterador para procesamiento eficiente
-"""
-if !this.validateFileExists(filePath)
-raise FileNotFoundError("El archivo no existe: " + filePath)
+        except(IOError):
+            print(f"Error leyendo archivo CSV {filepath}")
+        except(UnicodeDecodeError):
+            raise ValueError(f"Error decodificando archivo CSV {filepath}")
+        except(csv.Error):
+            raise ValueError(f"Formato CSV invalido en {filepath}")
 
-try
-    with open(filePath, 'r', newline='') as file
-        var
-        reader = csv.DictReader(file)
+    def count_rows(self, filepath) -> int:
+        """
+        Cuenta el numero total de filas en el archivo (Excluyendo encabezados)
+        :param filepath: Ruta absoluta o relativo del fichero
+        :return: Numero total de filas del fichero.
+        """
+        if not self.validateFileExist(filepath):
+            return 0
 
-        # Procesar fila por fila usando yield simulado con generador
-        for row in reader
-            yield row
-catch
-IOError
-e
-raise IOError("Error leyendo archivo CSV: " + str(e))
-catch
-UnicodeDecodeError
-e
-raise ValueError("Error decodificando archivo CSV: " + str(e))
-catch
-csv.Error
-e
-raise ValueError("Formato CSV inválido: " + str(e))
+        count = 0
 
-public
-int
-countRows(String
-filePath)
-"""
-Cuenta el número total de filas en el archivo (excluyendo encabezados)
-"""
-if !this.validateFileExists(filePath)
-return 0
+        try:
+            with open(filepath, 'r', newline='') as file:
+                reader = csv.reader(file)
 
-var
-count = 0
+                # ■■■■■■■■■■■■■ Saltar encabezado ■■■■■■■■■■■■■
+                next(reader, None)
 
-try
-    with open(filePath, 'r', newline='') as file
-        var
-        reader = csv.reader(file)
-        # Saltar encabezados
-        next(reader, None)
+                for row in reader:
+                    count += 1
 
-        for row in reader
-            count + +
-catch
-IOError
-e
-print("Error contando filas: " + str(e))
-return 0
+        except(IOError):
+            print(f"Error contando filas: {filepath}")
+            return 0
 
-return count
+        return count
