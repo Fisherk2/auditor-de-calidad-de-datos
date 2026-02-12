@@ -45,3 +45,11 @@ wheels/
 # Opcional: Ignorar archivos grandes de datos si no están versionados
 data/raw/*
 !data/raw/.gitkeep
+
+# JetBrains
+.idea/
+*.iml
+*.iws
+out/
+production/
+*.ipr
