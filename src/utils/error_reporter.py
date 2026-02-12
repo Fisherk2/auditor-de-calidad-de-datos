@@ -13,77 +13,77 @@ class ErrorReporter:
     Generador de mensajes de error consistentes para el validador CSV
     """
 
-    def generateFieldError(self, rowNum: int, fieldName: str, errorType: str, details: str) -> List[str]:
+    def generateFieldError(self, row_num: int, field_name: str, error_type: str, details: str) -> List[str]:
         """
         Genera un mensaje de error para un campo específico
-        :param rowNum: numero de fila donde ocurrio el error
-        :param fieldName: nombre del campo con error
-        :param errorType: tipo de error (tipo_incorrecto, valor_nulo, etc.)
+        :param row_num: numero de fila donde ocurrio el error
+        :param field_name: nombre del campo con error
+        :param error_type: tipo de error (tipo_incorrecto, valor_nulo, etc.)
         :param details: detalles adicionales sobre el error
         :return: Array de strings con los mensajes de error
         """
         errors = list()
 
         # TODO: ▼△▼△▼△▼△▼△▼△▼△▼△▼△ Refactorizar △▼△▼△▼△▼△▼△▼△▼△▼△▼
-        if errorType == "tipo_incorrecto":
-            errorMsg = f"Fila {rowNum}: valor no {details} en columna '{fieldName}'"
+        if error_type == "tipo_incorrecto":
+            errorMsg = f"Fila {row_num}: valor no {details} en columna '{field_name}'"
             errors.append(errorMsg)
-        elif errorType == "valor_nulo":
-            errorMsg = f"Fila {rowNum}: campo requerido '{fieldName}' está vacío"
+        elif error_type == "valor_nulo":
+            errorMsg = f"Fila {row_num}: campo requerido '{field_name}' está vacío"
             errors.append(errorMsg)
-        elif errorType == "campo_faltante":
-            errorMsg = f"Archivo: campo requerido '{fieldName}' no encontrado en encabezados"
+        elif error_type == "campo_faltante":
+            errorMsg = f"Archivo: campo requerido '{field_name}' no encontrado en encabezados"
             errors.append(errorMsg)
-        elif errorType == "campo_no_permitido":
-            errorMsg = f"Fila {rowNum}: campo '{fieldName}' no permitido según esquema"
+        elif error_type == "campo_no_permitido":
+            errorMsg = f"Fila {row_num}: campo '{field_name}' no permitido según esquema"
             errors.append(errorMsg)
         else:
-            errorMsg = f"Fila {rowNum}: error en campo '{fieldName}' - {details}"
+            errorMsg = f"Fila {row_num}: error en campo '{field_name}' - {details}"
             errors.append(errorMsg)
         return errors
 
-    def generateHeaderError(self, missingHeaders: List[str], unexpectedHeaders: List[str]) -> List[str]:
+    def generateHeaderError(self, missing_headers: List[str], unexpected_headers: List[str]) -> List[str]:
         """
         Genera mensajes de error para problemas con encabezados
-        :param unexpectedHeaders: Encabezados defectuosos
+        :param unexpected_headers: Encabezados defectuosos
         :return: Array de strings con los mensajes de error
         """
         errors = list()
 
-        for header in missingHeaders:
+        for header in missing_headers:
             errors.extend(self.generateFieldError(
-                rowNum=0,
-                fieldName=header,
-                errorType="campo_faltante",
+                row_num=0,
+                field_name=header,
+                error_type="campo_faltante",
                 details="")
             )
 
-        for header in unexpectedHeaders:
+        for header in unexpected_headers:
             errorMsg = f"Archivo: Campo no esperado '{header}' encontrado en encabezados"
             errors.append(errorMsg)
         return errors
 
-    def generateFileError(self, fileName: str, errorType: str, details: str) -> List[str]:
+    def generateFileError(self, file_name: str, error_type: str, details: str) -> List[str]:
         """
         Genera mensajes de error relacionados con el archivo en sí
-        :param fileName: Nombre del fichero
-        :param errorType: Error lanzando
+        :param file_name: Nombre del fichero
+        :param error_type: Error lanzando
         :param details: Especificación del error
         :return: Array de strings con los mensajes de error
         """
         errors = list()
 
         # TODO: ▼△▼△▼△▼△▼△▼△▼△▼△▼△ Refactorizar △▼△▼△▼△▼△▼△▼△▼△▼△▼
-        if errorType == "archivo_no_existe":
-            errorMsg = f"Archivo: '{fileName}' no existe"
+        if error_type == "archivo_no_existe":
+            errorMsg = f"Archivo: '{file_name}' no existe"
             errors.append(errorMsg)
-        elif errorType == "formato_invalido":
-            errorMsg = f"Archivo: No se pudo leer '{fileName}' - {details}"
+        elif error_type == "formato_invalido":
+            errorMsg = f"Archivo: No se pudo leer '{file_name}' - {details}"
             errors.append(errorMsg)
-        elif errorType == "lectura_fallida":
-            errorMsg = f"Archivo: No se pudo leer '{fileName}' - {details}"
+        elif error_type == "lectura_fallida":
+            errorMsg = f"Archivo: No se pudo leer '{file_name}' - {details}"
             errors.append(errorMsg)
         else:
-            errorMsg = f"Archivo: error en '{fileName}' - {details}"
+            errorMsg = f"Archivo: error en '{file_name}' - {details}"
             errors.append(errorMsg)
         return errors
