@@ -1,0 +1,11 @@
+# Bibliotecas estándar de Python utilizadas
+# Este archivo es informativo ya que no hay dependencias externas
+# Las bibliotecas estándar no necesitan instalación adicional
+
+# Bibliotecas utilizadas en el proyecto:
+# - csv: Para lectura de archivos CSV
+# - os: Para operaciones con archivos
+# - typing: Para anotaciones de tipo
+# - io: Para operaciones de entrada/salida
+# - collections: Para estructuras de datos
+# - sys: Para operaciones del sistema
