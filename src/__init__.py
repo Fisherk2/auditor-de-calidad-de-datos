@@ -1,6 +1,6 @@
 """
 ■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■
-MÓDULO:      Clase
+MÓDULO:      Init
 AUTOR:       Fisherk2
 FECHA:       2026-02-11
 DESCRIPCIÓN: Package initialization for CSV Validator components
