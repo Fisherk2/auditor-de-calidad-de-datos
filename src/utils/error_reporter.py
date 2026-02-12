@@ -6,8 +6,7 @@ FECHA:       2026-02-11
 DESCRIPCIÓN: Generador de mensajes de error consistentes para el validador de CSV
 ■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■
 """
-import os
-from typing import List, Dict, Any
+from typing import List
 
 class ErrorReporter:
     """
@@ -64,31 +63,27 @@ class ErrorReporter:
             errors.append(errorMsg)
         return errors
 
+    def generateFileError(self, fileName: str, errorType: str, details: str) -> List[str]:
+        """
+        Genera mensajes de error relacionados con el archivo en sí
+        :param fileName: Nombre del fichero
+        :param errorType: Error lanzando
+        :param details: Especificación del error
+        :return: Array de strings con los mensajes de error
+        """
+        errors = list()
 
-# ▏▎▍▌▋▊▉▉▉▉▉▉▉▉ Pseudocódigo ▉▉▉▉▉▉▉▉▉▊▋▌▍▎▏
-
-public List < String > generateFileError(String fileName, String errorType, String details)
-"""
-Genera mensajes de error relacionados con el archivo en sí
-"""
-var
-errors = list()
-
-if errorType == "archivo_no_existe"
-    var
-    errorMsg = "archivo: '" + fileName + "' no existe"
-    errors.append(errorMsg)
-else if errorType == "formato_invalido"
-var
-errorMsg = "archivo: '" + fileName + "' no es un archivo CSV válido"
-errors.append(errorMsg)
-else if errorType == "lectura_fallida"
-    var
-    errorMsg = "archivo: no se pudo leer '" + fileName + "' - " + details
-    errors.append(errorMsg)
-else
-    var
-    errorMsg = "archivo: error en '" + fileName + "' - " + details
-    errors.append(errorMsg)
-
-return errors
+        # TODO: ▼△▼△▼△▼△▼△▼△▼△▼△▼△ Refactorizar △▼△▼△▼△▼△▼△▼△▼△▼△▼
+        if errorType == "archivo_no_existe":
+            errorMsg = f"Archivo: '{fileName}' no existe"
+            errors.append(errorMsg)
+        elif errorType == "formato_invalido":
+            errorMsg = f"Archivo: No se pudo leer '{fileName}' - {details}"
+            errors.append(errorMsg)
+        elif errorType == "lectura_fallida":
+            errorMsg = f"Archivo: No se pudo leer '{fileName}' - {details}"
+            errors.append(errorMsg)
+        else:
+            errorMsg = f"Archivo: error en '{fileName}' - {details}"
+            errors.append(errorMsg)
+        return errors
