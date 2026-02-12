@@ -1,0 +1,35 @@
+# 🮙🮘🮙🮘🮙🮙🮘🮙🮘🮙🮙🮘🮙🮘🮙🮙🮘🮙🮘🮙 Esquema de ejemplo para validación de CSV 🮙🮘🮙🮘🮙🮙🮘🮙🮘🮙🮙🮘🮙🮘🮙🮙🮘🮙🮘🮙  #
+
+# Define las expectativas para cada columna del archivo
+
+id:
+  tipo: "entero"
+  requerido: true
+
+nombre:
+  tipo: "cadena"
+  requerido: true
+
+apellido:
+  tipo: "cadena"
+  requerido: false
+
+edad:
+  tipo: "entero"
+  requerido: false
+
+salario:
+  tipo: "flotante"
+  requerido: false
+
+activo:
+  tipo: "booleano"
+  requerido: true
+
+fecha_registro:
+  tipo: "cadena"
+  requerido: false
+
+email:
+  tipo: "cadena"
+  requerido: false
