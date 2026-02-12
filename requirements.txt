@@ -1,11 +1,12 @@
-# Bibliotecas estándar de Python utilizadas
-# Este archivo es informativo ya que no hay dependencias externas
-# Las bibliotecas estándar no necesitan instalación adicional
+# Validador de CSV para Pipelines de Datos
+# Este proyecto utiliza únicamente bibliotecas estándar de Python
+# No requiere dependencias externas adicionales
 
-# Bibliotecas utilizadas en el proyecto:
+# Bibliotecas estándar utilizadas:
 # - csv: Para lectura de archivos CSV
-# - os: Para operaciones con archivos
 # - typing: Para anotaciones de tipo
+# - os: Para operaciones con archivos
+# - sys: Para manipulación del sistema
+# - logging: Para registro de eventos
 # - io: Para operaciones de entrada/salida
-# - collections: Para estructuras de datos
-# - sys: Para operaciones del sistema
+# - collections: Para estructuras de datos avanzadas
