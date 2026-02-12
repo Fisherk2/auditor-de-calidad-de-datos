@@ -44,12 +44,41 @@ else:
 ```
 
 ## Project Structure
-- `src/validators/`: Core validation logic
-- `src/readers/`: CSV reading utilities
-- `src/utils/`: Error reporting and utility functions
-- `samples/`: Sample CSV files for testing
-- `schemas/`: Schema definition examples
-- `tests/`: Unit tests
+```bash
+.
+├── CHANGELOG.md
+├── CONTRIBUTING.md
+├── LICENSE
+├── README.md
+├── requirements.txt
+├── samples/
+│   ├── valid_sample.csv
+│   └── invalid_sample.csv
+├── schemas/
+│   └── default_schema.yaml
+├── src/
+│   ├── __init__.py
+│   ├── validators/
+│   │   ├── __init__.py
+│   │   ├── csv_validator.py
+│   │   ├── type_validator.py
+│   │   └── schema_validator.py
+│   ├── readers/
+│   │   ├── __init__.py
+│   │   └── csv_reader.py
+│   └── utils/
+│       ├── __init__.py
+│       └── error_reporter.py
+└── tests/
+    ├── __init__.py
+    └── test_csv_validator.py
+```
+
+## Schema Definition
+The schema defines expected columns with their types and required status:
+
+- `type`: Expected data type ("integer", "float", "string", "boolean")
+- `required`: Boolean indicating if the field is mandatory
 
 ## License
 MIT License - See LICENSE file for details
