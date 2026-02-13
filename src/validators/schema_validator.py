@@ -7,7 +7,8 @@ DESCRIPCIÓN: Validador de estructura del esquema de validación.
 ■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■
 """
 
-from typing import List, Dict, Any
+from typing import List, Dict
+
 
 class SchemaValidator:
     """
@@ -51,7 +52,7 @@ class SchemaValidator:
             return False
 
         # TODO: ■■■■■■■■■■■■■ Verificar que el tipo sea uno de los tipos soportados ■■■■■■■■■■■■■
-        supported_types = ["entero","flotante","cadena","booleano"]
+        supported_types = ["entero", "flotante", "cadena", "booleano"]
         if not field_type.lower() in supported_types:
             return False
 
@@ -94,20 +95,13 @@ class SchemaValidator:
 
         return field_names
 
-# ▼△▼△▼△▼△▼△▼△▼△▼△▼△ Pseudocodigo △▼△▼△▼△▼△▼△▼△▼△▼△▼
-
-public
-boolean
-fieldExistsInSchema(String
-fieldName, Dict < String, Dict > schema)
-"""
-Verifica si un campo existe en el esquema
-Parámetros:
-- fieldName: nombre del campo a buscar
-- schema: diccionario que define el esquema de validación
-Retorna: true si el campo existe en el esquema, false en caso contrario
-"""
-if schema == null | | fieldName == null
-    return false
-
-return fieldName in schema
+    def field_exist_in_schema(self, field_name: str, schema: SchemaDefinition) -> bool:
+        """
+        Verifica si un campo existe en el esquema
+        :param field_name: Nombre del campo a buscar
+        :param schema: Diccionario que define el esquema de validacion
+        :return: ¿El campo existe en el esquema?
+        """
+        if schema is None or field_name is None:
+            return False
+        return field_name in schema

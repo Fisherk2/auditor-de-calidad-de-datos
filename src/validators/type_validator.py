@@ -8,10 +8,12 @@ DESCRIPCIÓN: Validador y conversor de tipos establecido en el esquema
 """
 from typing import Any
 
+
 class TypeValidator:
     """
     Componente responsable de validar tipos de datos y realizar conversiones seguras
     """
+
     def validate_type(self, value: Any, expected_type: str) -> bool:
         """
         Valida si un valor coincide con el tipo esperado
@@ -47,7 +49,7 @@ class TypeValidator:
         else:
             return False
 
-    def convert_value(self, value: Any, expected_type:str) -> Any:
+    def convert_value(self, value: Any, expected_type: str) -> Any:
         """
         Convierte un valor al tipo esperado de forma segura
         :param value: Valor a convertir
@@ -111,7 +113,7 @@ class TypeValidator:
         """
         if value is None or value.strip() == "":
             return False
-        
+
         try:
             int(value.strip())
             return True
