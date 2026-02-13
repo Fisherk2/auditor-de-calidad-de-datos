@@ -102,6 +102,21 @@ class TypeValidator:
         except ValueError:
             return False
 
+    def _is_valid_float(self, value: str) -> bool:
+        """
+        Verifica si un string representa un valor flotante válido
+        :param value: Valor que quieres validar
+        :return: ¿Es un flotante?
+        """
+        if value is None or value.strip() == "":
+            return False
+
+        try:
+            float(value.strip())
+            return True
+        except ValueError:
+            return False
+
 
 
 # ▼△▼△▼△▼△▼△▼△▼△▼△▼△ Pseudocodigo △▼△▼△▼△▼△▼△▼△▼△▼△▼
