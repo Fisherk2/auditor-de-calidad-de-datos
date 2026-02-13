@@ -31,8 +31,8 @@ class TestCSVValidator:
         self.test_validate_missing_headers()
         self.test_validate_wrong_types()
         self.test_validate_null_values()
-        self.test_validates_non_existent_file()
-        self.test_validates_unexpected_headers()
+        self.test_validate_non_existent_file()
+        self.test_validate_unexpected_headers()
         print("🮙🮘🮙🮘🮙🮙🮘🮙🮘🮙🮙🮘🮙🮘🮙🮙🮘🮙🮘🮙 Todas las pruebas completadas 🮙🮘🮙🮘🮙🮙🮘🮙🮘🮙🮙🮘🮙🮘🮙🮙🮘🮙🮘🮙")
 
     def test_validate_correct_csv(self):
@@ -168,39 +168,38 @@ class TestCSVValidator:
         # ■■■■■■■■■■■■■ Limpiar archivo temporal ■■■■■■■■■■■■■
         os.remove(temp_file)
 
+    def test_validate_non_existent_file(self):
+        """
+        Test: Validar un archivo que no existe
+        :return:
+        """
+        # ■■■■■■■■■■■■■ Esquema de prueba ■■■■■■■■■■■■■
+        schema = dict()
+        schema["id"] = {"tipo": "entero", "requerido": True}
+
+        # ■■■■■■■■■■■■■ Declarar un directorio que no existe ■■■■■■■■■■■■■
+        non_existent_file = "/path/that/does/not/exist.csv"
+        errors = self.validator.validate_file(
+            filepath=non_existent_file,
+            schema=schema
+        )
+
+        # ■■■■■■■■■■■■■ Deberia haber error de archivo no existente ■■■■■■■■■■■■■
+        has_file_error = False
+        for error in errors:
+            # TODO: ▲▲▲▲▲▲ Refactorizar ▲▲▲▲▲▲
+            if "no existe" in error:
+                has_file_error = True
+                break
+        if has_file_error:
+            print("✓ testValidateNonExistentFile: PASSED")
+        else:
+            print("✗ testValidateNonExistentFile: FAILED - Expected file not found error")
+            print(f"  Errors: {str(errors)}")
 
 
 
 # ▼△▼△▼△▼△▼△▼△▼△▼△▼△ Pseudocodigo △▼△▼△▼△▼△▼△▼△▼△▼△▼
-
-public
-void
-testValidateNonExistentFile()
-"""
-Prueba: Validar un archivo que no existe
-"""
-var
-schema = dict()
-schema["id"] = {"tipo": "entero", "requerido": true}
-
-var
-nonExistentFile = "/path/that/does/not/exist.csv"
-var
-errors = this.validator.validateFile(nonExistentFile, schema)
-
-# Debería haber error de archivo no existente
-var
-hasFileError = false
-for error in errors
-    if "no existe" in error
-        hasFileError = true
-        break
-
-if hasFileError
-    print("✓ testValidateNonExistentFile: PASSED")
-else
-    print("✗ testValidateNonExistentFile: FAILED - Expected file not found error")
-    print("  Errors: " + str(errors))
 
 public
 void
