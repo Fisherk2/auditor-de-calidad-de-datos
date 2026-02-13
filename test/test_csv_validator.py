@@ -197,47 +197,41 @@ class TestCSVValidator:
             print("✗ testValidateNonExistentFile: FAILED - Expected file not found error")
             print(f"  Errors: {str(errors)}")
 
+    def test_validate_unexpected_headers(self):
+        """
+        Test: Validar un CSV con campos no permitidos por el esquema
+        :return:
+        """
+        # ■■■■■■■■■■■■■ Esquema de prueba ■■■■■■■■■■■■■
+        schema = dict()
+        schema["id"] = {"tipo": "entero", "requerido": True}
+        schema["nombre"] = {"tipo": "cadena", "requerido": True}
+
+        # ■■■■■■■■■■■■■ Crear archivo temporal con campo no permitido ■■■■■■■■■■■■■
+        temp_content = "id,nombre,apellido\n1,Alice,Pérez"
+        temp_file = self._create_temp_file(temp_content)
+        errors = self.validator.validate_file(
+            filepath=temp_file,
+            schema=schema
+        )
+
+        # ■■■■■■■■■■■■■ Deberia haber error por campo no permitido ■■■■■■■■■■■■■
+        has_unexpected_field_error = False
+        for error in errors:
+            if "apellido" in error and "no esperado" in error:
+                has_unexpected_field_error = True
+                break
+        if has_unexpected_field_error:
+            print("✓ testValidateUnexpectedHeaders: PASSED")
+        else:
+            print("✗ testValidateUnexpectedHeaders: FAILED - Expected unexpected field error")
+            print(f"  Errors: {str(errors)}")
+
+        # ■■■■■■■■■■■■■ Limpiar archivo temporal ■■■■■■■■■■■■■
+        os.remove(temp_file)
 
 
 # ▼△▼△▼△▼△▼△▼△▼△▼△▼△ Pseudocodigo △▼△▼△▼△▼△▼△▼△▼△▼△▼
-
-public
-void
-testValidateUnexpectedHeaders()
-"""
-Prueba: Validar un CSV con campos no permitidos por el esquema
-"""
-var
-schema = dict()
-schema["id"] = {"tipo": "entero", "requerido": true}
-schema["nombre"] = {"tipo": "cadena", "requerido": true}
-
-# Crear archivo temporal con campo no permitido
-var
-tempContent = "id,nombre,apellido\n1,Alice,Pérez"
-var
-tempFile = this.createTempFile(tempContent)
-
-var
-errors = this.validator.validateFile(tempFile, schema)
-
-# Debería haber error por campo no permitido
-var
-hasUnexpectedFieldError = false
-for error in errors
-    if "apellido" in error & & "no esperado" in error
-        hasUnexpectedFieldError = true
-        break
-
-if hasUnexpectedFieldError
-    print("✓ testValidateUnexpectedHeaders: PASSED")
-else
-    print("✗ testValidateUnexpectedHeaders: FAILED - Expected unexpected field error")
-    print("  Errors: " + str(errors))
-
-# Limpiar archivo temporal
-os.remove(tempFile)
-
 private
 String
 createTempFile(String
