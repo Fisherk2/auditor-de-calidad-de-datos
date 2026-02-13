@@ -63,36 +63,28 @@ class SchemaValidator:
 
         return True
 
+    def get_required_fields(self, schema: SchemaDefinition) -> List[str]:
+        """
+        Extrae la lista de campos requeridos del esquema
+        :param schema: Diccionario que defina el esquema de validacion
+        :return: Lista de nombres de campos que son requeridos
+        """
+        required_fields = List()
+        if schema is None:
+            return required_fields
 
+        for field_name, field_def in schema.items():
+            if self._is_valid_field_definition(field_def):
+                is_required = field_def.get("requerido", False)
+
+                # ■■■■■■■■■■■■■ Extrae el campo requerido ■■■■■■■■■■■■■
+                if is_required:
+                    required_fields.append(field_name)
+        return required_fields
 
 # ▼△▼△▼△▼△▼△▼△▼△▼△▼△ Pseudocodigo △▼△▼△▼△▼△▼△▼△▼△▼△▼
 
-
-public
-List < String > getRequiredFields(Dict < String, Dict > schema)
-"""
-Extrae la lista de campos requeridos del esquema
-Parámetros:
-- schema: diccionario que define el esquema de validación
-Retorna: lista de nombres de campos que son requeridos
-"""
-var
-requiredFields = list()
-
-if schema == null
-    return requiredFields
-
-for fieldName, fieldDef in schema.items()
-    if this.isValidFieldDefinition(fieldDef)
-        var
-        isRequired = fieldDef.get("requerido", false)
-        if isRequired
-            requiredFields.append(fieldName)
-
-return requiredFields
-
-public
-List < String > getAllFieldNames(Dict < String, Dict > schema)
+public List < String > getAllFieldNames(Dict < String, Dict > schema)
 """
 Extrae la lista de todos los nombres de campos del esquema
 Parámetros:
