@@ -232,13 +232,19 @@ class TestCSVValidator:
 
     def _create_temp_file(self, content:str) -> str:
         """
-        Crea un archivo temporal con contenido especifico
+        Crea un archivo temporal seguro con contenido especifico
         :return:
         """
-        temp_file = tempfile.mktemp(suffix=".csv")
-        with open(temp_file, "w") as file:
-            file.write(content)
-        return temp_file
+        temp_file_handle = tempfile.NamedTemporaryFile(mode='w', suffix='.csv', delete=False)
+        temp_file_handle.write(content)
+
+        # ■■■■■■■■■■■■■ Asegurar que el contenido se escribe ■■■■■■■■■■■■■
+        temp_file_handle.flush()
+
+        temp_file_path = temp_file_handle.name
+        temp_file_handle.close()
+
+        return temp_file_path
 
 # ▼△▼△▼△▼△▼△▼△▼△▼△▼△ Pseudocodigo △▼△▼△▼△▼△▼△▼△▼△▼△▼
 
