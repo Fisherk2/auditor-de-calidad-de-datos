@@ -10,6 +10,9 @@ DESCRIPCIÓN: Coordinador de validacion completa de archivos CSV
 import os
 import csv
 from typing import List, Dict, Any, Iterator
+
+from sqlalchemy import true, false
+
 from src.readers.csv_reader import CSVReader
 from src.validators.type_validator import TypeValidator
 from src.validators.schema_validator import SchemaValidator
@@ -131,21 +134,18 @@ class CSVValidator:
 
         return errors
 
-
+    def _has_critical_header_errors(self, headers_errors:List[str]) -> bool:
+        """
+        Determina si hay errores de encabezado criticos que impidan continuar
+        :param headers_errors: Lista de encabezados con posibles errores
+        :return: ¿Hay errores criticos en los encabezados?
+        """
+        for error in headers_errors:
+            if "campo requerido" in error or "no encontrado" in error:
+                return True
+        return False
 
     # ▼△▼△▼△▼△▼△▼△▼△▼△▼△ Pseudocodigo △▼△▼△▼△▼△▼△▼△▼△▼△▼
-
-
-private
-boolean
-hasCriticalHeaderErrors(List < String > headerErrors)
-"""
-Determina si hay errores de encabezado críticos que impidan continuar
-"""
-for error in headerErrors
-    if "campo requerido" in error | | "no encontrado" in error
-        return true
-return false
 
 private
 List < String > validateRow(Dict < String, String > row, Dict < String, Dict > schema, int
