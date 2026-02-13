@@ -2,21 +2,17 @@
 ■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■
 MÓDULO:      Validador de archivos CSV
 AUTOR:       Fisherk2
-FECHA:       2026-02-12
+FECHA:       2026-02-13
 DESCRIPCIÓN: Coordinador de validacion completa de archivos CSV
 ■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■
 """
 
-import os
-import csv
-from typing import List, Dict, Any, Iterator
-
-from sqlalchemy import true, false
-
+from typing import List, Dict, Any
 from src.readers.csv_reader import CSVReader
 from src.validators.type_validator import TypeValidator
 from src.validators.schema_validator import SchemaValidator
 from src.utils.error_reporter import ErrorReporter
+
 
 class CSVValidator:
     """
@@ -32,7 +28,7 @@ class CSVValidator:
         self.schema_validator = SchemaValidator()
         self.error_reporter = ErrorReporter()
 
-    def validate_file(self,filepath:str,schema:SchemaDefinition) -> List[str]:
+    def validate_file(self, filepath: str, schema: SchemaDefinition) -> List[str]:
         """
         Valida un archivo CSV completo contra un esquema
         :param filepath: Ruta del archivo CSV a validar
@@ -68,7 +64,10 @@ class CSVValidator:
             file_headers = self.csv_reader.read_headers(filepath)
 
             # ▲▲▲▲▲▲ Validar encabezados contra esquema ▲▲▲▲▲▲
-            headers_errors = self._validate_headers(file_headers, schema)
+            headers_errors = self._validate_headers(
+                file_headers=file_headers,
+                schema=schema
+            )
             all_errors.extend(headers_errors)
 
             # ▲▲▲▲▲▲ Si hay errores en los encabezados, no continuar con la validacion de filas ▲▲▲▲▲▲
@@ -76,20 +75,24 @@ class CSVValidator:
                 return all_errors
 
             # ▲▲▲▲▲▲ Validar cada fila del archivo ▲▲▲▲▲▲
-            row_index = 1 # Empezar en 1 porque la fila 0 son encabezados
+            row_index = 1  # Empezar en 1 porque la fila 0 son encabezados
             for row in self.csv_reader.read_rows(filepath):
                 row_index += 1
-                row_errors = self._validate_row(filepath)
+                row_errors = self._validate_row(
+                    row=row,
+                    schema=schema,
+                    row_num=row_index
+                )
                 all_errors.extend(row_errors)
 
-        except(IOError):
+        except IOError:
             file_error = self.error_reporter.generate_file_error(
                 file_name=filepath,
                 error_type="lectura_fallida",
                 details="No se pudo leer el fichero CSV"
             )
             all_errors.extend(file_error)
-        except(ValueError):
+        except ValueError:
             file_error = self.error_reporter.generate_file_error(
                 file_name=filepath,
                 error_type="formato_invalido",
@@ -99,7 +102,7 @@ class CSVValidator:
 
         return all_errors
 
-    def _validate_headers(self, file_headers: List[str], schema:SchemaDefinition) -> List[str]:
+    def _validate_headers(self, file_headers: List[str], schema: SchemaDefinition) -> List[str]:
         """
         Valida que los encabezados del archivo coincidan con el esquema
         :param file_headers: Lista de encabezados del archivo CSV
@@ -125,7 +128,7 @@ class CSVValidator:
                 unexpected_headers.append(header)
 
         # ■■■■■■■■■■■■■ Generar errores si hay discrepancias ■■■■■■■■■■■■■
-        if missing_headers.size() > 0 or unexpected_headers.size() > 0:
+        if len(missing_headers) > 0 or len(unexpected_headers) > 0:
             header_errors = self.error_reporter.generate_header_error(
                 missing_headers=missing_headers,
                 unexpected_headers=unexpected_headers
@@ -134,7 +137,7 @@ class CSVValidator:
 
         return errors
 
-    def _has_critical_header_errors(self, headers_errors:List[str]) -> bool:
+    def _has_critical_headers_errors(self, headers_errors: List[str]) -> bool:
         """
         Determina si hay errores de encabezado criticos que impidan continuar
         :param headers_errors: Lista de encabezados con posibles errores
@@ -145,13 +148,13 @@ class CSVValidator:
                 return True
         return False
 
-    def _validate_row(self, row: Dict[str,str], schema: SchemaDefinition, row_num:int) -> List[str]:
+    def _validate_row(self, row: Dict[str, str], schema: SchemaDefinition, row_num: int) -> List[str]:
         """
         Valida una fila individual contra el esquema
         :param row: Fila completa del archivo CSV
         :param schema: Esquema de validacion que define tipos y campos requeridos
         :param row_num: Numero de fila del archivo CSV
-        :return:
+        :return: Lista de errores encontrado en la fila del archivo CSV
         """
         errors = list()
 
@@ -159,9 +162,9 @@ class CSVValidator:
         for field_name, field_value in row.items():
 
             # ▲▲▲▲▲▲ Verificar si el campo esta permitido en el esquema ▲▲▲▲▲▲
-            if self.schema_validator.field_exist_in_schema(field_name=field_name,schema=schema):
+            if self.schema_validator.field_exist_in_schema(field_name=field_name, schema=schema):
                 field_schema = schema[field_name]
-                field_errors = self._validate_field(field_name,field_value,field_schema,row_num)
+                field_errors = self._validate_field(field_name, field_value, field_schema, row_num)
                 errors.extend(field_errors)
 
             # ▲▲▲▲▲▲ Campo no permitido en el esquema ▲▲▲▲▲▲
@@ -178,7 +181,7 @@ class CSVValidator:
         all_field_names = self.schema_validator.get_all_field_names(schema)
         for field_name in all_field_names:
             field_schema = schema[field_name]
-            is_required = field_schema.get("requerido",False)
+            is_required = field_schema.get("requerido", False)
             if is_required and not (field_name in row):
                 field_errors = self.error_reporter.generate_field_error(
                     row_num=row_num,
@@ -190,41 +193,43 @@ class CSVValidator:
 
         return errors
 
+    def _validate_field(self, field_name: str, field_value: Any, field_schema: Dict, row_num: int) -> List[str]:
+        """
+        Valida un campo individual segun su definicion en el esquema
+        :param field_name: Nombre del campo
+        :param field_value: Valor a evaluar de dicho campo
+        :param field_schema: Campo del esquema de referencia para evaluar
+        :param row_num: Numero de fila del archivo CSV
+        :return: Lista de errores encontrado en el campo.
+        """
+        errors = list()
 
+        # ■■■■■■■■■■■■■ Verificar si es un campo requerido y esta vacio ■■■■■■■■■■■■■
+        is_required = field_schema.get("requerido", False)
+        if is_required and (field_value is None) or str(field_value).strip() == "":
+            field_errors = self.error_reporter.generate_field_error(
+                row_num=row_num,
+                field_name=field_name,
+                error_type="valor_nulo",
+                details=""
+            )
+            errors.extend(field_errors)
 
-    # ▼△▼△▼△▼△▼△▼△▼△▼△▼△ Pseudocodigo △▼△▼△▼△▼△▼△▼△▼△▼△▼
+        # ■■■■■■■■■■■■■ Validar tipo de dato ■■■■■■■■■■■■■
+        expected_type = field_schema.get("tipo", "cadena")
+        if field_value is not None and str(field_value).strip() != "":
+            is_valid_type = self.type_validator.validate_type(
+                value=field_value,
+                expected_type=expected_type
+            )
+            if not is_valid_type:
+                type_error_details = f"No {expected_type} valido"
+                field_errors = self.error_reporter.generate_field_error(
+                    row_num=row_num,
+                    field_name=field_name,
+                    error_type="tipo_incorrecto",
+                    details=type_error_details
+                )
+                errors.extend(field_errors)
 
-private
-List < String > validateField(String
-fieldName, Object
-fieldValue, Dict
-fieldSchema, int
-rowNum)
-"""
-Valida un campo individual según su definición en el esquema
-"""
-var
-errors = list()
-
-# Verificar si es un campo requerido y está vacío
-var
-isRequired = fieldSchema.get("requerido", false)
-if isRequired & & (fieldValue == null | | str(fieldValue).strip() == "")
-    var
-    fieldErrors = this.errorReporter.generateFieldError(rowNum, fieldName, "valor_nulo", "")
-    errors.extend(fieldErrors)
-
-# Validar tipo de dato
-var
-expectedType = fieldSchema.get("tipo", "cadena")
-if fieldValue != null & & str(fieldValue).strip() != ""
-    var
-    isValidType = this.typeValidator.validateType(fieldValue, expectedType)
-    if !isValidType
-    var
-    typeErrorDetails = "no " + expectedType + " válido"
-    var
-    fieldErrors = this.errorReporter.generateFieldError(rowNum, fieldName, "tipo_incorrecto", typeErrorDetails)
-    errors.extend(fieldErrors)
-
-return errors
+        return errors
