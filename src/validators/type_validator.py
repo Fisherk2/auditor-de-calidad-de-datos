@@ -6,8 +6,7 @@ FECHA:       2026-02-12
 DESCRIPCIÓN: Validador y conversor de tipos establecido en el esquema
 ■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■
 """
-import os
-from typing import List, Dict, Any, Union
+from typing import Any
 
 class TypeValidator:
     """
@@ -72,7 +71,7 @@ class TypeValidator:
             elif lowerType == "cadena":
                 return value
             elif lowerType == "booleano":
-                return self.parse_bool(value)
+                return self._parse_bool(value)
 
             # ■■■■■■■■■■■■■ Tipo desconocido ■■■■■■■■■■■■■
             else:
@@ -88,6 +87,19 @@ class TypeValidator:
             # ■■■■■■■■■■■■■ Error en la conversion ■■■■■■■■■■■■■
             return None
 
+    def _parse_bool(self, value: str) -> bool:
+        """
+        Convierte un string a valor booleano
+        :param value: Valor a convertir a boolean
+        :return: True o False
+        """
+        if value is None:
+            return False
+
+        lowerValue = value.strip().lower()
+
+        # TODO: ■■■■■■■■■■■■■ Refactorizar ■■■■■■■■■■■■■
+        return lowerValue in ["true", "1", "si", "verdadero", "t"]
 
     # ▣▢▣▢▣▢▣▢▣▢▣▢▣▢▣▢▣▢▣▢▣▢▣▢▣  Validadores especificos ▣▢▣▢▣▢▣▢▣▢▣▢▣▢▣▢▣▢▣▢▣▢▣▢▣
 
@@ -135,21 +147,3 @@ class TypeValidator:
 
         # TODO: ■■■■■■■■■■■■■ Refactorizar ■■■■■■■■■■■■■
         return lowerValue in ["true", "false", "1", "0", "si", "no", "verdadero", "falso", "t", "f"]
-
-
-
-# ▼△▼△▼△▼△▼△▼△▼△▼△▼△ Pseudocodigo △▼△▼△▼△▼△▼△▼△▼△▼△▼
-
-private
-boolean
-parseBoolean(String
-value)
-"""
-Convierte un string a valor booleano
-"""
-if value == null
-    return false
-
-var
-lowerValue = value.strip().lower()
-return lowerValue in ["true", "1", "si", "verdadero", "t"]
