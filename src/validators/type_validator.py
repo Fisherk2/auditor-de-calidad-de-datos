@@ -20,14 +20,15 @@ class TypeValidator:
         :param expected_type: Tipo esperado ("entero", "flotante", "cadena", "booleano")
         :return: ¿Es del tipo esperado?
         """
-        # ▲▲▲▲▲▲▲▲▲▲▲▲▲ Convertir tipo string a tipo real para validación ▲▲▲▲▲▲▲▲▲▲▲▲▲
+        # ■■■■■■■■■■■■■ Convertir tipo string a tipo real para validación ■■■■■■■■■■■■■
         lower_type = expected_type.lower()
+
+        # ■■■■■■■■■■■■■ Valores nulos/vacíos se consideran válidos para validación de tipo ■■■■■■■■■■■■■
         if value == None or value == "":
-            # ■■■■■■■■■■■■■ Valores nulos/vacíos se consideran válidos para validación de tipo ■■■■■■■■■■■■■
             # ■■■■■■■■■■■■■ La validación de nulos se hace por separado ■■■■■■■■■■■■■
             return True
 
-        # ▲▲▲▲▲▲▲▲▲▲▲▲▲ Eliminar espacios en blanco iniciales y finales ▲▲▲▲▲▲▲▲▲▲▲▲▲
+        # ■■■■■■■■■■■■■ Eliminar espacios en blanco iniciales y finales ■■■■■■■■■■■■■
         value = str(value).strip()
 
         # TODO: ■■■■■■■■■■■■■ Refactorizar ■■■■■■■■■■■■■
@@ -41,7 +42,7 @@ class TypeValidator:
             return True
 
         elif lower_type == "booleano":
-            return self._is_valid_boolean(value)
+            return self._is_valid_bool(value)
 
         # ■■■■■■■■■■■■■ Tipo desconocido ■■■■■■■■■■■■■
         else:
@@ -57,7 +58,7 @@ class TypeValidator:
         if value == None or value == "":
             return None
 
-        # ▲▲▲▲▲▲▲▲▲▲▲▲▲ Formatear valor para procesarlo ▲▲▲▲▲▲▲▲▲▲▲▲▲
+        # ■■■■■■■■■■■■■ Formatear valor para procesarlo ■■■■■■■■■■■■■
         value = str(value).strip()
         lowerType = expected_type.lower()
 
@@ -86,6 +87,9 @@ class TypeValidator:
 
             # ■■■■■■■■■■■■■ Error en la conversion ■■■■■■■■■■■■■
             return None
+
+
+    # ▣▢▣▢▣▢▣▢▣▢▣▢▣▢▣▢▣▢▣▢▣▢▣▢▣  Validadores especificos ▣▢▣▢▣▢▣▢▣▢▣▢▣▢▣▢▣▢▣▢▣▢▣▢▣
 
     def _is_valid_integer(self, value: str) -> bool:
         """
@@ -117,45 +121,24 @@ class TypeValidator:
         except ValueError:
             return False
 
+    def _is_valid_bool(self, value: str) -> bool:
+        """
+        Verifica si un string representa un valor booleano válido
+        Acepta: "true", "false", "1", "0", "si", "no", "verdadero", "falso"
+        :param value: Valor que quieres validar
+        :return: ¿Es un booleano?
+        """
+        if value is None:
+            return False
+
+        lowerValue = value.strip().lower()
+
+        # TODO: ■■■■■■■■■■■■■ Refactorizar ■■■■■■■■■■■■■
+        return lowerValue in ["true", "false", "1", "0", "si", "no", "verdadero", "falso", "t", "f"]
+
 
 
 # ▼△▼△▼△▼△▼△▼△▼△▼△▼△ Pseudocodigo △▼△▼△▼△▼△▼△▼△▼△▼△▼
-
-
-
-private
-boolean
-isValidFloat(String
-value)
-"""
-Verifica si un string representa un valor flotante válido
-"""
-if value == null | | value.strip() == ""
-    return false
-
-try
-    var
-    floatValue = float(value.strip())
-    return true
-catch
-ValueError
-e
-return false
-
-private
-boolean
-isValidBoolean(String
-value)
-"""
-Verifica si un string representa un valor booleano válido
-Acepta: "true", "false", "1", "0", "si", "no", "verdadero", "falso"
-"""
-if value == null
-    return false
-
-var
-lowerValue = value.strip().lower()
-return lowerValue in ["true", "false", "1", "0", "si", "no", "verdadero", "falso", "t", "f"]
 
 private
 boolean
