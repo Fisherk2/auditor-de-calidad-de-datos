@@ -1,6 +1,6 @@
 """
 ■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■
-MÓDULO:      Test para validador de archivos CSV
+MÓDULO:      SUT de validador de archivos CSV
 AUTOR:       Fisherk2
 FECHA:       2026-02-13
 DESCRIPCIÓN: Campo de pruebas unitarias para la implementacion de validador CSV
@@ -21,56 +21,50 @@ class TestCSVValidator:
     def __init__(self):
         self.validator = CSVValidator()
 
+    def run_all_test(self):
+        """
+        Ejecuta todas las pruebas del validador
+        :return:
+        """
+        print("🮙🮘🮙🮘🮙🮙🮘🮙🮘🮙🮙🮘🮙🮘🮙🮙🮘🮙🮘🮙 Ejecutando pruebas del validador de CSV 🮙🮘🮙🮘🮙🮙🮘🮙🮘🮙🮙🮘🮙🮘🮙🮙🮘🮙🮘🮙")
+        self.test_validate_correct_csv()
+        self.test_validate_missing_headers()
+        self.test_validate_wrong_types()
+        self.test_validate_null_values()
+        self.test_validates_non_existent_file()
+        self.test_validates_unexpected_headers()
+        print("🮙🮘🮙🮘🮙🮙🮘🮙🮘🮙🮙🮘🮙🮘🮙🮙🮘🮙🮘🮙 Todas las pruebas completadas 🮙🮘🮙🮘🮙🮙🮘🮙🮘🮙🮙🮘🮙🮘🮙🮙🮘🮙🮘🮙")
+
+    def test_validate_csv(self):
+        """
+        Test: Validar un CSV que cumple completamente con el esquema
+        :return:
+        """
+        # ■■■■■■■■■■■■■ Esquema de prueba ■■■■■■■■■■■■■
+        schema = dict()
+        schema["id"] = {"tipo": "entero", "requerido": True}
+        schema["nombre"] = {"tipo": "cadena", "requerido": True}
+        schema["activo"] = {"tipo": "booleano", "requerido": True}
+
+        # ■■■■■■■■■■■■■ Crear archivo temporal con datos validos ■■■■■■■■■■■■■
+        temp_content= "id,nombre,activo\n1,Alice,true\n2,Bob,false"
+        temp_file = self._create_temp_file(temp_content)
+        errors = self.validator.validate_file(
+            filepath=temp_file,
+            schema=schema
+        )
+
+        # ■■■■■■■■■■■■■ Deberia haber 0 errores ■■■■■■■■■■■■■
+        if len(errors) == 0:
+            print("✓ testValidateCorrectCSV: PASSED")
+        else:
+            print(f"✗ testValidateCorrectCSV: FAILED - Expected 0 errors, got {str(len(errors))}")
+            print("  Errors: " + str(errors))
+
+        # ■■■■■■■■■■■■■ Limpiar archivo temporal ■■■■■■■■■■■■■
+        os.remove(temp_file)
 
 # ▼△▼△▼△▼△▼△▼△▼△▼△▼△ Pseudocodigo △▼△▼△▼△▼△▼△▼△▼△▼△▼
-
-public
-void
-runAllTests()
-"""
-Ejecuta todas las pruebas del validador
-"""
-print("Ejecutando pruebas del validador de CSV...")
-
-this.testValidateCorrectCSV()
-this.testValidateMissingHeaders()
-this.testValidateWrongTypes()
-this.testValidateNullValues()
-this.testValidateNonExistentFile()
-this.testValidateUnexpectedHeaders()
-
-print("Todas las pruebas completadas.")
-
-public
-void
-testValidateCorrectCSV()
-"""
-Prueba: Validar un CSV que cumple completamente con el esquema
-"""
-var
-schema = dict()
-schema["id"] = {"tipo": "entero", "requerido": true}
-schema["nombre"] = {"tipo": "cadena", "requerido": true}
-schema["activo"] = {"tipo": "booleano", "requerido": false}
-
-# Crear archivo temporal con datos válidos
-var
-tempContent = "id,nombre,activo\n1,Alice,true\n2,Bob,false"
-var
-tempFile = this.createTempFile(tempContent)
-
-var
-errors = this.validator.validateFile(tempFile, schema)
-
-# Debería haber 0 errores
-if errors.size() == 0
-    print("✓ testValidateCorrectCSV: PASSED")
-else
-    print("✗ testValidateCorrectCSV: FAILED - Expected 0 errors, got " + str(errors.size()))
-    print("  Errors: " + str(errors))
-
-# Limpiar archivo temporal
-os.remove(tempFile)
 
 public
 void
