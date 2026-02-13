@@ -32,16 +32,16 @@ class TypeValidator:
 
         # TODO: ■■■■■■■■■■■■■ Refactorizar ■■■■■■■■■■■■■
         if lower_type == "entero":
-            return self.is_valid_integer(value)
+            return self._is_valid_integer(value)
         elif lower_type == "flotante":
-            return self.is_valid_float(value)
+            return self._is_valid_float(value)
 
         # ■■■■■■■■■■■■■ Cualquier valor se puede representar como cadena ■■■■■■■■■■■■■
         elif lower_type == "cadena":
             return True
 
         elif lower_type == "booleano":
-            return self.is_valid_boolean(value)
+            return self._is_valid_boolean(value)
 
         # ■■■■■■■■■■■■■ Tipo desconocido ■■■■■■■■■■■■■
         else:
@@ -87,25 +87,26 @@ class TypeValidator:
             # ■■■■■■■■■■■■■ Error en la conversion ■■■■■■■■■■■■■
             return None
 
+    def _is_valid_integer(self, value: str) -> bool:
+        """
+        Verifica si un string representa un valor entero válido
+        :param value: Valor que quieres validar
+        :return: ¿Es un entero?
+        """
+        if value is None or value.strip() == "":
+            return False
+        
+        try:
+            int(value.strip())
+            return True
+        except ValueError:
+            return False
+
 
 
 # ▼△▼△▼△▼△▼△▼△▼△▼△▼△ Pseudocodigo △▼△▼△▼△▼△▼△▼△▼△▼△▼
 
-private boolean isValidInteger(String value)
-"""
-Verifica si un string representa un valor entero válido
-"""
-if value == null | | value.strip() == ""
-    return false
 
-try
-    var
-    intValue = int(value.strip())
-    return true
-catch
-ValueError
-e
-return false
 
 private
 boolean
