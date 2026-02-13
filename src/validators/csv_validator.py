@@ -96,38 +96,45 @@ class CSVValidator:
 
         return all_errors
 
+    def _validate_headers(self, file_headers: List[str], schema:SchemaDefinition) -> List[str]:
+        """
+        Valida que los encabezados del archivo coincidan con el esquema
+        :param file_headers: Lista de encabezados del archivo CSV
+        :param schema: Esquema de validacion que define tipos y campos requeridos
+        :return: Lista de errores en encabezados.
+        """
+        errors = list()
+
+        # ■■■■■■■■■■■■■ Obtener campos requeridos del esquema ■■■■■■■■■■■■■
+        required_fields = self.schema_validator.get_required_fields(schema)
+
+        # ■■■■■■■■■■■■■ Verificar campos faltantes ■■■■■■■■■■■■■
+        missing_headers = list()
+        for field in required_fields:
+            if not field in file_headers:
+                missing_headers.append(field)
+
+        # ■■■■■■■■■■■■■ Verificar campos no permitidos ■■■■■■■■■■■■■
+        allowed_fields = self.schema_validator.get_all_field_names(schema)
+        unexpected_headers = list()
+        for header in file_headers:
+            if not header in allowed_fields:
+                unexpected_headers.append(header)
+
+        # ■■■■■■■■■■■■■ Generar errores si hay discrepancias ■■■■■■■■■■■■■
+        if missing_headers.size() > 0 or unexpected_headers.size() > 0:
+            header_errors = self.error_reporter.generate_header_error(
+                missing_headers=missing_headers,
+                unexpected_headers=unexpected_headers
+            )
+            errors.extend(header_errors)
+
+        return errors
+
+
+
     # ▼△▼△▼△▼△▼△▼△▼△▼△▼△ Pseudocodigo △▼△▼△▼△▼△▼△▼△▼△▼△▼
 
-
-private Lis t <Strin g> validateHeaders(Lis t <Strin g> fileHeaders, Dic t <String, Dic t> schema)
-"""
-Valida que los encabezados del archivo coincidan con el esquema
-"""
-var errors = list()
-
-# Obtener campos requeridos del esquema
-var requiredFields = this.schemaValidator.getRequiredFields(schema)
-
-# Verificar campos faltantes
-var missingHeaders = list()
-for field in requiredFields
-    if !field in fileHeaders
-    missingHeaders.append(field)
-
-# Verificar campos no permitidos
-var allowedFields = this.schemaValidator.getAllFieldNames(schema)
-var unexpectedHeaders = list()
-for header in fileHeaders
-    if !header in allowedFields
-    unexpectedHeaders.append(header)
-
-# Generar errores si hay discrepancias
-if missingHeaders.size() > 0 || unexpectedHeaders.size() > 0
-    var
-    headerErrors = this.errorReporter.generateHeaderError(missingHeaders, unexpectedHeaders)
-    errors.extend(headerErrors)
-
-return errors
 
 private
 boolean
