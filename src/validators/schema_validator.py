@@ -82,22 +82,19 @@ class SchemaValidator:
                     required_fields.append(field_name)
         return required_fields
 
+    def get_all_field_names(self, schema: SchemaDefinition) -> List[str]:
+        """
+        Extrae la lista de todos los nombres de campos del esquema
+        :param schema: Diccionario que define el esquema de validación
+        :return: Lista de todos los nombres de campos
+        """
+        field_names = List()
+        if schema is None:
+            field_names = list(schema.keys())
+
+        return field_names
+
 # ▼△▼△▼△▼△▼△▼△▼△▼△▼△ Pseudocodigo △▼△▼△▼△▼△▼△▼△▼△▼△▼
-
-public List < String > getAllFieldNames(Dict < String, Dict > schema)
-"""
-Extrae la lista de todos los nombres de campos del esquema
-Parámetros:
-- schema: diccionario que define el esquema de validación
-Retorna: lista de todos los nombres de campos
-"""
-var
-fieldNames = list()
-
-if schema != null
-    fieldNames = list(schema.keys())
-
-return fieldNames
 
 public
 boolean
