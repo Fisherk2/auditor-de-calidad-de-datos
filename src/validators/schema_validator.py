@@ -33,48 +33,40 @@ class SchemaValidator:
         return True
 
     def _is_valid_field_definition(self, field_def: Dict) -> bool:
+        """
+        Valida la definicion de un campo individual en el esquema
+        :param field_def: Diccionario con la definicion de un campo
+        :return: ¿La definicion es valida?
+        """
+        if field_def is None:
+            return False
 
-        pass
+        # ■■■■■■■■■■■■■ Verificar que exista la clave 'tipo' ■■■■■■■■■■■■■
+        if "tipo" not in field_def:
+            return False
+
+        # ■■■■■■■■■■■■■ Verificar que 'tipo' sea una cadena ■■■■■■■■■■■■■
+        field_type = field_def["tipo"]
+        if not isinstance(field_type, str):
+            return False
+
+        # TODO: ■■■■■■■■■■■■■ Verificar que el tipo sea uno de los tipos soportados ■■■■■■■■■■■■■
+        supported_types = ["entero","flotante","cadena","booleano"]
+        if not field_type.lower() in supported_types:
+            return False
+
+        # ■■■■■■■■■■■■■ Verificar que 'requerido' exista y sea booleano si está presente ■■■■■■■■■■■■■
+        if "requerido" in field_def:
+            required_value = field_def["requerido"]
+            if not isinstance(required_value, bool):
+                return False
+
+        return True
+
+
 
 # ▼△▼△▼△▼△▼△▼△▼△▼△▼△ Pseudocodigo △▼△▼△▼△▼△▼△▼△▼△▼△▼
 
-private
-boolean
-isValidFieldDefinition(Dict
-fieldDef)
-"""
-Valida la definición de un campo individual en el esquema
-Parámetros:
-- fieldDef: diccionario con la definición de un campo
-Retorna: true si la definición es válida, false en caso contrario
-"""
-if fieldDef == null
-    return false
-
-# Verificar que exista la clave 'tipo'
-if !"tipo" in fieldDef
-return false
-
-# Verificar que 'tipo' sea una cadena
-var
-fieldType = fieldDef["tipo"]
-if !isinstance(fieldType, str)
-return false
-
-# Verificar que el tipo sea uno de los tipos soportados
-var
-supportedTypes = ["entero", "flotante", "cadena", "booleano"]
-if !fieldType.lower() in supportedTypes
-return false
-
-# Verificar que 'requerido' exista y sea booleano si está presente
-if "requerido" in fieldDef
-    var
-    requiredValue = fieldDef["requerido"]
-    if !isinstance(requiredValue, bool)
-    return false
-
-return true
 
 public
 List < String > getRequiredFields(Dict < String, Dict > schema)
