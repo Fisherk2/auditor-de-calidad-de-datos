@@ -145,47 +145,54 @@ class CSVValidator:
                 return True
         return False
 
+    def _validate_row(self, row: Dict[str,str], schema: SchemaDefinition, row_num:int) -> List[str]:
+        """
+        Valida una fila individual contra el esquema
+        :param row: Fila completa del archivo CSV
+        :param schema: Esquema de validacion que define tipos y campos requeridos
+        :param row_num: Numero de fila del archivo CSV
+        :return:
+        """
+        errors = list()
+
+        # ■■■■■■■■■■■■■ Validar cada campo en la fila ■■■■■■■■■■■■■
+        for field_name, field_value in row.items():
+
+            # ▲▲▲▲▲▲ Verificar si el campo esta permitido en el esquema ▲▲▲▲▲▲
+            if self.schema_validator.field_exist_in_schema(field_name=field_name,schema=schema):
+                field_schema = schema[field_name]
+                field_errors = self._validate_field(field_name,field_value,field_schema,row_num)
+                errors.extend(field_errors)
+
+            # ▲▲▲▲▲▲ Campo no permitido en el esquema ▲▲▲▲▲▲
+            else:
+                field_errors = self.error_reporter.generate_field_error(
+                    row_num=row_num,
+                    field_name=field_name,
+                    error_type="campo_no_permitido",
+                    details=""
+                )
+                errors.extend(field_errors)
+
+        # ■■■■■■■■■■■■■ Validar campos requeridos que podrian estar ausentes ■■■■■■■■■■■■■
+        all_field_names = self.schema_validator.get_all_field_names(schema)
+        for field_name in all_field_names:
+            field_schema = schema[field_name]
+            is_required = field_schema.get("requerido",False)
+            if is_required and not (field_name in row):
+                field_errors = self.error_reporter.generate_field_error(
+                    row_num=row_num,
+                    field_name=field_name,
+                    error_type="valor_nulo",
+                    details=""
+                )
+                errors.extend(field_errors)
+
+        return errors
+
+
+
     # ▼△▼△▼△▼△▼△▼△▼△▼△▼△ Pseudocodigo △▼△▼△▼△▼△▼△▼△▼△▼△▼
-
-private
-List < String > validateRow(Dict < String, String > row, Dict < String, Dict > schema, int
-rowNum)
-"""
-Valida una fila individual contra el esquema
-"""
-var
-errors = list()
-
-# Validar cada campo en la fila
-for fieldName, fieldValue in row.items()
-    # Verificar si el campo está permitido en el esquema
-    if this.schemaValidator.fieldExistsInSchema(fieldName, schema)
-        var
-        fieldSchema = schema[fieldName]
-        var
-        fieldErrors = this.validateField(fieldName, fieldValue, fieldSchema, rowNum)
-        errors.extend(fieldErrors)
-    else
-        # Campo no permitido en el esquema
-        var
-        fieldErrors = this.errorReporter.generateFieldError(rowNum, fieldName, "campo_no_permitido", "")
-        errors.extend(fieldErrors)
-
-# Validar campos requeridos que podrían estar ausentes
-var
-allFieldNames = this.schemaValidator.getAllFieldNames(schema)
-for fieldName in allFieldNames
-    var
-    fieldSchema = schema[fieldName]
-    var
-    isRequired = fieldSchema.get("requerido", false)
-
-    if isRequired & & !(fieldName in row)
-    var
-    fieldErrors = this.errorReporter.generateFieldError(rowNum, fieldName, "valor_nulo", "")
-    errors.extend(fieldErrors)
-
-return errors
 
 private
 List < String > validateField(String
