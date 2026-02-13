@@ -86,6 +86,7 @@ class TestCSVValidator:
         # ■■■■■■■■■■■■■ Deberia haber errores por campo faltante ■■■■■■■■■■■■■
         has_missing_field_error = False
         for error in errors:
+            # TODO: ▲▲▲▲▲▲ Refactorizar ▲▲▲▲▲▲
             if "apellido" in error and "no encontrado" in error:
                 has_missing_field_error = True
                 break
@@ -120,6 +121,7 @@ class TestCSVValidator:
         # ■■■■■■■■■■■■■ Deberia haber error por tipo incorrecto ■■■■■■■■■■■■■
         has_type_error = False
         for error in errors:
+            # TODO: ▲▲▲▲▲▲ Refactorizar ▲▲▲▲▲▲
             if "no entero valido" in error and "fila 1" in error:
                 has_type_error = True
                 break
@@ -132,46 +134,44 @@ class TestCSVValidator:
         # ■■■■■■■■■■■■■ Limpiar archivo temporal ■■■■■■■■■■■■■
         os.remove(temp_file)
 
+    def test_validate_null_values(self):
+        """
+        Test: Validar un CSV con valores nulos en campos requeridos
+        :return:
+        """
+        # ■■■■■■■■■■■■■ Esquema de prueba ■■■■■■■■■■■■■
+        schema = dict()
+        schema["id"] = {"tipo": "entero", "requerido": True}
+        schema["nombre"] = {"tipo": "cadena", "requerido": True}
+
+        # ■■■■■■■■■■■■■ Crear archivo temporal con campo requerido vacio ■■■■■■■■■■■■■
+        temp_content = "id,nombre\n1,\n2,Bob"
+        temp_file = self._create_temp_file(temp_content)
+        errors = self.validator.validate_file(
+            filepath=temp_file,
+            schema=schema
+        )
+
+        # ■■■■■■■■■■■■■ Deberia haber error por valor nulo en campo requerido ■■■■■■■■■■■■■
+        has_null_error = False
+        for error in errors:
+            # TODO: ▲▲▲▲▲▲ Refactorizar ▲▲▲▲▲▲
+            if "campo requerido" in error and "está vacío" in error and "fila 1" in error:
+                has_null_error = True
+                break
+        if has_null_error:
+            print("✓ testValidateNullValues: PASSED")
+        else:
+            print("✗ testValidateNullValues: FAILED - Expected null value error")
+            print(f"  Errors: {str(errors)}")
+
+        # ■■■■■■■■■■■■■ Limpiar archivo temporal ■■■■■■■■■■■■■
+        os.remove(temp_file)
+
+
+
 
 # ▼△▼△▼△▼△▼△▼△▼△▼△▼△ Pseudocodigo △▼△▼△▼△▼△▼△▼△▼△▼△▼
-
-
-public
-void
-testValidateNullValues()
-"""
-Prueba: Validar un CSV con valores nulos en campos requeridos
-"""
-var
-schema = dict()
-schema["id"] = {"tipo": "entero", "requerido": true}
-schema["nombre"] = {"tipo": "cadena", "requerido": true}
-
-# Crear archivo temporal con campo requerido vacío
-var
-tempContent = "id,nombre\n1,\n2,Bob"
-var
-tempFile = this.createTempFile(tempContent)
-
-var
-errors = this.validator.validateFile(tempFile, schema)
-
-# Debería haber error por valor nulo en campo requerido
-var
-hasNullError = false
-for error in errors
-    if "campo requerido" in error & & "está vacío" in error & & "fila 1" in error
-        hasNullError = true
-        break
-
-if hasNullError
-    print("✓ testValidateNullValues: PASSED")
-else
-    print("✗ testValidateNullValues: FAILED - Expected null value error")
-    print("  Errors: " + str(errors))
-
-# Limpiar archivo temporal
-os.remove(tempFile)
 
 public
 void
