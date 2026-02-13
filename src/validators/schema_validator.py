@@ -90,7 +90,7 @@ class SchemaValidator:
         :return: Lista de todos los nombres de campos
         """
         field_names = List()
-        if schema is None:
+        if schema is not None:
             field_names = list(schema.keys())
 
         return field_names
