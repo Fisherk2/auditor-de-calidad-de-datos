@@ -8,10 +8,10 @@ DESCRIPCIÓN: Campo de pruebas unitarias para la implementacion de validador CSV
 """
 import os
 import tempfile
-from typing import List, Dict
+
 from src.validators.csv_validator import CSVValidator
-from src.validators.type_validator import TypeValidator
 from src.validators.schema_validator import SchemaValidator
+
 
 class TestCSVValidator:
     """
@@ -26,14 +26,16 @@ class TestCSVValidator:
         Ejecuta todas las pruebas del validador
         :return:
         """
-        print("🮙🮘🮙🮘🮙🮙🮘🮙🮘🮙🮙🮘🮙🮘🮙🮙🮘🮙🮘🮙 Ejecutando pruebas del validador de CSV 🮙🮘🮙🮘🮙🮙🮘🮙🮘🮙🮙🮘🮙🮘🮙🮙🮘🮙🮘🮙")
+        print(
+            "🮙🮘🮙🮘🮙🮙🮘🮙🮘🮙🮙🮘🮙🮘🮙🮙🮘🮙🮘🮙 Ejecutando pruebas del validador de CSV 🮙🮘🮙🮘🮙🮙🮘🮙🮘🮙🮙🮘🮙🮘🮙🮙🮘🮙🮘🮙")
         self.test_validate_correct_csv()
         self.test_validate_missing_headers()
         self.test_validate_wrong_types()
         self.test_validate_null_values()
         self.test_validate_non_existent_file()
         self.test_validate_unexpected_headers()
-        print("🮙🮘🮙🮘🮙🮙🮘🮙🮘🮙🮙🮘🮙🮘🮙🮙🮘🮙🮘🮙 Todas las pruebas completadas 🮙🮘🮙🮘🮙🮙🮘🮙🮘🮙🮙🮘🮙🮘🮙🮙🮘🮙🮘🮙")
+        print(
+            "🮙🮘🮙🮘🮙🮙🮘🮙🮘🮙🮙🮘🮙🮘🮙🮙🮘🮙🮘🮙 Todas las pruebas completadas 🮙🮘🮙🮘🮙🮙🮘🮙🮘🮙🮙🮘🮙🮘🮙🮙🮘🮙🮘🮙")
 
     def test_validate_correct_csv(self):
         """
@@ -47,7 +49,7 @@ class TestCSVValidator:
         schema["activo"] = {"tipo": "booleano", "requerido": True}
 
         # ■■■■■■■■■■■■■ Crear archivo temporal con datos validos ■■■■■■■■■■■■■
-        temp_content= "id,nombre,activo\n1,Alice,true\n2,Bob,false"
+        temp_content = "id,nombre,activo\n1,Alice,true\n2,Bob,false"
         temp_file = self._create_temp_file(temp_content)
         errors = self.validator.validate_file(
             filepath=temp_file,
@@ -230,7 +232,7 @@ class TestCSVValidator:
         # ■■■■■■■■■■■■■ Limpiar archivo temporal ■■■■■■■■■■■■■
         os.remove(temp_file)
 
-    def _create_temp_file(self, content:str) -> str:
+    def _create_temp_file(self, content: str) -> str:
         """
         Crea un archivo temporal seguro con contenido especifico
         :return:
@@ -246,16 +248,9 @@ class TestCSVValidator:
 
         return temp_file_path
 
-# ▼△▼△▼△▼△▼△▼△▼△▼△▼△ Pseudocodigo △▼△▼△▼△▼△▼△▼△▼△▼△▼
 
-# 3. MAIN EXECUTION
-class Main
-    public
-    static
-    void
-    main(String[]
-    args)
-    var
-    tester = new
-    TestCSVValidator()
-    tester.runAllTests()
+# ▣▢▣▢▣▢▣▢▣▢▣▢▣▢▣▢▣▢▣▢▣▢▣▢▣  SUT ▣▢▣▢▣▢▣▢▣▢▣▢▣▢▣▢▣▢▣▢▣▢▣▢▣
+
+if __name__ == "__main__":
+    tester = TestCSVValidator()
+    tester.run_all_test()
