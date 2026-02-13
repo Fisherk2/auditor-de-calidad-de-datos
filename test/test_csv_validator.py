@@ -230,21 +230,17 @@ class TestCSVValidator:
         # ■■■■■■■■■■■■■ Limpiar archivo temporal ■■■■■■■■■■■■■
         os.remove(temp_file)
 
+    def _create_temp_file(self, content:str) -> str:
+        """
+        Crea un archivo temporal con contenido especifico
+        :return:
+        """
+        temp_file = tempfile.mktemp(suffix=".csv")
+        with open(temp_file, "w") as file:
+            file.write(content)
+        return temp_file
 
 # ▼△▼△▼△▼△▼△▼△▼△▼△▼△ Pseudocodigo △▼△▼△▼△▼△▼△▼△▼△▼△▼
-private
-String
-createTempFile(String
-content)
-"""
-Crea un archivo temporal con contenido específico
-"""
-var
-tempFile = tempfile.mktemp(suffix=".csv")
-with open(tempFile, 'w') as file
-    file.write(content)
-return tempFile
-
 
 # 3. MAIN EXECUTION
 class Main
