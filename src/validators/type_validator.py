@@ -47,53 +47,51 @@ class TypeValidator:
         else:
             return False
 
+    def convert_value(self, value: Any, expected_type:str) -> Any:
+        """
+        Convierte un valor al tipo esperado de forma segura
+        :param value: Valor a convertir
+        :param expected_type: Tipo al que se debe convertir
+        :return: Valor convertido o null si no se puede convertir
+        """
+        if value == None or value == "":
+            return None
+
+        # ▲▲▲▲▲▲▲▲▲▲▲▲▲ Formatear valor para procesarlo ▲▲▲▲▲▲▲▲▲▲▲▲▲
+        value = str(value).strip()
+        lowerType = expected_type.lower()
+
+        try:
+
+            # TODO: ■■■■■■■■■■■■■ Refactorizar ■■■■■■■■■■■■■
+            if lowerType == "entero":
+                return int(value)
+            elif lowerType == "flotante":
+                return float(value)
+            elif lowerType == "cadena":
+                return value
+            elif lowerType == "booleano":
+                return self.parse_bool(value)
+
+            # ■■■■■■■■■■■■■ Tipo desconocido ■■■■■■■■■■■■■
+            else:
+                return None
+
+        except(ValueError):
+
+            # ■■■■■■■■■■■■■ Error en la conversion ■■■■■■■■■■■■■
+            return None
+
+        except(TypeError):
+
+            # ■■■■■■■■■■■■■ Error en la conversion ■■■■■■■■■■■■■
+            return None
+
+
 
 # ▼△▼△▼△▼△▼△▼△▼△▼△▼△ Pseudocodigo △▼△▼△▼△▼△▼△▼△▼△▼△▼
 
-
-public Object convertValue(Object value, String expectedType)
-"""
-Convierte un valor al tipo esperado de forma segura
-Parámetros:
-- value: valor a convertir
-- expectedType: tipo al que se debe convertir
-Retorna: valor convertido o null si no se puede convertir
-"""
-if value == null | | value == ""
-    return null
-
-var
-stringValue = str(value).strip()
-var
-lowerType = expectedType.lower()
-
-try
-    if lowerType == "entero"
-        return int(stringValue)
-    else if lowerType == "flotante"
-    return float(stringValue)
-else if lowerType == "cadena"
-    return stringValue
-else if lowerType == "booleano"
-return this.parseBoolean(stringValue)
-else
-# Tipo desconocido
-return null
-catch
-ValueError
-e
-# Error en la conversión
-return null
-catch
-TypeError
-e
-# Error en la conversión
-return null
-
-private
-boolean
-isValidInteger(String
-value)
+private boolean isValidInteger(String value)
 """
 Verifica si un string representa un valor entero válido
 """
