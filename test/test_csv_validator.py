@@ -59,7 +59,7 @@ class TestCSVValidator:
             print("✓ testValidateCorrectCSV: PASSED")
         else:
             print(f"✗ testValidateCorrectCSV: FAILED - Expected 0 errors, got {str(len(errors))}")
-            print("  Errors: " + str(errors))
+            print(f"  Errors: {str(errors)}")
 
         # ■■■■■■■■■■■■■ Limpiar archivo temporal ■■■■■■■■■■■■■
         os.remove(temp_file)
@@ -93,7 +93,41 @@ class TestCSVValidator:
             print("✓ testValidateMissingHeaders: PASSED")
         else:
             print("✗ testValidateMissingHeaders: FAILED - Expected missing field error")
-            print("  Errors: " + str(errors))
+            print(f"  Errors: {str(errors)}")
+
+        # ■■■■■■■■■■■■■ Limpiar archivo temporal ■■■■■■■■■■■■■
+        os.remove(temp_file)
+
+    def test_validate_wrong_types(self):
+        """
+        Test: Validar un CSV con tipos de datos incorrectos
+        :return:
+        """
+        # ■■■■■■■■■■■■■ Esquema de prueba ■■■■■■■■■■■■■
+        schema = dict()
+        schema["id"] = {"tipo": "entero", "requerido": True}
+        schema["nombre"] = {"tipo": "cadena", "requerido": True}
+        schema["edad"] = {"tipo": "entero", "requerido": False}
+
+        # ■■■■■■■■■■■■■ Crear archivo temporal con tipo incorrecto ■■■■■■■■■■■■■
+        temp_content = "id,nombre,edad\n1,Alice,treinta\n2,Bob,25"
+        temp_file = self._create_temp_file(temp_content)
+        errors = self.validator.validate_file(
+            filepath=temp_file,
+            schema=schema
+        )
+
+        # ■■■■■■■■■■■■■ Deberia haber error por tipo incorrecto ■■■■■■■■■■■■■
+        has_type_error = False
+        for error in errors:
+            if "no entero valido" in error and "fila 1" in error:
+                has_type_error = True
+                break
+        if has_type_error:
+            print("✓ testValidateWrongTypes: PASSED")
+        else:
+            print("✗ testValidateWrongTypes: FAILED - Expected type error")
+            print(f"  Errors: {str(errors)}")
 
         # ■■■■■■■■■■■■■ Limpiar archivo temporal ■■■■■■■■■■■■■
         os.remove(temp_file)
@@ -101,44 +135,6 @@ class TestCSVValidator:
 
 # ▼△▼△▼△▼△▼△▼△▼△▼△▼△ Pseudocodigo △▼△▼△▼△▼△▼△▼△▼△▼△▼
 
-
-public
-void
-testValidateWrongTypes()
-"""
-Prueba: Validar un CSV con tipos de datos incorrectos
-"""
-var
-schema = dict()
-schema["id"] = {"tipo": "entero", "requerido": true}
-schema["nombre"] = {"tipo": "cadena", "requerido": true}
-schema["edad"] = {"tipo": "entero", "requerido": false}
-
-# Crear archivo temporal con tipo incorrecto
-var
-tempContent = "id,nombre,edad\n1,Alice,treinta\n2,Bob,25"
-var
-tempFile = this.createTempFile(tempContent)
-
-var
-errors = this.validator.validateFile(tempFile, schema)
-
-# Debería haber error por tipo incorrecto
-var
-hasTypeError = false
-for error in errors
-    if "no entero válido" in error & & "fila 1" in error
-        hasTypeError = true
-        break
-
-if hasTypeError
-    print("✓ testValidateWrongTypes: PASSED")
-else
-    print("✗ testValidateWrongTypes: FAILED - Expected type error")
-    print("  Errors: " + str(errors))
-
-# Limpiar archivo temporal
-os.remove(tempFile)
 
 public
 void
