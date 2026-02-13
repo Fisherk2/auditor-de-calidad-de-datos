@@ -35,9 +35,9 @@ class TestCSVValidator:
         self.test_validates_unexpected_headers()
         print("🮙🮘🮙🮘🮙🮙🮘🮙🮘🮙🮙🮘🮙🮘🮙🮙🮘🮙🮘🮙 Todas las pruebas completadas 🮙🮘🮙🮘🮙🮙🮘🮙🮘🮙🮙🮘🮙🮘🮙🮙🮘🮙🮘🮙")
 
-    def test_validate_csv(self):
+    def test_validate_correct_csv(self):
         """
-        Test: Validar un CSV que cumple completamente con el esquema
+        Test: Validar un CSV que cumple completamente con un esquema de prueba
         :return:
         """
         # ■■■■■■■■■■■■■ Esquema de prueba ■■■■■■■■■■■■■
@@ -64,45 +64,43 @@ class TestCSVValidator:
         # ■■■■■■■■■■■■■ Limpiar archivo temporal ■■■■■■■■■■■■■
         os.remove(temp_file)
 
+    def test_validate_missing_headers(self):
+        """
+        Test: Validar un CSV con campos requeridos faltantes
+        :return:
+        """
+        # ■■■■■■■■■■■■■ Esquema de prueba ■■■■■■■■■■■■■
+        schema = dict()
+        schema["id"] = {"tipo": "entero", "requerido": True}
+        schema["nombre"] = {"tipo": "cadena", "requerido": True}
+        schema["activo"] = {"tipo": "cadena", "requerido": True}
+
+        # ■■■■■■■■■■■■■ Crear archivo temporal con campo requerido faltante ■■■■■■■■■■■■■
+        temp_content = "id,nombre\n1,Alice"
+        temp_file = self._create_temp_file(temp_content)
+        errors = self.validator.validate_file(
+            filepath=temp_file,
+            schema=schema
+        )
+
+        # ■■■■■■■■■■■■■ Deberia haber errores por campo faltante ■■■■■■■■■■■■■
+        has_missing_field_error = False
+        for error in errors:
+            if "apellido" in error and "no encontrado" in error:
+                has_missing_field_error = True
+                break
+        if has_missing_field_error:
+            print("✓ testValidateMissingHeaders: PASSED")
+        else:
+            print("✗ testValidateMissingHeaders: FAILED - Expected missing field error")
+            print("  Errors: " + str(errors))
+
+        # ■■■■■■■■■■■■■ Limpiar archivo temporal ■■■■■■■■■■■■■
+        os.remove(temp_file)
+
+
 # ▼△▼△▼△▼△▼△▼△▼△▼△▼△ Pseudocodigo △▼△▼△▼△▼△▼△▼△▼△▼△▼
 
-public
-void
-testValidateMissingHeaders()
-"""
-Prueba: Validar un CSV con campos requeridos faltantes
-"""
-var
-schema = dict()
-schema["id"] = {"tipo": "entero", "requerido": true}
-schema["nombre"] = {"tipo": "cadena", "requerido": true}
-schema["apellido"] = {"tipo": "cadena", "requerido": true}
-
-# Crear archivo temporal con campo requerido faltante
-var
-tempContent = "id,nombre\n1,Alice"
-var
-tempFile = this.createTempFile(tempContent)
-
-var
-errors = this.validator.validateFile(tempFile, schema)
-
-# Debería haber errores por campo faltante
-var
-hasMissingFieldError = false
-for error in errors
-    if "apellido" in error & & "no encontrado" in error
-        hasMissingFieldError = true
-        break
-
-if hasMissingFieldError
-    print("✓ testValidateMissingHeaders: PASSED")
-else
-    print("✗ testValidateMissingHeaders: FAILED - Expected missing field error")
-    print("  Errors: " + str(errors))
-
-# Limpiar archivo temporal
-os.remove(tempFile)
 
 public
 void
