@@ -102,7 +102,7 @@ class TestCSVValidator:
         # ■■■■■■■■■■■■■ Deberia haber error por tipo incorrecto ■■■■■■■■■■■■■
         has_type_error = False
         for error in errors:
-            if ("no entero valido" in error or "no flotante valido" in error or "no booleano valido" in error) and "fila" in error:
+            if ("valor entero no valido" in error or "valor flotante no valido" in error or "valor booleano no valido" in error) and "Fila" in error:
                 has_type_error = True
                 break
         if has_type_error:
@@ -125,7 +125,7 @@ class TestCSVValidator:
         # ■■■■■■■■■■■■■ Deberia haber error por valor nulo en campo requerido ■■■■■■■■■■■■■
         has_null_error = False
         for error in errors:
-            if "campo requerido" in error and ("está vacío" in error or "vacío" in error) and "fila" in error:
+            if "campo requerido" in error and ("está vacío" in error or "vacío" in error) and "Fila" in error:
                 has_null_error = True
                 break
         if has_null_error:

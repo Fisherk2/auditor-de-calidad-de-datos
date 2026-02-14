@@ -92,13 +92,6 @@ class CSVValidator:
                 details="No se pudo leer el fichero CSV"
             )
             all_errors.extend(file_error)
-        except FileNotFoundError:
-            file_error = self.error_reporter.generate_file_error(
-                file_name=filepath,
-                error_type="archivo_no_existe",
-                details=""
-            )
-            all_errors.extend(file_error)
         except ValueError:
             file_error = self.error_reporter.generate_file_error(
                 file_name=filepath,
@@ -213,7 +206,7 @@ class CSVValidator:
 
         # ■■■■■■■■■■■■■ Verificar si es un campo requerido y esta vacio ■■■■■■■■■■■■■
         is_required = field_schema.get("requerido", False)
-        if is_required and (field_value is None) or str(field_value).strip() == "":
+        if is_required and ((field_value is None) or str(field_value).strip() == ""):
             field_errors = self.error_reporter.generate_field_error(
                 row_num=row_num,
                 field_name=field_name,
@@ -230,7 +223,7 @@ class CSVValidator:
                 expected_type=expected_type
             )
             if not is_valid_type:
-                type_error_details = f"No {expected_type} valido"
+                type_error_details = f"{expected_type} no valido"
                 field_errors = self.error_reporter.generate_field_error(
                     row_num=row_num,
                     field_name=field_name,

@@ -25,7 +25,7 @@ class ErrorReporter:
 
         # TODO: ▼△▼△▼△▼△▼△▼△▼△▼△▼△ Refactorizar △▼△▼△▼△▼△▼△▼△▼△▼△▼
         if error_type == "tipo_incorrecto":
-            error_msg = f"Fila {row_num}: valor no {details} en columna '{field_name}'"
+            error_msg = f"Fila {row_num}: valor {details} en columna '{field_name}'"
             errors.append(error_msg)
         elif error_type == "valor_nulo":
             error_msg = f"Fila {row_num}: campo requerido '{field_name}' está vacío"
