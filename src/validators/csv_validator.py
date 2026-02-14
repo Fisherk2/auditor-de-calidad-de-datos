@@ -48,7 +48,7 @@ class CSVValidator:
             return all_errors
 
         # ■■■■■■■■■■■■■ Verificar existencia del archivo ■■■■■■■■■■■■■
-        if self.csv_reader.validate_file_exist(filepath):
+        if not self.csv_reader.validate_file_exist(filepath):
             file_error = self.error_reporter.generate_file_error(
                 file_name=filepath,
                 error_type="archivo_no_existe",
@@ -90,6 +90,13 @@ class CSVValidator:
                 file_name=filepath,
                 error_type="lectura_fallida",
                 details="No se pudo leer el fichero CSV"
+            )
+            all_errors.extend(file_error)
+        except FileNotFoundError:
+            file_error = self.error_reporter.generate_file_error(
+                file_name=filepath,
+                error_type="archivo_no_existe",
+                details=""
             )
             all_errors.extend(file_error)
         except ValueError:

@@ -23,8 +23,8 @@ class TestCSVValidator:
         self.validator = CSVValidator()
         self.schema_validator = SchemaValidator()
         self.schema = self._load_schema_from_yaml()
-        self.valid_csv_path = "samples/valid_sample.csv"
-        self.invalid_csv_path = "samples/invalid_sample.csv"
+        self.valid_csv_path = "../samples/valid_sample.csv"
+        self.invalid_csv_path = "../samples/invalid_sample.csv"
 
     def run_all_test(self):
         """
@@ -207,7 +207,7 @@ class TestCSVValidator:
         Carga el esquema de validación desde un archivo YAML
         :return: Diccionario con el esquema cargado
         """
-        schema_path = "schemas/default_schema.yaml"
+        schema_path = "../schemas/default_schema.yaml"
         try:
             with open(schema_path, 'r', encoding='utf-8') as file:
                 schema = yaml.safe_load(file)
