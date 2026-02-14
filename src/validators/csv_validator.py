@@ -6,8 +6,8 @@ FECHA:       2026-02-13
 DESCRIPCIÓN: Coordinador de validacion completa de archivos CSV
 ■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■
 """
+from typing import Any
 
-from typing import List, Dict, Any
 from src.readers.csv_reader import CSVReader
 from src.validators.type_validator import TypeValidator
 from src.validators.schema_validator import SchemaValidator
@@ -20,7 +20,7 @@ class CSVValidator:
     """
 
     # ⋮⋮⋮⋮⋮⋮⋮⋮ Definir la estructura del esquema como tipo ⋮⋮⋮⋮⋮⋮⋮⋮
-    SchemaDefinition = Dict[str, Dict]
+    SchemaDefinition = dict[str, dict]
 
     def __init__(self):
         self.csv_reader = CSVReader()
@@ -28,7 +28,7 @@ class CSVValidator:
         self.schema_validator = SchemaValidator()
         self.error_reporter = ErrorReporter()
 
-    def validate_file(self, filepath: str, schema: SchemaDefinition) -> List[str]:
+    def validate_file(self, filepath: str, schema: SchemaDefinition) -> list[str]:
         """
         Valida un archivo CSV completo contra un esquema
         :param filepath: Ruta del archivo CSV a validar
@@ -102,7 +102,7 @@ class CSVValidator:
 
         return all_errors
 
-    def _validate_headers(self, file_headers: List[str], schema: SchemaDefinition) -> List[str]:
+    def _validate_headers(self, file_headers: list[str], schema: SchemaDefinition) -> list[str]:
         """
         Valida que los encabezados del archivo coincidan con el esquema
         :param file_headers: Lista de encabezados del archivo CSV
@@ -137,7 +137,7 @@ class CSVValidator:
 
         return errors
 
-    def _has_critical_headers_errors(self, headers_errors: List[str]) -> bool:
+    def _has_critical_headers_errors(self, headers_errors: list[str]) -> bool:
         """
         Determina si hay errores de encabezado criticos que impidan continuar
         :param headers_errors: Lista de encabezados con posibles errores
@@ -148,7 +148,7 @@ class CSVValidator:
                 return True
         return False
 
-    def _validate_row(self, row: Dict[str, str], schema: SchemaDefinition, row_num: int) -> List[str]:
+    def _validate_row(self, row: dict[str, str], schema: SchemaDefinition, row_num: int) -> list[str]:
         """
         Valida una fila individual contra el esquema
         :param row: Fila completa del archivo CSV
@@ -193,7 +193,7 @@ class CSVValidator:
 
         return errors
 
-    def _validate_field(self, field_name: str, field_value: Any, field_schema: Dict, row_num: int) -> List[str]:
+    def _validate_field(self, field_name: str, field_value: Any, field_schema: dict, row_num: int) -> list[str]:
         """
         Valida un campo individual segun su definicion en el esquema
         :param field_name: Nombre del campo

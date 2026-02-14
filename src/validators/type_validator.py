@@ -25,7 +25,7 @@ class TypeValidator:
         lower_type = expected_type.lower()
 
         # ■■■■■■■■■■■■■ Valores nulos/vacíos se consideran válidos para validación de tipo ■■■■■■■■■■■■■
-        if value == None or value == "":
+        if value is None or value == "":
             # ■■■■■■■■■■■■■ La validación de nulos se hace por separado ■■■■■■■■■■■■■
             return True
 
@@ -56,35 +56,35 @@ class TypeValidator:
         :param expected_type: Tipo al que se debe convertir
         :return: Valor convertido o null si no se puede convertir
         """
-        if value == None or value == "":
+        if value is None or value == "":
             return None
 
         # ■■■■■■■■■■■■■ Formatear valor para procesarlo ■■■■■■■■■■■■■
         value = str(value).strip()
-        lowerType = expected_type.lower()
+        lower_type = expected_type.lower()
 
         try:
 
             # TODO: ■■■■■■■■■■■■■ Refactorizar ■■■■■■■■■■■■■
-            if lowerType == "entero":
+            if lower_type == "entero":
                 return int(value)
-            elif lowerType == "flotante":
+            elif lower_type == "flotante":
                 return float(value)
-            elif lowerType == "cadena":
+            elif lower_type == "cadena":
                 return value
-            elif lowerType == "booleano":
+            elif lower_type == "booleano":
                 return self._parse_bool(value)
 
             # ■■■■■■■■■■■■■ Tipo desconocido ■■■■■■■■■■■■■
             else:
                 return None
 
-        except(ValueError):
+        except ValueError:
 
             # ■■■■■■■■■■■■■ Error en la conversion ■■■■■■■■■■■■■
             return None
 
-        except(TypeError):
+        except TypeError:
 
             # ■■■■■■■■■■■■■ Error en la conversion ■■■■■■■■■■■■■
             return None
@@ -98,10 +98,10 @@ class TypeValidator:
         if value is None:
             return False
 
-        lowerValue = value.strip().lower()
+        lower_value = value.strip().lower()
 
         # TODO: ■■■■■■■■■■■■■ Refactorizar ■■■■■■■■■■■■■
-        return lowerValue in ["true", "1", "si", "verdadero", "t"]
+        return lower_value in ["true", "1", "si", "verdadero", "t"]
 
     # ▣▢▣▢▣▢▣▢▣▢▣▢▣▢▣▢▣▢▣▢▣▢▣▢▣  Validadores especificos ▣▢▣▢▣▢▣▢▣▢▣▢▣▢▣▢▣▢▣▢▣▢▣▢▣
 
@@ -145,7 +145,7 @@ class TypeValidator:
         if value is None:
             return False
 
-        lowerValue = value.strip().lower()
+        lower_value = value.strip().lower()
 
         # TODO: ■■■■■■■■■■■■■ Refactorizar ■■■■■■■■■■■■■
-        return lowerValue in ["true", "false", "1", "0", "si", "no", "verdadero", "falso", "t", "f"]
+        return lower_value in ["true", "false", "1", "0", "si", "no", "verdadero", "falso", "t", "f"]

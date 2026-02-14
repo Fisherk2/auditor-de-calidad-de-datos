@@ -8,7 +8,7 @@ DESCRIPCIÓN: Lector de ficheros CSV que valida la existencia del fichero y su f
 """
 import os
 import csv
-from typing import List, Iterator, Dict
+from typing import Iterator
 
 
 class CSVReader:
@@ -24,7 +24,7 @@ class CSVReader:
         """
         return os.path.exists(filepath)
 
-    def read_headers(self, filepath: str) -> List[str]:
+    def read_headers(self, filepath: str) -> list[str]:
         """
         Lee solo los encabezados del archivo CSV
         :param filepath: Ruta absoluta o relativa del fichero
@@ -37,21 +37,21 @@ class CSVReader:
         try:
             with open(filepath, 'r', newline='') as file:
                 reader = csv.reader(file)
-                firstRow = next(reader)
+                first_row = next(reader)
 
                 # ■■■■■■■■■■■■■ En caso de que la primera fila pueda estar vacia ■■■■■■■■■■■■■
-                if firstRow is not None:
-                    headers = firstRow
+                if first_row is not None:
+                    headers = first_row
 
-        except(IOError):
+        except IOError:
             print(f"Error leyendo encabezados en el fichero {filepath}")
             return []
-        except(UnicodeDecodeError):
+        except UnicodeDecodeError:
             print(f"Error decodificando archivo {filepath}")
             return []
         return headers
 
-    def read_rows(self, filepath: str) -> Iterator[Dict[str, str]]:
+    def read_rows(self, filepath: str) -> Iterator[dict[str, str]]:
         """
         Lee las filas del archivo CSV como diccionarios
         :param filepath: Ruta absoluta o relativa del fichero
@@ -68,11 +68,11 @@ class CSVReader:
                 for row in reader:
                     yield row
 
-        except(IOError):
+        except IOError:
             print(f"Error leyendo archivo CSV {filepath}")
-        except(UnicodeDecodeError):
+        except UnicodeDecodeError:
             raise ValueError(f"Error decodificando archivo CSV {filepath}")
-        except(csv.Error):
+        except csv.Error:
             raise ValueError(f"Formato CSV invalido en {filepath}")
 
     def count_rows(self, filepath) -> int:
@@ -96,7 +96,7 @@ class CSVReader:
                 for row in reader:
                     count += 1
 
-        except(IOError):
+        except IOError:
             print(f"Error contando filas: {filepath}")
             return 0
 

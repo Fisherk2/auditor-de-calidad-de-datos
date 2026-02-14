@@ -6,14 +6,13 @@ FECHA:       2026-02-11
 DESCRIPCIÓN: Generador de mensajes de error consistentes para el validador de CSV
 ■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■
 """
-from typing import List
 
 class ErrorReporter:
     """
     Generador de mensajes de error consistentes para el validador CSV
     """
 
-    def generate_field_error(self, row_num: int, field_name: str, error_type: str, details: str) -> List[str]:
+    def generate_field_error(self, row_num: int, field_name: str, error_type: str, details: str) -> list[str]:
         """
         Genera un mensaje de error para un campo específico
         :param row_num: numero de fila donde ocurrio el error
@@ -26,25 +25,26 @@ class ErrorReporter:
 
         # TODO: ▼△▼△▼△▼△▼△▼△▼△▼△▼△ Refactorizar △▼△▼△▼△▼△▼△▼△▼△▼△▼
         if error_type == "tipo_incorrecto":
-            errorMsg = f"Fila {row_num}: valor no {details} en columna '{field_name}'"
-            errors.append(errorMsg)
+            error_msg = f"Fila {row_num}: valor no {details} en columna '{field_name}'"
+            errors.append(error_msg)
         elif error_type == "valor_nulo":
-            errorMsg = f"Fila {row_num}: campo requerido '{field_name}' está vacío"
-            errors.append(errorMsg)
+            error_msg = f"Fila {row_num}: campo requerido '{field_name}' está vacío"
+            errors.append(error_msg)
         elif error_type == "campo_faltante":
-            errorMsg = f"Archivo: campo requerido '{field_name}' no encontrado en encabezados"
-            errors.append(errorMsg)
+            error_msg = f"Archivo: campo requerido '{field_name}' no encontrado en encabezados"
+            errors.append(error_msg)
         elif error_type == "campo_no_permitido":
-            errorMsg = f"Fila {row_num}: campo '{field_name}' no permitido según esquema"
-            errors.append(errorMsg)
+            error_msg = f"Fila {row_num}: campo '{field_name}' no permitido según esquema"
+            errors.append(error_msg)
         else:
-            errorMsg = f"Fila {row_num}: error en campo '{field_name}' - {details}"
-            errors.append(errorMsg)
+            error_msg = f"Fila {row_num}: error en campo '{field_name}' - {details}"
+            errors.append(error_msg)
         return errors
 
-    def generate_header_error(self, missing_headers: List[str], unexpected_headers: List[str]) -> List[str]:
+    def generate_header_error(self, missing_headers: list[str], unexpected_headers: list[str]) -> list[str]:
         """
         Genera mensajes de error para problemas con encabezados
+        :param missing_headers: Encabezados faltantes
         :param unexpected_headers: Encabezados defectuosos
         :return: Array de strings con los mensajes de error
         """
@@ -59,11 +59,11 @@ class ErrorReporter:
             )
 
         for header in unexpected_headers:
-            errorMsg = f"Archivo: Campo no esperado '{header}' encontrado en encabezados"
-            errors.append(errorMsg)
+            error_msg = f"Archivo: Campo no esperado '{header}' encontrado en encabezados"
+            errors.append(error_msg)
         return errors
 
-    def generate_file_error(self, file_name: str, error_type: str, details: str) -> List[str]:
+    def generate_file_error(self, file_name: str, error_type: str, details: str) -> list[str]:
         """
         Genera mensajes de error relacionados con el archivo en sí
         :param file_name: Nombre del fichero
@@ -75,15 +75,15 @@ class ErrorReporter:
 
         # TODO: ▼△▼△▼△▼△▼△▼△▼△▼△▼△ Refactorizar △▼△▼△▼△▼△▼△▼△▼△▼△▼
         if error_type == "archivo_no_existe":
-            errorMsg = f"Archivo: '{file_name}' no existe"
-            errors.append(errorMsg)
+            error_msg = f"Archivo: '{file_name}' no existe"
+            errors.append(error_msg)
         elif error_type == "formato_invalido":
-            errorMsg = f"Archivo: No se pudo leer '{file_name}' - {details}"
-            errors.append(errorMsg)
+            error_msg = f"Archivo: No se pudo leer '{file_name}' - {details}"
+            errors.append(error_msg)
         elif error_type == "lectura_fallida":
-            errorMsg = f"Archivo: No se pudo leer '{file_name}' - {details}"
-            errors.append(errorMsg)
+            error_msg = f"Archivo: No se pudo leer '{file_name}' - {details}"
+            errors.append(error_msg)
         else:
-            errorMsg = f"Archivo: error en '{file_name}' - {details}"
-            errors.append(errorMsg)
+            error_msg = f"Archivo: error en '{file_name}' - {details}"
+            errors.append(error_msg)
         return errors

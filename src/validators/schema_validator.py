@@ -7,16 +7,13 @@ DESCRIPCIÓN: Validador de estructura del esquema de validación.
 ■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■
 """
 
-from typing import List, Dict
-
-
 class SchemaValidator:
     """
     Componente responsable de validar la estructura del esquema de validación
     """
 
     # ⋮⋮⋮⋮⋮⋮⋮⋮ Definir la estructura del esquema como tipo ⋮⋮⋮⋮⋮⋮⋮⋮
-    SchemaDefinition = Dict[str, Dict]
+    SchemaDefinition = dict[str, dict]
 
     def validate_schema_structure(self, schema: SchemaDefinition) -> bool:
         """
@@ -33,7 +30,7 @@ class SchemaValidator:
 
         return True
 
-    def _is_valid_field_definition(self, field_def: Dict) -> bool:
+    def _is_valid_field_definition(self, field_def: dict) -> bool:
         """
         Valida la definicion de un campo individual en el esquema
         :param field_def: Diccionario con la definicion de un campo
@@ -64,13 +61,13 @@ class SchemaValidator:
 
         return True
 
-    def get_required_fields(self, schema: SchemaDefinition) -> List[str]:
+    def get_required_fields(self, schema: SchemaDefinition) -> list[str]:
         """
         Extrae la lista de campos requeridos del esquema
         :param schema: Diccionario que defina el esquema de validacion
         :return: Lista de nombres de campos que son requeridos
         """
-        required_fields = List()
+        required_fields = list()
         if schema is None:
             return required_fields
 
@@ -83,13 +80,13 @@ class SchemaValidator:
                     required_fields.append(field_name)
         return required_fields
 
-    def get_all_field_names(self, schema: SchemaDefinition) -> List[str]:
+    def get_all_field_names(self, schema: SchemaDefinition) -> list[str]:
         """
         Extrae la lista de todos los nombres de campos del esquema
         :param schema: Diccionario que define el esquema de validación
         :return: Lista de todos los nombres de campos
         """
-        field_names = List()
+        field_names = list()
         if schema is not None:
             field_names = list(schema.keys())
 
