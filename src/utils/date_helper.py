@@ -8,6 +8,7 @@ DESCRIPCIÓN: Componente de bajo nivel que proporciona funciones auxiliares para
 """
 
 import datetime
+from typing import Optional, List
 
 class DateHelper:
     """
@@ -17,7 +18,7 @@ class DateHelper:
     def is_valid_date_format (self, date:str, format:str = "%Y-%m-%d") -> bool:
         """
         Valida si un string tiene el formato de fecha especificado
-        :param date: fecha en forma de cadena
+        :param date: Fecha en forma de cadena
         :param format: Formato de fecha especificado
         :return: ¿Tiene el formato de fecha especificado correcto?
         """
@@ -27,24 +28,20 @@ class DateHelper:
         except ValueError:
             return False
 
+    @staticmethod
+    def parse_date(date: str, format: str = "%Y-%m-%d") -> Optional[datetime.datetime]:
+        """
+        Convierte un string a objeto datetime segun el formato especificado
+        :param date: Fecha en forma de cadena
+        :param format: Formato de fecha especificado
+        :return: datetime o None si hay error
+        """
+        try:
+            return datetime.datetime.strptime(date, format)
+        except ValueError:
+            return None
 
 # ▼△▼△▼△▼△▼△▼△▼△▼△▼△ Pseudocodigo △▼△▼△▼△▼△▼△▼△▼△▼△▼
-
-public
-static
-Optional[datetime.datetime]
-parseDate(String
-dateString, String
-format = "%Y-%m-%d")
-"""
-Convierte un string a objeto datetime según el formato especificado
-"""
-try
-    return datetime.datetime.strptime(dateString, format)
-catch
-ValueError
-e
-return null
 
 public
 static
