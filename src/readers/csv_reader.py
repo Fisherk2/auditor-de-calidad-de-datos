@@ -64,7 +64,7 @@ class CSVReader:
             with open(filepath, 'r', newline='') as file:
                 reader = csv.DictReader(file)
 
-                # TODO: ■■■■■■■■■■■■■ Procesar fila por fila usando yield simulado con generador ■■■■■■■■■■■■■
+                # ■■■■■■■■■■■■■ Procesar fila por fila usando yield simulado con generador ■■■■■■■■■■■■■
                 for row in reader:
                     yield row
 
