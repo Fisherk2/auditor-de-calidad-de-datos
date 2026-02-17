@@ -61,37 +61,39 @@ class DataParser:
             return True
         if isinstance(value,str):
             lower_value = value.lower().strip()
+
+            # TODO: ▁▂▃▄▅▆▇███████ Interpretaciones aceptadas ███████▇▆▅▄▃▂▁
             return (
                     lower_value == "true" or lower_value == "false" or
                     lower_value == "1" or lower_value == "0" or
                     lower_value == "yes" or lower_value == "no" or
                     lower_value == "on" or lower_value == "off"
             )
+
         return False
 
+    @staticmethod
+    def is_null_value(value:Any) -> bool:
+        """
+        Verifica si un valor es nulo o representa un valor nulo
+        :param value:
+        :return: ¿Es un valor nulo?
+        """
+        if value == None:
+            return True
+        if isinstance(value,str):
+            trimmed = value.lower().strip()
+
+            # TODO: ▁▂▃▄▅▆▇███████ Interpretaciones aceptadas ███████▇▆▅▄▃▂▁
+            return (
+                trimmed == "" or trimmed == "null" or
+                trimmed == "none" or trimmed == "na" or
+                trimmed == "n/a" or trimmed == "<null>"
+            )
+
+        return False
 
     # ▼△▼△▼△▼△▼△▼△▼△▼△▼△ Pseudocodigo △▼△▼△▼△▼△▼△▼△▼△▼△▼
-
-
-public
-static
-boolean
-isNullValue(Any
-value)
-"""
-Verifica si un valor es nulo o representa un valor nulo
-"""
-if value == null
-    return true
-
-if isinstance(value, str)
-    var
-    trimmed = value.trim().toLowerCase()
-    return trimmed == "" | | trimmed == "null" | | \
-        trimmed == "none" | | trimmed == "na" | | \
-        trimmed == "n/a" | | trimmed == "<null>"
-
-return false
 
 public
 static
