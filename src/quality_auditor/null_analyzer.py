@@ -10,14 +10,13 @@ DESCRIPCIÓN: Proporciona función para contar valores nulos por columna
 from typing import Any
 from src.utils.data_parser import DataParser
 
+# ⋮⋮⋮⋮⋮⋮⋮⋮ ALIAS de estructura datos ⋮⋮⋮⋮⋮⋮⋮⋮
+RowDataType = list[dict[str, Any]]
 
 class NullAnalyzer:
     """
     Clase para análisis de valores nulos en datos estructurados
     """
-
-    # ⋮⋮⋮⋮⋮⋮⋮⋮ ALIAS de estructura datos ⋮⋮⋮⋮⋮⋮⋮⋮
-    RowDataType = list[dict[str, Any]]
 
     @staticmethod
     def count_nulls(datos: RowDataType) -> dict[str, int]:
