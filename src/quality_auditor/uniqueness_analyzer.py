@@ -3,7 +3,7 @@
 MÓDULO:      Análisis de unicidad
 AUTOR:       Fisherk2
 FECHA:       2026-02-17
-DESCRIPCIÓN: Proporcionar función para calcular porcentaje de valores únicos por columna
+DESCRIPCIÓN: Proporciona funciones para calcular porcentaje de valores únicos por columna
 ■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■
 """
 from typing import Any
