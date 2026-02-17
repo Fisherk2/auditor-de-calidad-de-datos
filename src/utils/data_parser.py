@@ -48,32 +48,30 @@ class DataParser:
             return value.strip().length() > 0
         return False
 
+    @staticmethod
+    def is_bool_value(value:Any) -> bool:
+        """
+        Verifica si un valor puede ser interpretado como booleano
+        :param value:
+        :return: ¿Es un valor booleano?
+        """
+        if value == None:
+            return False
+        if isinstance(value,bool):
+            return True
+        if isinstance(value,str):
+            lower_value = value.lower().strip()
+            return (
+                    lower_value == "true" or lower_value == "false" or
+                    lower_value == "1" or lower_value == "0" or
+                    lower_value == "yes" or lower_value == "no" or
+                    lower_value == "on" or lower_value == "off"
+            )
+        return False
+
 
     # ▼△▼△▼△▼△▼△▼△▼△▼△▼△ Pseudocodigo △▼△▼△▼△▼△▼△▼△▼△▼△▼
 
-public
-static
-boolean
-isBooleanValue(Any
-value)
-"""
-Verifica si un valor puede ser interpretado como booleano
-"""
-if value == null
-    return false
-
-if isinstance(value, bool)
-    return true
-
-if isinstance(value, str)
-    var
-    lowerValue = value.toLowerCase().trim()
-    return lowerValue == "true" | | lowerValue == "false" | | \
-        lowerValue == "1" | | lowerValue == "0" | | \
-        lowerValue == "yes" | | lowerValue == "no" | | \
-        lowerValue == "on" | | lowerValue == "off"
-
-return false
 
 public
 static
