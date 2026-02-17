@@ -52,19 +52,17 @@ class DateHelper:
         current_date = datetime.datetime.now()
         return date > current_date
 
+    @staticmethod
+    def is_date_before(first_date:datetime.datetime, second_date:datetime.datetime) -> bool:
+        """
+        Verifica si la primer fecha es anterior a la segunda
+        :param first_date:
+        :param second_date:
+        :return: ¿La primer fecha es anterior a la segunda?
+        """
+        return first_date < second_date
 
 # ▼△▼△▼△▼△▼△▼△▼△▼△▼△ Pseudocodigo △▼△▼△▼△▼△▼△▼△▼△▼△▼
-
-public
-static
-boolean
-isDateBefore(datetime.datetime
-date1, datetime.datetime
-date2)
-"""
-Verifica si la primera fecha es anterior a la segunda
-"""
-return date1 < date2
 
 public
 static
