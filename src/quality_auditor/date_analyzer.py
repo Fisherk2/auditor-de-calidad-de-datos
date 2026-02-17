@@ -7,14 +7,13 @@ DESCRIPCIÓN: Proporciona funciones para verificar coherencia de fechas (ej: fec
 ■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■
 """
 
-from typing import Any
+from typing import Any, Optional
 from datetime import datetime
-
-from src.utils.error_reporter import ErrorReporter
 from src.utils.date_helper import DateHelper
 
 # ⋮⋮⋮⋮⋮⋮⋮⋮ ALIAS de estructura datos ⋮⋮⋮⋮⋮⋮⋮⋮
 RowDataType = list[dict[str, Any]]
+
 
 class DateAnalyzer:
     """
@@ -22,7 +21,7 @@ class DateAnalyzer:
     """
 
     @staticmethod
-    def check_date_coherence(datos:RowDataType, birth_column_name:str) -> list[str]:
+    def check_date_coherence(datos: RowDataType, birth_column_name: str) -> list[str]:
         """
         Verifica la coherencia de fechas comparando contra la fecha actual
         Detecta fechas de nacimiento futuras o fechas imposibles
@@ -36,7 +35,6 @@ class DateAnalyzer:
         errors = list()
 
         if birth_column_name is None or not birth_column_name.strip():
-            errors = list()
             errors.append("Error en encabezado: Nombre de columna de fecha inválido o vacío")
             return errors
 
@@ -54,11 +52,12 @@ class DateAnalyzer:
             if date_value is None:
                 continue
 
-            date:str = ""
-            if isinstance(date_value,str):
-                date:str = date_value.strip()
+            date: str = ""
+
+            if isinstance(date_value, str):
+                date: str = date_value.strip()
             else:
-                date:str = str(date_value).strip()
+                date: str = str(date_value).strip()
 
             # ■■■■■■■■■■■■■ Saltar cadenas vacias ■■■■■■■■■■■■■
             if not date:
@@ -66,19 +65,19 @@ class DateAnalyzer:
 
             # ■■■■■■■■■■■■■ Intentar parsear la fecha con diferentes formatos ■■■■■■■■■■■■■
             date_parsed = None
-            for format in supported_formats:
-                date_parsed = DateHelper.parse_date(date, format)
+            for supported_format in supported_formats:
+                date_parsed = DateHelper.parse_date(date, supported_format)
                 if date_parsed is not None:
                     break
 
             if date_parsed is None:
-                errors.append(f"Fila {i+1}: Fecha invalida en columna '{birth_column_name}': {date}")
+                errors.append(f"Fila {i + 1}: Fecha invalida en columna '{birth_column_name}': {date}")
 
             # ■■■■■■■■■■■■■ Verificar si la fecha es futura ■■■■■■■■■■■■■
             else:
                 if DateHelper.is_future_date(date_parsed):
                     mensaje = f"""
-                    Fila {i+1}: 
+                    Fila {i + 1}: 
                     Fecha futura en columna '{birth_column_name}': {DateHelper.format_date(date_parsed, "%Y-%m-%d")} 
                     (actual: {DateHelper.format_date(datetime.now(), "%Y-%m-%d")})
                     """
@@ -86,91 +85,78 @@ class DateAnalyzer:
 
         return errors
 
+    @staticmethod
+    def check_date_range(
+            datos: RowDataType,
+            column_name: str,
+            minimum_date: Optional[datetime] = None,
+            maximum_date: Optional[datetime] = None
+    ) -> list[str]:
+        """
+        Verifica que las fechas esten dentro de un rango especifico
+        :param datos: Lista de diccionarios representando filas de datos
+        :param column_name: Nombre de la columna que contiene las fechas
+        :param minimum_date: Fecha minimia permitida (Opcional)
+        :param maximum_date: Fecha maxima permitida (Opcional)
+        :return: Lista de mensajes de error indicando fechas fuera de rango
+        """
+        if datos is None or not datos:
+            return list()
 
+        errors = list()
 
-    # ▼△▼△▼△▼△▼△▼△▼△▼△▼△ Pseudocodigo △▼△▼△▼△▼△▼△▼△▼△▼△▼
+        if column_name is None or not column_name.strip():
+            errors.append("Error en encabezado: Nombre de columna de fecha inválido o vacío")
+            return errors
 
-public
-static
-List[String]
-verificarRangoFechas(List[Dict[String, Any]]
-datos, String
-nombreColumna,
-Optional[datetime]
-fechaMinima = null,
-Optional[datetime]
-fechaMaxima = null)
-"""
-Verifica que las fechas estén dentro de un rango específico
+        supported_formats = DateHelper.get_supported_formats()
 
-Args:
-    datos: Lista de diccionarios representando filas de datos
-    nombreColumna: Nombre de la columna que contiene las fechas
-    fechaMinima: Fecha mínima permitida (opcional)
-    fechaMaxima: Fecha máxima permitida (opcional)
+        for i in range(len(datos)):
+            row = datos[i]
 
-Returns:
-    Lista de mensajes de error indicando fechas fuera de rango
-"""
-if datos == null | | datos.isEmpty()
-    return list()
+            # ■■■■■■■■■■■■■ Saltar filas sin la columna ■■■■■■■■■■■■■
+            if not column_name in row.keys():
+                continue
 
-if nombreColumna == null | | nombreColumna.trim().isEmpty()
-    var
-    errorList = list()
-    errorList.append("Nombre de columna de fecha inválido o vacío")
-    return errorList
+            # ■■■■■■■■■■■■■ Saltar valores nulos ■■■■■■■■■■■■■
+            date_value = row[column_name]
+            if date_value is None:
+                continue
 
-var
-errores = list()
-var
-formatosSoportados = DateHelper.getSupportedFormats()
+            date: str = ""
 
-for int i = 0; i < datos.size(); i++
-var
-fila = datos[i]
+            if isinstance(date_value, str):
+                date = date_value.strip()
+            else:
+                date = str(date_value).strip()
 
-if !fila.containsKey(nombreColumna)
-continue  # Saltar filas sin la columna
+            # ■■■■■■■■■■■■■ Saltar cadenas vacias ■■■■■■■■■■■■■
+            if not date:
+                continue
 
-var
-valorFecha = fila[nombreColumna]
-if valorFecha == null
-    continue  # Saltar valores nulos
+            # ■■■■■■■■■■■■■ Intentar parsear la fecha ■■■■■■■■■■■■■
+            date_parsed = None
+            for supported_format in supported_formats:
+                date_parsed = DateHelper.parse_date(date, supported_format)
+                if date_parsed is not None:
+                    break
 
-var
-fechaStr = ""
-if isinstance(valorFecha, str)
-    fechaStr = valorFecha.trim()
-else
-    fechaStr = str(valorFecha).trim()
+            if date_parsed is not None:
 
-if fechaStr.isEmpty()
-    continue  # Saltar cadenas vacías
+                # ▲▲▲▲▲▲ Verificar rango minimo ▲▲▲▲▲▲
+                if minimum_date is not None and DateHelper.is_date_before(date_parsed, minimum_date):
+                    message = f"""
+                    Fila {i + 1}: Fecha fuera de rango minimo en '{column_name}': {DateHelper.format_date(date_parsed, "%Y-%m-%d")}
+                    (minimo permitido: {DateHelper.format_date(minimum_date, "%Y-%m-%d")})
+                    """
+                    errors.append(message)
 
-# Intentar parsear la fecha
-var
-fechaParseada = null
-for String formato in formatosSoportados
-    fechaParseada = DateHelper.parseDate(fechaStr, formato)
-    if fechaParseada != null
-        break
+                # ▲▲▲▲▲▲ Verificar rango maximo ▲▲▲▲▲▲
+                if maximum_date is not None and DateHelper.is_date_before(maximum_date, date_parsed):
+                    message = f"""
+                    Fila {i + 1}: Fecha fuera de rango maximo en '{column_name}': {DateHelper.format_date(date_parsed, "%Y-%m-%d")}
+                    (maximo permitido: {DateHelper.format_date(maximum_date, "%Y-%m-%d")})
+                    """
+                    errors.append(message)
 
-if fechaParseada != null
-    # Verificar rango mínimo
-    if fechaMinima != null & & DateHelper.isDateBefore(fechaParseada, fechaMinima)
-        var
-        mensaje = "Fila " + (i + 1) + ": Fecha fuera de rango mínimo en '" + nombreColumna + "': " + \
-                  DateHelper.formatDate(fechaParseada, "%Y-%m-%d") + \
-                  " (mínimo permitido: " + DateHelper.formatDate(fechaMinima, "%Y-%m-%d") + ")"
-        errores.append(mensaje)
-
-    # Verificar rango máximo
-    if fechaMaxima != null & & DateHelper.isDateBefore(fechaMaxima, fechaParseada)
-        var
-        mensaje = "Fila " + (i + 1) + ": Fecha fuera de rango máximo en '" + nombreColumna + "': " + \
-                  DateHelper.formatDate(fechaParseada, "%Y-%m-%d") + \
-                  " (máximo permitido: " + DateHelper.formatDate(fechaMaxima, "%Y-%m-%d") + ")"
-        errores.append(mensaje)
-
-return errores
+        return errors
