@@ -6,11 +6,12 @@ FECHA:       2026-02-17
 DESCRIPCIÓN: Proporcionar función para calcular porcentaje de valores únicos por columna
 ■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■
 """
-from typing import List, Dict, Any
+from typing import Any
 from collections import Counter
 
 # ⋮⋮⋮⋮⋮⋮⋮⋮ ALIAS de estructura datos ⋮⋮⋮⋮⋮⋮⋮⋮
 RowDataType = list[dict[str, Any]]
+MetricValuesType = dict[str, dict[str, int]]
 
 
 class UniquenessAnalyzer:
@@ -66,68 +67,56 @@ class UniquenessAnalyzer:
 
         return unique_result
 
-    # ▼△▼△▼△▼△▼△▼△▼△▼△▼△ Pseudocodigo △▼△▼△▼△▼△▼△▼△▼△▼△▼
+    @staticmethod
+    def get_unique_details(datos: RowDataType) -> MetricValuesType:
+        """
+        Obtiene detalles adicionales sobre unicidad: conteo de únicos, duplicados y total por columna
+        :param datos: Lista de diccionarios representando filas de datos
+        :return: Diccionario con nombre de columna como clave y diccionario de metricas como valor
+        """
+        if datos is None or not datos:
+            return dict()
 
-public
-static
-Dict[String, Dict[String, int]]
-obtenerDetallesUnicidad(List[Dict[String, Any]]
-datos)
-"""
-Obtiene detalles adicionales sobre unicidad: conteo de únicos, duplicados y total por columna
+        # ■■■■■■■■■■■■■ Obtener todas las columnas posibles ■■■■■■■■■■■■■
+        all_columns = set()
+        for row in datos:
+            for column in row.keys():
+                all_columns.add(column)
 
-Args:
-    datos: Lista de diccionarios representando filas de datos
+        details = dict()
+        for column in all_columns:
 
-Returns:
-    Diccionario con nombre de columna como clave y diccionario de métricas como valor
-"""
-if datos == null | | datos.isEmpty()
-    return dict()
+            # ▲▲▲▲▲▲ Recoger todos los valores de la columna ▲▲▲▲▲▲
+            values = list()
+            for row in datos:
+                if column in row.keys():
+                    values.append(row[column])
 
-var
-todasLasColumnas = set()
-for Dict[String, Any] fila in datos
-    for String columna in fila.keySet()
-        todasLasColumnas.add(columna)
+            # ▲▲▲▲▲▲ Salta a la siguiente columna si no hay valores ▲▲▲▲▲▲
+            if not values:
+                details[column] = dict()
+                details[column]["total"] = 0
+                details[column]["unicos"] = 0
+                details[column]["duplicados"] = 0
+                details[column]["porcentajeUnicidad"] = 0.0
+                continue
 
-var
-detalles = dict()
+            # ▲▲▲▲▲▲ Contar frecuencia de cada valor ▲▲▲▲▲▲
+            counter = Counter(values)
+            total = len(counter)
+            uniques = 0
+            duplicates = 0
 
-for String columna in todasLasColumnas
-    var
-    valores = list()
-    for Dict[String, Any] fila in datos
-        if fila.containsKey(columna)
-            valores.append(fila[columna])
+            for count in counter.values():
+                if count == 1:
+                    uniques += 1
+                else:
+                    duplicates += count
 
-    if valores.isEmpty()
-        detalles[columna] = dict()
-        detalles[columna]["total"] = 0
-        detalles[columna]["unicos"] = 0
-        detalles[columna]["duplicados"] = 0
-        detalles[columna]["porcentajeUnicidad"] = 0.0
-        continue
+            details[column] = dict()
+            details[column]["total"] = total
+            details[column]["unicos"] = uniques
+            details[column]["duplicados"] = duplicates
+            details[column]["porcentajeUnicidad"] = round((uniques / total) * 100.0, 2)
 
-    var
-    contador = Counter(valores)
-    var
-    total = valores.size()
-    var
-    unicos = 0
-    var
-    duplicados = 0
-
-    for var count in contador.values()
-        if count == 1
-            unicos + +
-        else
-            duplicados += count
-
-    detalles[columna] = dict()
-    detalles[columna]["total"] = total
-    detalles[columna]["unicos"] = unicos
-    detalles[columna]["duplicados"] = duplicados
-    detalles[columna]["porcentajeUnicidad"] = round((unicos / total) * 100.0, 2)
-
-return detalles
+        return details
