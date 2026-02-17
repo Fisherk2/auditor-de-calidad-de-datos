@@ -7,12 +7,12 @@ DESCRIPCIÓN: Capa de acceso a datos que proporciona funciones para validar y tr
 ■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■
 """
 
-from typing import Any, Optional
-import re
+from typing import Any
 
 # ⋮⋮⋮⋮⋮⋮⋮⋮ ALIAS de estructura datos ⋮⋮⋮⋮⋮⋮⋮⋮
 RowDataType = list[dict[str, Any]]
 ColumnIndexMap = dict[str, list[int]]
+
 
 class DataParser:
     """
@@ -20,17 +20,17 @@ class DataParser:
     """
 
     @staticmethod
-    def is_numeric_value(value:Any) -> bool:
+    def is_numeric_value(value: Any) -> bool:
         """
         Verifica si un valor puede ser convertido a número
         :param value:
         :return: ¿Es un valor numérico?
         """
-        if value == None:
+        if value is None:
             return False
-        if isinstance(value, (int, float)): # TODO: Verificar como saber si una instancia es numero entero
+        if isinstance(value, (int, float)):
             return True
-        if isinstance(value,str):
+        if isinstance(value, str):
             try:
                 float(value)
                 return True
@@ -39,30 +39,30 @@ class DataParser:
         return False
 
     @staticmethod
-    def is_string_value(value:Any) -> bool:
+    def is_string_value(value: Any) -> bool:
         """
         Verifica si un valor es una cadena valida (no vacia)
         :param value:
         :return: ¿Es una cadena valida?
         """
-        if value == None:
+        if value is None:
             return False
-        if isinstance(value,str):
-            return value.strip().length() > 0
+        if isinstance(value, str):
+            return len(value.strip()) > 0
         return False
 
     @staticmethod
-    def is_bool_value(value:Any) -> bool:
+    def is_bool_value(value: Any) -> bool:
         """
         Verifica si un valor puede ser interpretado como booleano
         :param value:
         :return: ¿Es un valor booleano?
         """
-        if value == None:
+        if value is None:
             return False
-        if isinstance(value,bool):
+        if isinstance(value, bool):
             return True
-        if isinstance(value,str):
+        if isinstance(value, str):
             lower_value = value.lower().strip()
 
             # TODO: ▁▂▃▄▅▆▇███████ Interpretaciones aceptadas ███████▇▆▅▄▃▂▁
@@ -76,22 +76,22 @@ class DataParser:
         return False
 
     @staticmethod
-    def is_null_value(value:Any) -> bool:
+    def is_null_value(value: Any) -> bool:
         """
         Verifica si un valor es nulo o representa un valor nulo
         :param value:
         :return: ¿Es un valor nulo?
         """
-        if value == None:
+        if value is None:
             return True
-        if isinstance(value,str):
+        if isinstance(value, str):
             trimmed = value.lower().strip()
 
             # TODO: ▁▂▃▄▅▆▇███████ Interpretaciones aceptadas ███████▇▆▅▄▃▂▁
             return (
-                trimmed == "" or trimmed == "null" or
-                trimmed == "none" or trimmed == "na" or
-                trimmed == "n/a" or trimmed == "<null>"
+                    trimmed == "" or trimmed == "null" or
+                    trimmed == "none" or trimmed == "na" or
+                    trimmed == "n/a" or trimmed == "<null>"
             )
 
         return False
@@ -128,7 +128,7 @@ class DataParser:
         return column_index
 
     @staticmethod
-    def validate_row_structure(row:dict[str,Any], expected_columns:set[str]) -> dict[str,Any]:
+    def validate_row_structure(row: dict[str, Any], expected_columns: set[str]) -> dict[str, Any]:
         """
         Valida la estructura de una fila contra columnas esperadas
         :return: Diccionario de resultados que validan la fila
@@ -153,23 +153,21 @@ class DataParser:
 
         return result
 
+    @staticmethod
+    def filter_valid_rows(data: RowDataType, expected_columns: set[str]) -> RowDataType:
+        """
+        Filtra filas que contienen todas las columnas esperadas
+        :param data:
+        :param expected_columns:
+        :return:
+        """
+        valid_rows = list()
+        for row in data:
+            validation = DataParser.validate_row_structure(
+                row=row,
+                expected_columns=expected_columns
+            )
+            if validation["valid"]:
+                valid_rows.append(row)
 
-    # ▼△▼△▼△▼△▼△▼△▼△▼△▼△ Pseudocodigo △▼△▼△▼△▼△▼△▼△▼△▼△▼
-
-public
-static
-List[Dict[String, Any]]
-filterValidRows(List[Dict[String, Any]]
-data, Set[String]
-expectedColumns)
-"""
-Filtra filas que contienen todas las columnas esperadas
-"""
-var
-validRows = list()
-for Dict[String, Any] row in data
-    var
-    validation = DataParser.validateRowStructure(row, expectedColumns)
-    if validation["valid"]
-        validRows.append(row)
-return validRows
+        return valid_rows
