@@ -10,6 +10,9 @@ DESCRIPCIÓN: Capa de acceso a datos que proporciona funciones para validar y tr
 from typing import Any, Optional
 import re
 
+# ⋮⋮⋮⋮⋮⋮⋮⋮ ALIAS de estructura datos ⋮⋮⋮⋮⋮⋮⋮⋮
+RowDataType = list[dict[str, Any]]
+ColumnIndexMap = dict[str, list[int]]
 
 class DataParser:
     """
@@ -25,7 +28,7 @@ class DataParser:
         """
         if value == None:
             return False
-        if isinstance(value, (int,float)):
+        if isinstance(value, (int, float)): # TODO: Verificar como saber si una instancia es numero entero
             return True
         if isinstance(value,str):
             try:
@@ -93,33 +96,38 @@ class DataParser:
 
         return False
 
+    @staticmethod
+    def get_column_index(data: RowDataType) -> ColumnIndexMap:
+        """
+        Obtiene los indices de aparicion de cada columna de los datos
+        para recibir una lista de diccionarios (que representan filas de datos)
+        y devolver un diccionario que mapea cada nombre de columna
+        a una lista de los índices (posiciones) de las filas en las que
+        esa columna aparece.
+        :return: Diccionario de indices de cada columna
+        """
+        if not data:
+            return dict()
+
+        # ■■■■■■■■■■■■■ Obtenemos la primera fila de datos para conocer las columnas existentes ■■■■■■■■■■■■■
+        column_index = dict()
+        first_row = data[0]
+
+        # ■■■■■■■■■■■■■ Iteramos sobre cada clave (nombre de columna) en la primera fila ■■■■■■■■■■■■■
+        for key in first_row.keys():
+            indexes = list()
+
+            # ■■■■■■■■■■■■■ Recorremos cada fila en los datos (usando su índice) ■■■■■■■■■■■■■
+            for i in range(len(data)):
+                if key in data[i]:
+                    indexes.append(i)
+
+            # ■■■■■■■■■■■■■ Una vez recorridas todas las filas, asignamos la lista de índices al nombre de la columna ■■■■■■■■■■■■■
+            column_index[key] = indexes
+
+        return column_index
+
     # ▼△▼△▼△▼△▼△▼△▼△▼△▼△ Pseudocodigo △▼△▼△▼△▼△▼△▼△▼△▼△▼
-
-public
-static
-Dict[String, List[int]]
-getColumnIndices(List[Dict[String, Any]]
-data)
-"""
-Obtiene los índices de aparición de cada columna en los datos
-"""
-if data.isEmpty()
-    return dict()
-
-var
-columnIndices = dict()
-var
-firstRow = data[0]
-
-for String key in firstRow.keySet()
-    var
-    indices = list()
-    for int i = 0; i < data.size(); i++
-    if data[i].containsKey(key)
-        indices.append(i)
-columnIndices[key] = indices
-
-return columnIndices
 
 public
 static
