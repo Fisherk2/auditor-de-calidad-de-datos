@@ -8,14 +8,15 @@ DESCRIPCIÓN: Componente de bajo nivel que proporciona funciones auxiliares para
 """
 
 import datetime
-from typing import Optional, List
+from typing import Optional
 
 class DateHelper:
     """
     Clase de utilidad para operaciones comunes con fechas
     """
 
-    def is_valid_date_format (self, date:str, format:str = "%Y-%m-%d") -> bool:
+    @staticmethod
+    def is_valid_date_format (date:str, format:str = "%Y-%m-%d") -> bool:
         """
         Valida si un string tiene el formato de fecha especificado
         :param date: Fecha en forma de cadena
@@ -41,19 +42,18 @@ class DateHelper:
         except ValueError:
             return None
 
-# ▼△▼△▼△▼△▼△▼△▼△▼△▼△ Pseudocodigo △▼△▼△▼△▼△▼△▼△▼△▼△▼
+    @staticmethod
+    def is_future_date(date: datetime.datetime) -> bool:
+        """
+        Verifica si una fecha es futura conparandola con la fecha actual
+        :param date:
+        :return:
+        """
+        current_date = datetime.datetime.now()
+        return date > current_date
 
-public
-static
-boolean
-isFutureDate(datetime.datetime
-date)
-"""
-Verifica si una fecha es futura comparándola con la fecha actual
-"""
-var
-currentDate = datetime.datetime.now()
-return date > currentDate
+
+# ▼△▼△▼△▼△▼△▼△▼△▼△▼△ Pseudocodigo △▼△▼△▼△▼△▼△▼△▼△▼△▼
 
 public
 static
