@@ -62,18 +62,18 @@ class DateHelper:
         """
         return first_date < second_date
 
-# ▼△▼△▼△▼△▼△▼△▼△▼△▼△ Pseudocodigo △▼△▼△▼△▼△▼△▼△▼△▼△▼
+    @staticmethod
+    def format_date(date:datetime.datetime, format:str = "%Y-%m-%d") -> str:
+        """
+        Formatea un objeto datetime a string según el formato especificado
+        :param date: Fecha en forma de cadena
+        :param format: Formato de fecha especificado
+        :return: Fecha en forma de cadena
+        """
+        return date.strftime(format)
 
-public
-static
-String
-formatDate(datetime.datetime
-date, String
-format = "%Y-%m-%d")
-"""
-Formatea un objeto datetime a string según el formato especificado
-"""
-return date.strftime(format)
+
+# ▼△▼△▼△▼△▼△▼△▼△▼△▼△ Pseudocodigo △▼△▼△▼△▼△▼△▼△▼△▼△▼
 
 public
 static
