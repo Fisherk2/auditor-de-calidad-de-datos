@@ -35,23 +35,21 @@ class DataParser:
                 return False
         return False
 
+    @staticmethod
+    def is_string_value(value:Any) -> bool:
+        """
+        Verifica si un valor es una cadena valida (no vacia)
+        :param value:
+        :return: ¿Es una cadena valida?
+        """
+        if value == None:
+            return False
+        if isinstance(value,str):
+            return value.strip().length() > 0
+        return False
+
+
     # ▼△▼△▼△▼△▼△▼△▼△▼△▼△ Pseudocodigo △▼△▼△▼△▼△▼△▼△▼△▼△▼
-
-public
-static
-boolean
-isStringValue(Any
-value)
-"""
-Verifica si un valor es una cadena válida (no vacía)
-"""
-if value == null
-    return false
-
-if isinstance(value, str)
-    return value.trim().length() > 0
-
-return false
 
 public
 static
