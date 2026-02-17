@@ -127,35 +127,34 @@ class DataParser:
 
         return column_index
 
+    @staticmethod
+    def validate_row_structure(row:dict[str,Any], expected_columns:set[str]) -> dict[str,Any]:
+        """
+        Valida la estructura de una fila contra columnas esperadas
+        :return: Diccionario de resultados que validan la fila
+        """
+        result = dict()
+        result["valid"] = True
+        result["missing_columns"] = list()
+        result["extra_columns"] = list()
+
+        # ■■■■■■■■■■■■■ Verificar columnas faltantes ■■■■■■■■■■■■■
+        for expected_column in expected_columns:
+            if not expected_column in row.keys():
+                result["missing_columns"].append(expected_column)
+
+        # ■■■■■■■■■■■■■ Verificar columnas extra ■■■■■■■■■■■■■
+        for actual_column in row.keys():
+            if not actual_column in expected_columns:
+                result["extra_columns"].append(actual_column)
+
+        has_issues = result["missing_columns"] or result["extra_columns"]
+        result["valid"] = not has_issues
+
+        return result
+
+
     # ▼△▼△▼△▼△▼△▼△▼△▼△▼△ Pseudocodigo △▼△▼△▼△▼△▼△▼△▼△▼△▼
-
-public
-static
-Dict[String, Any]
-validateRowStructure(Dict[String, Any]
-row, Set[String]
-expectedColumns)
-"""
-Valida la estructura de una fila contra columnas esperadas
-"""
-var
-result = dict()
-result["valid"] = true
-result["missing_columns"] = list()
-result["extra_columns"] = list()
-
-# Verificar columnas faltantes
-for String expectedCol in expectedColumns
-    if !row.containsKey(expectedCol)
-    result["missing_columns"].append(expectedCol)
-
-# Verificar columnas extra
-for String actualCol in row.keySet()
-    if !expectedColumns.contains(actualCol)
-    result["extra_columns"].append(actualCol)
-
-result["valid"] = result["missing_columns"].isEmpty() & & result["extra_columns"].isEmpty()
-return result
 
 public
 static
