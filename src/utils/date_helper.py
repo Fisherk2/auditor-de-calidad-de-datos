@@ -72,21 +72,19 @@ class DateHelper:
         """
         return date.strftime(format)
 
+    @staticmethod
+    def get_supported_formats() -> list[str]:
+        """
+        Retorna lista de formatos de fecha soportados comúnmente
+        :return: Lista de formatos de fecha
+        """
 
-# ▼△▼△▼△▼△▼△▼△▼△▼△▼△ Pseudocodigo △▼△▼△▼△▼△▼△▼△▼△▼△▼
+        # ▁▂▃▄▅▆▇███████ Formatos disponibles ███████▇▆▅▄▃▂▁
 
-public
-static
-List[String]
-getSupportedFormats()
-"""
-Retorna lista de formatos de fecha soportados comúnmente
-"""
-var
-formats = list()
-formats.append("%Y-%m-%d")  # 2023-12-25
-formats.append("%d/%m/%Y")  # 25/12/2023
-formats.append("%m/%d/%Y")  # 12/25/2023
-formats.append("%Y-%m-%d %H:%M:%S")  # 2023-12-25 14:30:00
-formats.append("%d/%m/%Y %H:%M")  # 25/12/2023 14:30
-return formats
+        # %Y-%m-%d -> 2025-12-25
+        # %d/%m/%Y -> 25/12/2025
+        # %m/%d/%Y -> 12/25/2025
+        # %Y-%m-%d %H:%M:%S -> 2025-12-25 14:30:00
+        # %d/%m/%Y %H:%M -> 25/12/2025 14:30
+
+        return ["%Y-%m-%d", "%d/%m/%Y", "%m/%d/%Y", "%Y-%m-%d %H:%M:%S", "%d/%m/%Y %H:%M"]
