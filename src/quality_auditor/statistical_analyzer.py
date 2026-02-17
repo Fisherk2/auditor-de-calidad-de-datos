@@ -7,12 +7,14 @@ DESCRIPCIÓN: Proporciona funciones para resumen estadístico (min, max, promedi
 ■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■
 """
 import math
-from typing import Any, Optional
+from typing import Any
 from src.utils.data_parser import DataParser
 
 # ⋮⋮⋮⋮⋮⋮⋮⋮ ALIAS de estructura datos ⋮⋮⋮⋮⋮⋮⋮⋮
 RowDataType = list[dict[str, Any]]
 MetricDataType = dict[str, dict[str, float]]
+ValueListType = dict[str, list[float]]
+
 
 class StatisticalAnalyzer:
     """
@@ -20,7 +22,7 @@ class StatisticalAnalyzer:
     """
 
     @staticmethod
-    def summary_stadistic(data:RowDataType) -> MetricDataType:
+    def summary_stadistic(data: RowDataType) -> MetricDataType:
         """
         Calcula metricas estadisticas basicas para columnas numericas
         :param data: Lista de diccionarios representando filas de datos
@@ -55,28 +57,28 @@ class StatisticalAnalyzer:
                 # ▲▲▲▲▲▲ Calcular metricas basicas ▲▲▲▲▲▲
                 minimum = numeric_values[0]
                 maximum = numeric_values[0]
-                sum = 0.0
+                suma = 0.0
 
                 for number in numeric_values:
                     if number < minimum:
                         minimum = number
                     if number > maximum:
                         maximum = number
-                    sum += number
+                    suma += number
 
                 count = len(numeric_values)
-                average = sum / count
+                average = suma / count
 
                 # ▲▲▲▲▲▲ Calcular desviacion estandar ▲▲▲▲▲▲
                 squares_sum = 0.0
                 for number in numeric_values:
                     difference = number - average
-                    squares_sum += difference*difference
+                    squares_sum += difference * difference
 
                 # ▲▲▲▲▲▲ Calcular varianza muestral ▲▲▲▲▲▲
                 variance = 0.0
                 if count > 1:
-                    variance = squares_sum / (count -1)
+                    variance = squares_sum / (count - 1)
 
                 # ▲▲▲▲▲▲ Calcular desviación estandar ▲▲▲▲▲▲
                 standard_deviation = math.sqrt(variance)
@@ -85,7 +87,7 @@ class StatisticalAnalyzer:
                 stadistics["minimum"] = round(minimum, 2)
                 stadistics["maximum"] = round(maximum, 2)
                 stadistics["average"] = round(average, 2)
-                stadistics["sum"] = round(sum, 2)
+                stadistics["sum"] = round(suma, 2)
                 stadistics["count"] = count
                 stadistics["standard_deviation"] = round(standard_deviation, 2)
 
@@ -94,7 +96,7 @@ class StatisticalAnalyzer:
         return results
 
     @staticmethod
-    def count_by_type(data:RowDataType) -> dict[str,int]:
+    def count_by_type(data: RowDataType) -> dict[str, int]:
         """
         Cuenta cuantas columnas son numericas, de texto, booleanas, etc.
         :param data: Lista de diccionarios representando filas de datos
@@ -149,47 +151,33 @@ class StatisticalAnalyzer:
 
         return count_types
 
-# ▼△▼△▼△▼△▼△▼△▼△▼△▼△ Pseudocodigo △▼△▼△▼△▼△▼△▼△▼△▼△▼
+    @staticmethod
+    def get_numerics_values(data: RowDataType) -> ValueListType:
+        """
+        Extrae solo los valores numericos por columna
+        :param data: Lista de diccionarios representando filas de datos
+        :return: Diccionario con nombre de la columna como clave y lista de valores numericos como valor
+        """
+        if data is None or not data:
+            return dict()
 
+        # ■■■■■■■■■■■■■ Obtener todas las columnas posibles ■■■■■■■■■■■■■
+        all_columns = set()
+        for row in data:
+            for column in row.keys():
+                all_columns.add(column)
 
-public
-static
-Dict[String, List[float]]
-obtenerValoresNumericos(List[Dict[String, Any]]
-datos)
-"""
-Extrae solo los valores numéricos por columna
+        numerics_values = dict()
+        for column in all_columns:
+            numeric_list = list()
 
-Args:
-    datos: Lista de diccionarios representando filas de datos
+            for row in data:
+                if column in row.keys():
+                    value = row[column]
+                    if DataParser.is_numeric_value(value):
+                        numeric_list.append(float(value))
 
-Returns:
-    Diccionario con nombre de columna como clave y lista de valores numéricos como valor
-"""
-if datos == null | | datos.isEmpty()
-    return dict()
+            if numeric_list:
+                numerics_values[column] = numeric_list
 
-var
-todasLasColumnas = set()
-for Dict[String, Any] fila in datos
-    for String columna in fila.keySet()
-        todasLasColumnas.add(columna)
-
-var
-valoresNumericos = dict()
-
-for String columna in todasLasColumnas
-    var
-    listaNumerica = list()
-
-    for Dict[String, Any] fila in datos
-        if fila.containsKey(columna)
-            var
-            valor = fila[columna]
-            if DataParser.isNumericValue(valor)
-                listaNumerica.append(float(valor))
-
-    if !listaNumerica.isEmpty()
-    valoresNumericos[columna] = listaNumerica
-
-return valoresNumericos
+        return numerics_values
