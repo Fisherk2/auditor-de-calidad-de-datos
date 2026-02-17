@@ -2,11 +2,10 @@
 ■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■
 MÓDULO:      Utilidades reutilizables para manejo de fechas
 AUTOR:       Fisherk2
-FECHA:       2026-02-10
+FECHA:       2026-02-16
 DESCRIPCIÓN: Componente de bajo nivel que proporciona funciones auxiliares para conversión y validación de fechas
 ■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■
 """
-
 import datetime
 from typing import Optional
 
@@ -16,7 +15,7 @@ class DateHelper:
     """
 
     @staticmethod
-    def is_valid_date_format (date:str, format:str = "%Y-%m-%d") -> bool:
+    def is_valid_date_format(date: str, format: str = "%Y-%m-%d") -> bool:
         """
         Valida si un string tiene el formato de fecha especificado
         :param date: Fecha en forma de cadena
@@ -53,7 +52,7 @@ class DateHelper:
         return date > current_date
 
     @staticmethod
-    def is_date_before(first_date:datetime.datetime, second_date:datetime.datetime) -> bool:
+    def is_date_before(first_date: datetime.datetime, second_date: datetime.datetime) -> bool:
         """
         Verifica si la primer fecha es anterior a la segunda
         :param first_date:
@@ -63,7 +62,7 @@ class DateHelper:
         return first_date < second_date
 
     @staticmethod
-    def format_date(date:datetime.datetime, format:str = "%Y-%m-%d") -> str:
+    def format_date(date: datetime.datetime, format: str = "%Y-%m-%d") -> str:
         """
         Formatea un objeto datetime a string según el formato especificado
         :param date: Fecha en forma de cadena
