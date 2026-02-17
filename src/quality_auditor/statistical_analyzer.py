@@ -93,77 +93,64 @@ class StatisticalAnalyzer:
 
         return results
 
+    @staticmethod
+    def count_by_type(data:RowDataType) -> dict[str,int]:
+        """
+        Cuenta cuantas columnas son numericas, de texto, booleanas, etc.
+        :param data: Lista de diccionarios representando filas de datos
+        :return: Diccionario con categorias de tipo y conteo de columnas:
+        ["numerics", "texts", "booleans", "others"]
+        """
+        if data is None or not data:
+            return dict()
+
+        # ■■■■■■■■■■■■■ Obtener todas las columnas posibles ■■■■■■■■■■■■■
+        all_columns = set()
+        for row in data:
+            for column in row.keys():
+                all_columns.add(column)
+
+        count_types = dict()
+        count_types["numerics"] = 0
+        count_types["texts"] = 0
+        count_types["booleans"] = 0
+        count_types["others"] = 0
+
+        # ■■■■■■■■■■■■■ Para cada columna, determinar el tipo predominante ■■■■■■■■■■■■■
+        for column in all_columns:
+            count_numeric = 0
+            count_text = 0
+            count_booleans = 0
+            count_total = 0
+
+            for row in data:
+                if column in row.keys():
+                    value = row[column]
+                    count_total = 0
+
+                    if DataParser.is_numeric_value(value):
+                        count_numeric += 1
+                    elif DataParser.is_string_value(value):
+                        count_text += 1
+                    elif DataParser.is_bool_value(value):
+                        count_booleans += 1
+
+            # ▲▲▲▲▲▲ Determinar tipo predominante (más del 50% ▲▲▲▲▲▲
+            if count_total > 0:
+                umbral = count_total / 2.0
+                if count_numeric >= umbral:
+                    count_types["numerics"] += 1
+                elif count_text >= umbral:
+                    count_types["texts"] += 1
+                elif count_booleans >= umbral:
+                    count_types["booleans"] += 1
+                else:
+                    count_types["others"] += 1
+
+        return count_types
 
 # ▼△▼△▼△▼△▼△▼△▼△▼△▼△ Pseudocodigo △▼△▼△▼△▼△▼△▼△▼△▼△▼
 
-public
-static
-Dict[String, int]
-conteoPorTipo(List[Dict[String, Any]]
-datos)
-"""
-Cuenta cuántas columnas son numéricas, de texto, booleanas, etc.
-
-Args:
-    datos: Lista de diccionarios representando filas de datos
-
-Returns:
-    Diccionario con categorías de tipo y conteo de columnas
-"""
-if datos == null | | datos.isEmpty()
-    return dict()
-
-var
-todasLasColumnas = set()
-for Dict[String, Any] fila in datos
-    for String columna in fila.keySet()
-        todasLasColumnas.add(columna)
-
-var
-conteoTipos = dict()
-conteoTipos["numericas"] = 0
-conteoTipos["texto"] = 0
-conteoTipos["booleanas"] = 0
-conteoTipos["otras"] = 0
-
-# Para cada columna, determinar el tipo predominante
-for String columna in todasLasColumnas
-    var
-    conteoNumericos = 0
-    var
-    conteoTexto = 0
-    var
-    conteoBooleanos = 0
-    var
-    conteoTotal = 0
-
-    for Dict[String, Any] fila in datos
-        if fila.containsKey(columna)
-            var
-            valor = fila[columna]
-            conteoTotal + +
-
-            if DataParser.isNumericValue(valor)
-                conteoNumericos + +
-            elif DataParser.isStringValue(valor)
-                conteoTexto + +
-            elif DataParser.isBooleanValue(valor)
-                conteoBooleanos + +
-
-    # Determinar tipo predominante (más del 50%)
-    if conteoTotal > 0
-        var
-        umbral = conteoTotal / 2.0
-        if conteoNumericos >= umbral
-            conteoTipos["numericas"] + +
-        elif conteoTexto >= umbral
-            conteoTipos["texto"] + +
-        elif conteoBooleanos >= umbral
-            conteoTipos["booleanas"] + +
-        else
-            conteoTipos["otras"] + +
-
-return conteoTipos
 
 public
 static
