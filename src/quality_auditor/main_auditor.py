@@ -18,9 +18,6 @@ from utils.data_parser import DataParser
 
 # ⋮⋮⋮⋮⋮⋮⋮⋮ ALIAS de estructura datos ⋮⋮⋮⋮⋮⋮⋮⋮
 RowDataType = list[dict[str, Any]]
-MetricDataType = dict[str, dict[str, float]]
-ValueListType = dict[str, list[float]]
-
 
 class QualityAuditor:
     """
@@ -147,7 +144,7 @@ class QualityAuditor:
                     text_metrics["unique_values"] = len(unique_values)
                     text_metrics["unique_percent"] = round(len(unique_values) / len(text_values) * 100.0, 2)
 
-                    # ▲▲▲▲▲▲ TODO: refactoricar - > Detectar posible problemas de formato ▲▲▲▲▲▲
+                    # ▲▲▲▲▲▲ Detectar posible problemas de formato ▲▲▲▲▲▲
                     format_problems = list()
                     for text in text_values:
                         # ▲▲▲▲▲▲ Detectar cadenas con solo espacios ▲▲▲▲▲▲
