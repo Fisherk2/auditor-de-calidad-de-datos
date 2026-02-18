@@ -64,8 +64,8 @@ class QualityAuditor:
         Realiza un analisis completo de calidad de datos con opciones avanzadas
         :param data: Lista de diccionarios representando filas de datos
         :param birth_column_name: Columna especifica para analisis de coherencia de fechas
-        :param numerics_column: Lista de columnas a tratar como nuemricas
-        :param text_column: Lista de columnas a tratar como de texto
+        :param numerics_columns: Lista de columnas a tratar como nuemricas
+        :param text_columns: Lista de columnas a tratar como de texto
         :return: Diccionario con todos los resultados de calidad ampliados
         """
         results = QualityAuditor.quality_audit(data)
@@ -104,8 +104,8 @@ class QualityAuditor:
                             stadistics["mediana"] = sorted_values[half]
 
                         # ▲▲▲▲▲▲ Percentiles ▲▲▲▲▲▲
-                        stadistics["q25"] = sorted_values[math.floor(size*0.25)]
-                        stadistics["q75"] = sorted_values[math.floor(size*0.75)]
+                        stadistics["q25"] = sorted_values[math.floor(size * 0.25)]
+                        stadistics["q75"] = sorted_values[math.floor(size * 0.75)]
 
                     stadistics_details[column] = stadistics
 
@@ -114,7 +114,7 @@ class QualityAuditor:
         return results
 
     @staticmethod
-    def get_general_metrics(data: RowDataType) -> dict[str,int]:
+    def get_general_metrics(data: RowDataType) -> dict[str, int]:
         """
         Obtiene metricas generales de calidad de datos
         :param data: Lista de diccionarios representando filas de datos
@@ -140,11 +140,11 @@ class QualityAuditor:
         for count in nulls_count.values():
             nulls_total += count
 
-        posible_nulls_total = rows_total_count*len(nulls_count.keys())
+        posible_nulls_total = rows_total_count * len(nulls_count.keys())
         nulls_percent = 0.0
         if posible_nulls_total > 0:
-            nulls_percent = (nulls_total/posible_nulls_total)*100.0
-        metrics["nulls_percent"] = round(nulls_percent,2)
+            nulls_percent = (nulls_total / posible_nulls_total) * 100.0
+        metrics["nulls_percent"] = round(nulls_percent, 2)
         metrics["general_quality"] = round(100.0 - nulls_percent, 2)
 
         # ■■■■■■■■■■■■■ Metricas de unicidad ■■■■■■■■■■■■■
@@ -154,82 +154,59 @@ class QualityAuditor:
             sum_uniqueness = 0.0
             for value in uniqueness.values():
                 sum_uniqueness += value
-            average_uniqueness = sum_uniqueness/len(uniqueness)
-        metrics["average_uniqueness"] = round(average_uniqueness,2)
+            average_uniqueness = sum_uniqueness / len(uniqueness)
+        metrics["average_uniqueness"] = round(average_uniqueness, 2)
 
         return metrics
 
+    @staticmethod
+    def generate_alerts(
+            data: RowDataType,
+            null_umbral: Optional[float] = 50.0,
+            low_uniqueness_umbral: Optional[float] = 10.0,
+            high_uniqueness_umbral: Optional[float] = 95.0
+    ) -> list[str]:
+        """
+        Genera alertas basadas en umbrales de calidad
+        :param data: Lista de diccionarios representando filas de datos
+        :param null_umbral: Porcentaje de nulos que dispara alerta
+        :param low_uniqueness_umbral: Porcentaje de unicidad baja que dispara alerta
+        :param high_uniqueness_umbral: Porcentaje de unicidad alta que dispara alerta
+        :return: Lista de mensajes de alerta
+        """
+        alerts = list()
+        if data is None or not data:
+            alerts.append("ALERTA: No hay datos para analizar")
+            return alerts
 
-# ▼△▼△▼△▼△▼△▼△▼△▼△▼△ Pseudocodigo △▼△▼△▼△▼△▼△▼△▼△▼△▼
+        # ■■■■■■■■■■■■■ Analisis de nulos ■■■■■■■■■■■■■
+        count_nulls = NullAnalyzer.count_nulls(data)
+        total_rows = len(data)
+        for column in count_nulls.keys():
+            nulls = count_nulls[column]
+            percent_nulls = (nulls / total_rows) * 100.0
+            if percent_nulls >= null_umbral:
+                message = f"""
+                ALERTA: Columna '{column}' tiene {round(percent_nulls, 2)}% de valores nulos
+                (umbral: {null_umbral}%)
+                """
+                alerts.append(message)
 
-public
-static
-List[String]
-generarAlertas(List[Dict[String, Any]]
-datos,
-Optional[float]
-umbralNulos = 50.0,
-Optional[float]
-umbralUnicidadBaja = 10.0,
-Optional[float]
-umbralUnicidadAlta = 95.0)
-"""
-Genera alertas basadas en umbrales de calidad
+        # ■■■■■■■■■■■■■ Analisis de unicidad ■■■■■■■■■■■■■
+        uniqueness = UniquenessAnalyzer.calculate_uniqueness(data)
+        for column in uniqueness.keys():
+            percent_uniqueness = uniqueness[column]
+            if percent_uniqueness <= low_uniqueness_umbral:
+                message = f"""
+                ALERTA: Columna '{column}' tiene baja unicidad: {round(percent_uniqueness, 2)}%
+                (umbral bajo: {low_uniqueness_umbral}%)
+                """
+                alerts.append(message)
+            elif percent_uniqueness >= high_uniqueness_umbral:
+                message = f"""
+                ALERTA: Columna '{column}' tiene alta unicidad: {round(percent_uniqueness, 2)}%
+                (umbral alto: {high_uniqueness_umbral}%)
+                """
+                alerts.append(message)
 
-Args:
-    datos: Lista de diccionarios representando filas de datos
-    umbralNulos: Porcentaje de nulos que dispara alerta
-    umbralUnicidadBaja: Porcentaje de unicidad baja que dispara alerta
-    umbralUnicidadAlta: Porcentaje de unicidad alta que dispara alerta
-
-Returns:
-    Lista de mensajes de alerta
-"""
-var
-alertas = list()
-
-if datos == null | | datos.isEmpty()
-    alertas.append("ALERTA: No hay datos para analizar")
-    return alertas
-
-# Análisis de nulos
-var
-conteoNulos = NullAnalyzer.contarNulos(datos)
-var
-totalFilas = datos.size()
-
-for String columna in conteoNulos.keySet()
-    var
-    nulos = conteoNulos[columna]
-    var
-    porcentajeNulos = (nulos / totalFilas) * 100.0
-
-    if porcentajeNulos >= umbralNulos
-        var
-        mensaje = "ALERTA: Columna '" + columna + "' tiene " + \
-                  round(porcentajeNulos, 2) + "% de valores nulos (umbral: " + \
-                  umbralNulos + "%)"
-        alertas.append(mensaje)
-
-# Análisis de unicidad
-var
-unicidad = UniquenessAnalyzer.calcularUnicidad(datos)
-
-for String columna in unicidad.keySet()
-    var
-    porcentajeUnicidad = unicidad[columna]
-
-    if porcentajeUnicidad <= umbralUnicidadBaja
-        var
-        mensaje = "ALERTA: Columna '" + columna + "' tiene baja unicidad: " + \
-                  round(porcentajeUnicidad, 2) + "% (umbral bajo: " + \
-                  umbralUnicidadBaja + "%)"
-        alertas.append(mensaje)
-    else if porcentajeUnicidad >= umbralUnicidadAlta
-    var
-    mensaje = "ALERTA: Columna '" + columna + "' tiene alta unicidad: " + \
-              round(porcentajeUnicidad, 2) + "% (umbral alto: " + \
-              umbralUnicidadAlta + "%) - posible clave primaria"
-    alertas.append(mensaje)
-
-return alertas
+        return alerts
