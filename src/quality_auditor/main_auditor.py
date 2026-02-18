@@ -6,6 +6,7 @@ FECHA:       2026-02-17
 DESCRIPCIÓN: Proporciona un punto de entrada centralizado para todas las funciones de auditoría (Patrón Strategy)
 ■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■
 """
+import math
 from typing import Any, Optional
 from datetime import datetime
 
@@ -19,11 +20,13 @@ RowDataType = list[dict[str, Any]]
 MetricDataType = dict[str, dict[str, float]]
 ValueListType = dict[str, list[float]]
 
+
 class QualityAuditor:
     """
     Clase principal que coordina todos los análisis de calidad de datos
     Implementa el patrón Strategy al delegar diferentes tipos de análisis
     """
+
     @staticmethod
     def quality_audit(data: RowDataType) -> dict[str, Any]:
         """
@@ -50,85 +53,67 @@ class QualityAuditor:
 
         return results
 
+    @staticmethod
+    def advance_quality_audit(
+            data: RowDataType,
+            birth_column_name: Optional[str] = None,
+            numerics_columns: Optional[list[str]] = None,
+            text_columns: Optional[list[str]] = None
+    ) -> dict[str, Any]:
+        """
+        Realiza un analisis completo de calidad de datos con opciones avanzadas
+        :param data: Lista de diccionarios representando filas de datos
+        :param birth_column_name: Columna especifica para analisis de coherencia de fechas
+        :param numerics_column: Lista de columnas a tratar como nuemricas
+        :param text_column: Lista de columnas a tratar como de texto
+        :return: Diccionario con todos los resultados de calidad ampliados
+        """
+        results = QualityAuditor.quality_audit(data)
+
+        # ■■■■■■■■■■■■■ Analisis de fechas si se especifica una columna ■■■■■■■■■■■■■
+        if birth_column_name is not None and birth_column_name.strip():
+            date_errors = DateAnalyzer.check_date_coherence(data, birth_column_name)
+            results["date_analysis"] = dict()
+            results["date_analysis"]["date_column"] = birth_column_name
+            results["date_analysis"]["errors"] = date_errors
+            results["date_analysis"]["error_total"] = len(date_errors)
+
+        # ■■■■■■■■■■■■■ Analisis estadistico detallado si se especifican columnas numericas ■■■■■■■■■■■■■
+        if numerics_columns is not None and numerics_columns:
+            numerics_values = StatisticalAnalyzer.get_numerics_values(data)
+            stadistics_details = dict()
+            for column in numerics_columns:
+                if column in numerics_values.keys():
+                    values = numerics_values[column]
+                    stadistics = dict()
+
+                    # ▲▲▲▲▲▲ Calcular percentiles ▲▲▲▲▲▲
+                    if values:
+                        sorted_values = sorted(values)
+                        size = len(values)
+
+                        stadistics["min"] = sorted_values[0]
+                        stadistics["max"] = sorted_values[size - 1]
+                        stadistics["media"] = sum(sorted_values) / size
+
+                        # Calcular mediana
+                        half = size // 2
+                        if size % 2 == 0:
+                            stadistics["mediana"] = (sorted_values[half - 1] + sorted_values[half]) / 2.0
+                        else:
+                            stadistics["mediana"] = sorted_values[half]
+
+                        # ▲▲▲▲▲▲ Percentiles ▲▲▲▲▲▲
+                        stadistics["q25"] = sorted_values[math.floor(size*0.25)]
+                        stadistics["q75"] = sorted_values[math.floor(size*0.75)]
+
+                    stadistics_details[column] = stadistics
+
+            results["stadistic_details"] = stadistics_details
+
+        return results
+
 # ▼△▼△▼△▼△▼△▼△▼△▼△▼△ Pseudocodigo △▼△▼△▼△▼△▼△▼△▼△▼△▼
-
-public
-static
-Dict[String, Any]
-auditarCalidadAvanzada(List[Dict[String, Any]]
-datos,
-Optional[String]
-colFechaNacimiento = null,
-Optional[List[String]]
-columnasNumericas = null,
-Optional[List[String]]
-columnasTexto = null)
-"""
-Realiza un análisis completo de calidad de datos con opciones avanzadas
-
-Args:
-    datos: Lista de diccionarios representando filas de datos
-    colFechaNacimiento: Columna específica para análisis de coherencia de fechas
-    columnasNumericas: Lista de columnas a tratar como numéricas
-    columnasTexto: Lista de columnas a tratar como de texto
-
-Returns:
-    Diccionario con todos los resultados de calidad ampliados
-"""
-var
-resultados = QualityAuditor.auditarCalidad(datos)
-
-# Análisis de fechas si se especifica una columna
-if colFechaNacimiento != null & & !colFechaNacimiento.trim().isEmpty()
-var
-erroresFechas = DateAnalyzer.verificarCoherenciaFechas(datos, colFechaNacimiento)
-resultados["analisis_fechas"] = dict()
-resultados["analisis_fechas"]["columna_fecha"] = colFechaNacimiento
-resultados["analisis_fechas"]["errores"] = erroresFechas
-resultados["analisis_fechas"]["total_errores"] = erroresFechas.size()
-
-# Análisis estadístico detallado si se especifican columnas numéricas
-if columnasNumericas != null & & !columnasNumericas.isEmpty()
-var
-valoresNumericos = StatisticalAnalyzer.obtenerValoresNumericos(datos)
-var
-estadisticosDetallados = dict()
-
-for String col in columnasNumericas
-    if valoresNumericos.containsKey(col)
-        var
-        valores = valoresNumericos[col]
-        var
-        estadisticos = dict()
-
-        # Calcular percentiles
-        if !valores.isEmpty()
-        var
-        valoresOrdenados = sorted(valores)
-        var
-        size = valoresOrdenados.size()
-
-        estadisticos["min"] = valoresOrdenados[0]
-        estadisticos["max"] = valoresOrdenados[size - 1]
-        estadisticos["media"] = sum(valoresOrdenados) / size
-
-        # Mediana
-        var
-        medio = size / 2
-        if size % 2 == 0
-            estadisticos["mediana"] = (valoresOrdenados[medio - 1] + valoresOrdenados[medio]) / 2.0
-        else
-            estadisticos["mediana"] = valoresOrdenados[medio]
-
-        # Percentiles
-        estadisticos["q25"] = valoresOrdenados[Math.floor(size * 0.25)]
-        estadisticos["q75"] = valoresOrdenados[Math.floor(size * 0.75)]
-
-    estadisticosDetallados[col] = estadisticos
-
-resultados["estadisticos_detalles"] = estadisticosDetallados
-
-return resultados
 
 public
 static
