@@ -20,7 +20,7 @@ class UniquenessAnalyzer:
     """
 
     @staticmethod
-    def calcular_unicidad(datos: RowDataType) -> dict[str, float]:
+    def calculate_uniqueness(datos: RowDataType) -> dict[str, float]:
         """
         Calcula el porcentaje de valores únicos por columna en una lista de diccionarios
         El porcentaje se calcula como: (número de valores únicos / número total de valores) * 100

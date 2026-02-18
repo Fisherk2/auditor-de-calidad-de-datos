@@ -96,7 +96,7 @@ class QualityAuditor:
                         stadistics["max"] = sorted_values[size - 1]
                         stadistics["media"] = sum(sorted_values) / size
 
-                        # Calcular mediana
+                        # # ▲▲▲▲▲▲ Calcular mediana ▲▲▲▲▲▲
                         half = size // 2
                         if size % 2 == 0:
                             stadistics["mediana"] = (sorted_values[half - 1] + sorted_values[half]) / 2.0
@@ -113,72 +113,54 @@ class QualityAuditor:
 
         return results
 
+    @staticmethod
+    def get_general_metrics(data: RowDataType) -> dict[str,int]:
+        """
+        Obtiene metricas generales de calidad de datos
+        :param data: Lista de diccionarios representando filas de datos
+        :return: Diccionario con metricas generales de calidad
+        """
+        metrics = dict()
+        if data is None or not data:
+            metrics["total_rows"] = 0
+            metrics["total_columns"] = 0
+            metrics["general_quality"] = 0.0
+            return metrics
+
+        # ■■■■■■■■■■■■■ Obtener informacion basica ■■■■■■■■■■■■■
+        nulls_count = NullAnalyzer.count_nulls(data)
+        rows_total_count = len(data)
+
+        # ■■■■■■■■■■■■■ Calcular metricas ■■■■■■■■■■■■■
+        metrics["total_rows"] = rows_total_count
+        metrics["total_columns"] = len(nulls_count.keys())
+
+        # ■■■■■■■■■■■■■ Calcular calidad general basada en nulos ■■■■■■■■■■■■■
+        nulls_total = 0
+        for count in nulls_count.values():
+            nulls_total += count
+
+        posible_nulls_total = rows_total_count*len(nulls_count.keys())
+        nulls_percent = 0.0
+        if posible_nulls_total > 0:
+            nulls_percent = (nulls_total/posible_nulls_total)*100.0
+        metrics["nulls_percent"] = round(nulls_percent,2)
+        metrics["general_quality"] = round(100.0 - nulls_percent, 2)
+
+        # ■■■■■■■■■■■■■ Metricas de unicidad ■■■■■■■■■■■■■
+        uniqueness = UniquenessAnalyzer.calculate_uniqueness(data)
+        average_uniqueness = 0.0
+        if uniqueness:
+            sum_uniqueness = 0.0
+            for value in uniqueness.values():
+                sum_uniqueness += value
+            average_uniqueness = sum_uniqueness/len(uniqueness)
+        metrics["average_uniqueness"] = round(average_uniqueness,2)
+
+        return metrics
+
+
 # ▼△▼△▼△▼△▼△▼△▼△▼△▼△ Pseudocodigo △▼△▼△▼△▼△▼△▼△▼△▼△▼
-
-public
-static
-Dict[String, int]
-obtenerMetricasGenerales(List[Dict[String, Any]]
-datos)
-"""
-Obtiene métricas generales de calidad de datos
-
-Args:
-    datos: Lista de diccionarios representando filas de datos
-
-Returns:
-    Diccionario con métricas generales de calidad
-"""
-var
-metricas = dict()
-
-if datos == null | | datos.isEmpty()
-    metricas["total_filas"] = 0
-    metricas["total_columnas"] = 0
-    metricas["calidad_general"] = 0.0
-    return metricas
-
-# Obtener información básica
-var
-conteoNulos = NullAnalyzer.contarNulos(datos)
-var
-conteoTotalFilas = datos.size()
-
-# Calcular métricas
-metricas["total_filas"] = conteoTotalFilas
-metricas["total_columnas"] = conteoNulos.keySet().size()
-
-# Calcular calidad general basada en nulos
-var
-totalNulos = 0
-for int conteo in conteoNulos.values()
-    totalNulos += conteo
-
-var
-totalPosiblesNulos = conteoTotalFilas * conteoNulos.keySet().size()
-var
-porcentajeNulos = 0.0
-if totalPosiblesNulos > 0
-    porcentajeNulos = (totalNulos / totalPosiblesNulos) * 100.0
-
-metricas["porcentaje_datos_nulos"] = round(porcentajeNulos, 2)
-metricas["calidad_general"] = round(100.0 - porcentajeNulos, 2)
-
-# Métricas de unicidad
-var
-unicidad = UniquenessAnalyzer.calcularUnicidad(datos)
-var
-promedioUnicidad = 0.0
-if !unicidad.isEmpty()
-var
-sumaUnicidad = 0.0
-for float valor in unicidad.values()
-    sumaUnicidad += valor
-promedioUnicidad = sumaUnicidad / unicidad.size()
-
-metricas["promedio_unicidad"] = round(promedioUnicidad, 2)
-
-return metricas
 
 public
 static
