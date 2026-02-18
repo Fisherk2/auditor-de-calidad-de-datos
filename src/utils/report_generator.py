@@ -33,101 +33,75 @@ class ReportGenerator:
         except Exception as e: # TODO: Colocar as en toda las excepciones del proyecto
             return f"Error al generar el informe JSON: {str(e)}"
 
+    @staticmethod
+    def generate_summary_report(results:dict[str, Any]) -> str:
+        """
+        Genera un informe resumido en formato texto
+        :param results: Diccionario con resultados de analisis de validacion y calidad
+        :return: String con formato de texto del informe resumido
+        """
+        report = list()
+        report.append("🮙🮘🮙🮘🮙🮙🮘🮙🮘🮙🮙🮘🮙🮘🮙🮙🮘🮙🮘🮙 INFORME DE CALIDAD DE DATOS 🮙🮘🮙🮘🮙🮙🮘🮙🮘🮙🮙🮘🮙🮘🮙🮙🮘🮙🮘🮙")
+        report.append("")
+
+        if "timestamp" in results.keys():
+            report.append(f"Fecha y hora del análisis: {results["timestamp"]}")
+            report.append("")
+        if "total_rows" in results.keys():
+            report.append(f"Total de filas analizadas: {str(results["total_rows"])}")
+            report.append("")
+
+        # TODO: Investigar llave su nombre correcto ■■■■■■■■■■■■■ Metricas generales si estan disponibles ■■■■■■■■■■■■■
+        if "general_metrics" in results.keys():
+            metrics = results["general_metrics"]
+            report.append("▏▎▍▌▋▊▉▉▉▉▉▉▉▉ MÉTRICAS GENERALES ▉▉▉▉▉▉▉▉▉▊▋▌▍▎")
+            report.append("")
+            report.append(f"Calidad general de los datos: {str(metrics["general_quality"])}%")
+            report.append(f"Porcentaje de datos nulos: {str(metrics["nulls_percent"])}%")
+            report.append(f"Promedio de unicidad: {str(metrics["average_uniqueness"])}%")
+            report.append("")
+
+        # TODO: Investigar llave su nombre correcto ■■■■■■■■■■■■■ Analisis de nulos ■■■■■■■■■■■■■
+        if "null_analysis" in results.keys():
+            nulls = results["null_analysis"]
+            report.append("▏▎▍▌▋▊▉▉▉▉▉▉▉▉ ANÁLISIS DE NULOS ▉▉▉▉▉▉▉▉▉▊▋▌▍▎")
+            for column in nulls.keys():
+                count = nulls[column]
+                if count > 0:
+                    report.append(f"    {column}: {count} valores nulos")
+            if not nulls or report[len(report)-1] != "▏▎▍▌▋▊▉▉▉▉▉▉▉▉ ANÁLISIS DE NULOS ▉▉▉▉▉▉▉▉▉▊▋▌▍▎":
+                report.append(f"    No se encontraron valores nulos")
+            report.append("")
+
+        # TODO: Investigar llave su nombre correcto ■■■■■■■■■■■■■ Analisis de unicidad ■■■■■■■■■■■■■
+        if "uniqueness_analysis" in results.keys():
+            uniqueness = results["uniqueness_analysis"]
+            report.append("▏▎▍▌▋▊▉▉▉▉▉▉▉▉ ANÁLISIS DE UNICIDAD ▉▉▉▉▉▉▉▉▉▊▋▌▍▎")
+            for column in uniqueness.keys():
+                percent = uniqueness[column]
+                report.append(f"    {column}: {percent}% unicos")
+
+            informe.append("")
+
+        # TODO: Investigar llave su nombre correcto ■■■■■■■■■■■■■ Analisis de estadístico ■■■■■■■■■■■■■
+        if "statistical_analysis" in results.keys():
+            statistical = results["statistical_analysis"]
+            if statistical:
+                report.append("▏▎▍▌▋▊▉▉▉▉▉▉▉▉ ANÁLISIS DE ESTADÍSTICO ▉▉▉▉▉▉▉▉▉▊▋▌▍▎")
+                for column in statistical.keys():
+                    metrics = statistical[column]
+                    report.append(f"▲▲▲▲▲▲ Columna {column} ▲▲▲▲▲▲")
+                    report.append(f"    Minimo: {metrics.get('minimum', "N/A")}")
+                    report.append(f"    Maximo: {metrics.get('maximum', "N/A")}")
+                    report.append(f"    Promedio: {metrics.get('average', "N/A")}")
+                    report.append(f"    Conteo: {metrics.get('count', "N/A")}")
+                    report.append("")
+
+        return "\n".join(report)
+
+
 
 # ▼△▼△▼△▼△▼△▼△▼△▼△▼△ Pseudocodigo △▼△▼△▼△▼△▼△▼△▼△▼△▼
-
-public
-static
-String
-generarInformeResumen(Dict[String, Any]
-resultados)
-"""
-Genera un informe resumido en formato texto
-
-Args:
-    resultados: Diccionario con resultados de análisis de calidad
-
-Returns:
-    String con formato de texto del informe resumido
-"""
-var
-informe = list()
-informe.append("=== INFORME DE CALIDAD DE DATOS ===")
-informe.append("")
-
-if resultados.containsKey("timestamp")
-    informe.append("Fecha y hora del análisis: " + resultados["timestamp"])
-    informe.append("")
-
-if resultados.containsKey("total_filas")
-    informe.append("Total de filas analizadas: " + str(resultados["total_filas"]))
-    informe.append("")
-
-# Métricas generales si están disponibles
-if resultados.containsKey("metricas_generales")
-    var
-    metricas = resultados["metricas_generales"]
-    informe.append("--- MÉTRICAS GENERALES ---")
-
-    if metricas.containsKey("calidad_general")
-        informe.append("Calidad general de los datos: " + str(metricas["calidad_general"]) + "%")
-
-    if metricas.containsKey("porcentaje_datos_nulos")
-        informe.append("Porcentaje de datos nulos: " + str(metricas["porcentaje_datos_nulos"]) + "%")
-
-    if metricas.containsKey("promedio_unicidad")
-        informe.append("Promedio de unicidad: " + str(metricas["promedio_unicidad"]) + "%")
-
-    informe.append("")
-
-# Análisis de nulos
-if resultados.containsKey("analisis_nulos")
-    var
-    nulos = resultados["analisis_nulos"]
-    informe.append("--- ANÁLISIS DE NULOS ---")
-
-    for String columna in nulos.keySet()
-        var
-        conteo = nulos[columna]
-        if conteo > 0
-            informe.append("  " + columna + ": " + str(conteo) + " valores nulos")
-
-    if nulos.isEmpty() | | informe[informe.size() - 1] != "--- ANÁLISIS DE NULOS ---"
-        informe.append("  No se encontraron valores nulos")
-
-    informe.append("")
-
-# Análisis de unicidad
-if resultados.containsKey("analisis_unicidad")
-    var
-    unicidad = resultados["analisis_unicidad"]
-    informe.append("--- ANÁLISIS DE UNICIDAD ---")
-
-    for String columna in unicidad.keySet()
-        var
-        porcentaje = unicidad[columna]
-        informe.append("  " + columna + ": " + str(porcentaje) + "% únicos")
-
-    informe.append("")
-
-# Análisis estadístico
-if resultados.containsKey("analisis_estadistico")
-    var
-    estadisticos = resultados["analisis_estadistico"]
-    if !estadisticos.isEmpty()
-    informe.append("--- ANÁLISIS ESTADÍSTICO ---")
-
-    for String columna in estadisticos.keySet()
-        var
-        metrics = estadisticos[columna]
-        informe.append("  Columna: " + columna)
-        informe.append("    Mínimo: " + str(metrics.get("min", "N/A")))
-        informe.append("    Máximo: " + str(metrics.get("max", "N/A")))
-        informe.append("    Promedio: " + str(metrics.get("promedio", "N/A")))
-        informe.append("    Conteo: " + str(metrics.get("conteo", "N/A")))
-        informe.append("")
-
-return "\n".join(informe)
 
 public
 static
