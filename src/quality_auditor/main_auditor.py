@@ -14,6 +14,7 @@ from src.quality_auditor.null_analyzer import NullAnalyzer
 from src.quality_auditor.uniqueness_analyzer import UniquenessAnalyzer
 from src.quality_auditor.date_analyzer import DateAnalyzer
 from src.quality_auditor.statistical_analyzer import StatisticalAnalyzer
+from utils.data_parser import DataParser
 
 # ⋮⋮⋮⋮⋮⋮⋮⋮ ALIAS de estructura datos ⋮⋮⋮⋮⋮⋮⋮⋮
 RowDataType = list[dict[str, Any]]
@@ -110,6 +111,55 @@ class QualityAuditor:
                     stadistics_details[column] = stadistics
 
             results["stadistic_details"] = stadistics_details
+
+        # ■■■■■■■■■■■■■ Análisis detallado de columnas de texto si se especifican ■■■■■■■■■■■■■
+        if text_columns is not None and text_columns:
+            text_analysis = dict()
+            for column in text_columns:
+                text_values = list()
+
+                # ▲▲▲▲▲▲ Recoger valores de texto de la columna ▲▲▲▲▲▲
+                for row in data:
+                    if column in row.keys():
+                        value = row[column]
+                        if DataParser.is_string_value(value):
+                            text_values.append(str(value))
+                if text_values:
+                    text_metrics = dict()
+
+                    # ▲▲▲▲▲▲ Logitud promedio de texto ▲▲▲▲▲▲
+                    total_lenght = 0
+                    for text in text_values:
+                        total_lenght += len(text)
+
+                    text_metrics["total_registers"] = len(text_values)
+                    text_metrics["average_lenght"] = round(total_lenght / len(text_values), 2)
+
+                    # ▲▲▲▲▲▲ Logitud minima y maxima ▲▲▲▲▲▲
+                    lenghts = list()
+                    for text in text_values:
+                        lenghts.append(len(text))
+                    text_metrics["max_lenght"] = max(lenghts)
+                    text_metrics["min_lenght"] = min(lenghts)
+
+                    # ▲▲▲▲▲▲ Contar valores unicos ▲▲▲▲▲▲
+                    unique_values = set(text_values)
+                    text_metrics["unique_values"] = len(unique_values)
+                    text_metrics["unique_percent"] = round(len(unique_values) / len(text_values) * 100.0, 2)
+
+                    # ▲▲▲▲▲▲ TODO: refactoricar - > Detectar posible problemas de formato ▲▲▲▲▲▲
+                    format_problems = list()
+                    for text in text_values:
+                        # ▲▲▲▲▲▲ Detectar cadenas con solo espacios ▲▲▲▲▲▲
+                        if not (text.strip()) and text:
+                            format_problems.append("Cadenas con solo espacio")
+                            break
+                    text_metrics["format_problems"] = format_problems
+                    text_metrics["has_issues"] = len(format_problems) > 0
+
+                    text_analysis[column] = text_metrics
+
+            results["text_analysis"] = text_analysis
 
         return results
 
