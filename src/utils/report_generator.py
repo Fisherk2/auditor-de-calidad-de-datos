@@ -158,42 +158,34 @@ class ReportGenerator:
         report.append("■■■■■■■■■■■■■ Fin del informe ■■■■■■■■■■■■■ ")
 
         return "\n".join(report)
+
+    @staticmethod
+    def save_report(results:dict[str,Any], path_file:str, format_file:str= "json"):
+        """
+        Guarda el informe en un archivo
+        :param results: Diccionario con resultados de analisis de calidad
+        :param path_file: Ruta donde guardar el archivo
+        :param format_file: Formato del informe ("json","summary,"detailed")
+        :return:
+        """
+        content = ""
+        if format_file.lower()== "json":
+            content = ReportGenerator.generate_json_report(results)
+        elif format_file.lower()== "summary":
+            content = ReportGenerator.generate_summary_report(results)
+        elif format_file.lower()== "detailed":
+            content = ReportGenerator.generate_detail_report(results)
+
+        # ■■■■■■■■■■■■■ Default to JSON ■■■■■■■■■■■■■
+        else:
+            content = ReportGenerator.generate_json_report(results)
+
+        try:
+            with open(path_file,'w',encoding='utf-8') as file:
+                file.write(content)
+        except IOError as e:
+            print(f"Error al guardar el informe: {e}")
 # ▼△▼△▼△▼△▼△▼△▼△▼△▼△ Pseudocodigo △▼△▼△▼△▼△▼△▼△▼△▼△▼
-
-public
-static
-void
-guardarInforme(Dict[String, Any]
-resultados, String
-rutaArchivo, String
-formato = "json")
-"""
-Guarda el informe en un archivo
-
-Args:
-    resultados: Diccionario con resultados de análisis de calidad
-    rutaArchivo: Ruta donde guardar el archivo
-    formato: Formato del informe ("json", "resumen", "detallado")
-"""
-var
-contenido = ""
-
-if formato.toLowerCase() == "json"
-    contenido = ReportGenerator.generarInformeJSON(resultados)
-else if formato.toLowerCase() == "resumen"
-contenido = ReportGenerator.generarInformeResumen(resultados)
-else if formato.toLowerCase() == "detallado"
-    contenido = ReportGenerator.generarInformeDetallado(resultados)
-else
-    contenido = ReportGenerator.generarInformeJSON(resultados)  # Default to JSON
-
-try
-    with open(rutaArchivo, 'w', encoding='utf-8') as file
-        file.write(contenido)
-catch
-IOError
-e
-print("Error al guardar el informe: " + str(e))
 
 public
 static
