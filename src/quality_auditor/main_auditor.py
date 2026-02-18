@@ -79,7 +79,7 @@ class QualityAuditor:
         # ■■■■■■■■■■■■■ Analisis estadistico detallado si se especifican columnas numericas ■■■■■■■■■■■■■
         if numerics_columns is not None and numerics_columns:
             numerics_values = StatisticalAnalyzer.get_numerics_values(data)
-            stadistics_details = dict()
+            statistics_details = dict()
             for column in numerics_columns:
                 if column in numerics_values.keys():
                     values = numerics_values[column]
@@ -105,9 +105,9 @@ class QualityAuditor:
                         stadistics["q25"] = sorted_values[math.floor(size * 0.25)]
                         stadistics["q75"] = sorted_values[math.floor(size * 0.75)]
 
-                    stadistics_details[column] = stadistics
+                    statistics_details[column] = stadistics
 
-            results["stadistic_details"] = stadistics_details
+            results["statistical_details"] = statistics_details
 
         # ■■■■■■■■■■■■■ Análisis detallado de columnas de texto si se especifican ■■■■■■■■■■■■■
         if text_columns is not None and text_columns:

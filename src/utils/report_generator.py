@@ -21,7 +21,7 @@ class ReportGenerator:
     """
 
     @staticmethod
-    def generate_JSON_report(results:dict[str, Any]) -> str:
+    def generate_json_report(results:dict[str, Any]) -> str:
         """
         Genera un informe en formato JSON
         :param results: Diccionario con resultados de analisis de validacion y calidad
@@ -81,7 +81,7 @@ class ReportGenerator:
                 percent = uniqueness[column]
                 report.append(f"    {column}: {percent}% unicos")
 
-            informe.append("")
+            report.append("")
 
         # TODO: Investigar llave su nombre correcto ■■■■■■■■■■■■■ Analisis de estadístico ■■■■■■■■■■■■■
         if "statistical_analysis" in results.keys():
@@ -99,86 +99,66 @@ class ReportGenerator:
 
         return "\n".join(report)
 
+    @staticmethod
+    def generate_detail_report(results: dict[str, Any] ) -> str:
+        """
+        Genera un informe detallado en formato texto
+        :param results: Diccionario con resultados de analisis de calidad
+        :return: String con formato de texto del informe detallado
+        """
+        report = list()
+        report.append("🮙🮘🮙🮘🮙🮙🮘🮙🮘🮙🮙🮘🮙🮘🮙🮙🮘🮙🮘🮙 INFORME DETALLADO DE CALIDAD DE DATOS 🮙🮘🮙🮘🮙🮙🮘🮙🮘🮙🮙🮘🮙🮘🮙🮙🮘🮙🮘🮙")
+        report.append("▢▣" * 20)
+        report.append("")
 
+        # ■■■■■■■■■■■■■ Informacion general ■■■■■■■■■■■■■
+        if "timestamp" in results.keys():
+            report.append(f"Timestamp del analisis: {results["timestamp"]}")
+        if "total_rows" in results.keys():
+            report.append(f"Numero todal de filas: {results["total_rows"]}")
 
+        report.append("")
+
+        # ■■■■■■■■■■■■■ Incluir todos los analisis disponibles ■■■■■■■■■■■■■
+        seccions = dict()
+        seccions["NULL_ANALYSIS"] = "null_analysis"
+        seccions["UNIQUENESS_ANALYSIS"] = "uniqueness_analysis"
+        seccions["STATISTICAL_ANALYSIS"] = "statistical_analysis"
+        seccions["DATE_ANALYSIS"]= "date_analysis"
+        seccions["STATISTICAL_DETAILS"] = "statistical_details"
+        seccions["COUNT_TYPES"] = "count_types"
+        for title in seccions.keys():
+            key = seccions[title]
+            if key in results.keys():
+                data = results[key]
+                report.append(f"▏▎▍▌▋▊▉▉▉▉▉▉▉▉ {title} ▉▉▉▉▉▉▉▉▉▊▋▌▍▎")
+                if isinstance(data, dict):
+                    for key in data.keys():
+                        value = data[key]
+                        if isinstance(value,Dict):
+                            report.append(f"■■■■■■■■■■■■■ {key} ■■■■■■■■■■■■■" )
+                            for subkey in value.keys():
+                                report.append(f"    {subkey}: {str(value[subkey])}")
+                        else:
+                            report.append(f"    {key}: {str(value)}")
+                else:
+                    report.append(f"    {str(data)}")
+                report.append("")
+
+        # TODO: Investigar llave su nombre correcto ■■■■■■■■■■■■■ Agregar alertas si están disponibles ■■■■■■■■■■■■■
+        if "alerts" in results.keys():
+            alerts = results["alerts"]
+            if alerts:
+                report.append("🮙🮘🮙🮘🮙🮙🮘🮙🮘🮙🮙🮘🮙🮘🮙🮙🮘🮙🮘🮙 ALERTAS IMPORTANTES 🮙🮘🮙🮘🮙🮙🮘🮙🮘🮙🮙🮘🮙🮘🮙🮙🮘🮙🮘🮙")
+                for alert in alerts:
+                    report.append(f"# ⋮⋮⋮⋮⋮⋮⋮⋮ {alert} ⋮⋮⋮⋮⋮⋮⋮⋮ ")
+                report.append("")
+
+        report.append("▢▣" * 20)
+        report.append("■■■■■■■■■■■■■ Fin del informe ■■■■■■■■■■■■■ ")
+
+        return "\n".join(report)
 # ▼△▼△▼△▼△▼△▼△▼△▼△▼△ Pseudocodigo △▼△▼△▼△▼△▼△▼△▼△▼△▼
-
-public
-static
-String
-generarInformeDetallado(Dict[String, Any]
-resultados)
-"""
-Genera un informe detallado en formato texto
-
-Args:
-    resultados: Diccionario con resultados de análisis de calidad
-
-Returns:
-    String con formato de texto del informe detallado
-"""
-var
-informe = list()
-informe.append("=== INFORME DETALLADO DE CALIDAD DE DATOS ===")
-informe.append("=" * 50)
-informe.append("")
-
-# Información general
-if resultados.containsKey("timestamp")
-    informe.append("Timestamp del análisis: " + resultados["timestamp"])
-
-if resultados.containsKey("total_filas")
-    informe.append("Número total de filas: " + str(resultados["total_filas"]))
-
-informe.append("")
-
-# Incluir todos los análisis disponibles
-var
-secciones = dict()
-secciones["ANÁLISIS DE NULOS"] = "analisis_nulos"
-secciones["ANÁLISIS DE UNICIDAD"] = "analisis_unicidad"
-secciones["ANÁLISIS ESTADÍSTICO"] = "analisis_estadistico"
-secciones["ANÁLISIS DE FECHAS"] = "analisis_fechas"
-secciones["ESTADÍSTICOS DETALLES"] = "estadisticos_detalles"
-secciones["CONTEO POR TIPO"] = "conteo_tipos"
-
-for String titulo in secciones.keySet()
-    var
-    clave = secciones[titulo]
-    if resultados.containsKey(clave)
-        var
-        datos = resultados[clave]
-        informe.append("--- " + titulo + " ---")
-
-        if isinstance(datos, Dict)
-            for String key in datos.keySet()
-                var
-                value = datos[key]
-                if isinstance(value, Dict)
-                    informe.append("  " + key + ":")
-                    for String subkey in value.keySet()
-                        informe.append("    " + subkey + ": " + str(value[subkey]))
-                else
-                    informe.append("  " + key + ": " + str(value))
-        else
-            informe.append("  " + str(datos))
-
-        informe.append("")
-
-# Agregar alertas si están disponibles
-if resultados.containsKey("alertas")
-    var
-    alertas = resultados["alertas"]
-    if !alertas.isEmpty()
-    informe.append("--- ALERTAS IMPORTANTES ---")
-    for String alerta in alertas
-        informe.append("! " + alerta)
-    informe.append("")
-
-informe.append("=" * 50)
-informe.append("Fin del informe")
-
-return "\n".join(informe)
 
 public
 static
