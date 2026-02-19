@@ -159,10 +159,10 @@ class DataParser:
     def filter_valid_rows(data: RowDataType, expected_columns: set[str], rules_config: Dict[str, Any] = None) -> RowDataType:
         """
         Filtra filas que contienen todas las columnas esperadas
-        Optionally applies quality rules from configuration
+        Opcionalmente, aplica reglas de calidad desde la configuracion
         :param data: Datos a filtrar
         :param expected_columns: Columnas esperadas
-        :param rules_config: Configuración de reglas opcional
+        :param rules_config: Configuración de reglas (opcional)
         :return: Filas válidas filtradas
         """
         valid_rows = list()
@@ -172,7 +172,8 @@ class DataParser:
                 expected_columns=expected_columns
             )
             if validation["valid"]:
-                # Apply quality rules if provided
+
+                # ■■■■■■■■■■■■■ Aplicar reglas de calidad (OPCIONAL) ■■■■■■■■■■■■■
                 if rules_config:
                     if DataParser.validarContraReglas([row], rules_config):
                         valid_rows.append(row)
@@ -180,30 +181,6 @@ class DataParser:
                     valid_rows.append(row)
 
         return valid_rows
-
-    @staticmethod
-    def leerCsv(rutaArchivo: str) -> List[Dict[str, Any]]:
-        """
-        Lee un archivo CSV y retorna una lista de diccionarios
-        :param rutaArchivo: Ruta al archivo CSV
-        :return: Lista de diccionarios con los datos del CSV
-        :raises FileNotFoundError: Si el archivo no existe
-        :raises csv.Error: Si hay error en el formato CSV
-        :raises PermissionError: Si no hay permisos de lectura
-        """
-        try:
-            with open(rutaArchivo, mode='r', encoding='utf-8') as archivo_csv:
-                lector = csv.DictReader(archivo_csv)
-                datos = list(lector)
-                return datos
-        except FileNotFoundError as e:
-            raise FileNotFoundError(f"Archivo no encontrado: {rutaArchivo}") from e
-        except csv.Error as e:
-            raise csv.Error(f"Error de formato CSV en archivo {rutaArchivo}: {str(e)}") from e
-        except PermissionError as e:
-            raise PermissionError(f"Sin permisos para leer archivo: {rutaArchivo}") from e
-        except UnicodeDecodeError as e:
-            raise UnicodeDecodeError(f"Error de codificación en archivo {rutaArchivo}: {str(e)}") from e
 
     @staticmethod
     def validarContraReglas(datos: List[Dict[str, Any]], reglasConfig: Dict[str, Any]) -> bool:

@@ -11,7 +11,7 @@ from typing import Any, Dict
 import yaml
 import os
 
-class ConfigLoader:
+class QualityRulesReader:
     """
     Clase de utilidad para cargar y gestionar configuraciones YAML
     de reglas de calidad de datos
@@ -41,8 +41,8 @@ class ConfigLoader:
             raise yaml.YAMLError(f"Error de formato YAML en archivo {path_yaml}: {str(e)}") from e
         except PermissionError as e:
             raise PermissionError(f"Sin permisos para leer archivo de configuración: {path_yaml}") from e
-        except UnicodeDecodeError as e:
-            raise print(f"El Archivo {path_yaml} no se pudo decodificar: {e}")
+        except UnicodeDecodeError:
+            raise ValueError(f"Error decodificando archivo YAML {path_yaml}")
 
     @staticmethod
     def get_general_rules(config: Dict[str, Any]) -> Dict[str, Any]:
@@ -86,7 +86,7 @@ class ConfigLoader:
         :return: Diccionario con umbrales de advertencia y críticos
         """
         if not config or 'quality_rules' not in config:
-            return ConfigLoader._default_thresholds()
+            return QualityRulesReader._default_thresholds()
         
         thresholds = config['quality_rules'].get('thresholds', {})
         
