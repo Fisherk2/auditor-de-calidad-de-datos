@@ -175,7 +175,7 @@ class DataParser:
 
                 # ■■■■■■■■■■■■■ Aplicar reglas de calidad (OPCIONAL) ■■■■■■■■■■■■■
                 if rules_config:
-                    if DataParser.validarContraReglas([row], rules_config):
+                    if DataParser.is_quality_rules_passed([row], rules_config):
                         valid_rows.append(row)
                 else:
                     valid_rows.append(row)
@@ -183,22 +183,22 @@ class DataParser:
         return valid_rows
 
     @staticmethod
-    def validarContraReglas(datos: List[Dict[str, Any]], reglasConfig: Dict[str, Any]) -> bool:
+    def is_quality_rules_passed(data: RowDataType, rules_config: Dict[str, Any]) -> bool:
         """
         Aplica reglas de validación desde configuración YAML
-        :param datos: Datos a validar
-        :param reglasConfig: Configuración de reglas desde YAML
+        :param data: Datos a validar
+        :param rules_config: Configuración de reglas desde YAML
         :return: True si los datos cumplen las reglas, False otherwise
         """
-        if not reglasConfig or 'quality_rules' not in reglasConfig:
+        if not rules_config or 'quality_rules' not in rules_config:
             return True
 
-        quality_rules = reglasConfig['quality_rules']
+        quality_rules = rules_config['quality_rules']
         general_rules = quality_rules.get('general', {})
         data_type_rules = quality_rules.get('data_type_rules', {})
 
-        # Validar reglas generales
-        for row in datos:
+        # ■■■■■■■■■■■■■ Validar reglas generales ■■■■■■■■■■■■■
+        for row in data:
             # Verificar porcentaje de nulos
             null_count = sum(1 for value in row.values() if DataParser.is_null_value(value))
             null_percentage = (null_count / len(row)) * 100 if len(row) > 0 else 0
@@ -241,28 +241,28 @@ class DataParser:
         return True
 
     @staticmethod
-    def filtrarSegunExclusiones(datos: List[Dict[str, Any]], exclusiones: Dict[str, Any]) -> List[Dict[str, Any]]:
+    def thresholds_filter(data: RowDataType, exclusions: Dict[str, Any]) -> RowDataType:
         """
         Aplica reglas de exclusión a los datos
-        :param datos: Datos a filtrar
-        :param exclusiones: Configuración de exclusiones
+        :param data: Datos a filtrar
+        :param exclusions: Configuración de exclusiones
         :return: Datos filtrados según exclusiones
         """
-        if not exclusiones:
-            return datos
+        if not exclusions:
+            return data
 
-        datos_filtrados = datos.copy()
-        
-        # Excluir columnas específicas
-        columns_to_ignore = exclusiones.get('columns_to_ignore', [])
+        datos_filtrados = data.copy()
+
+        # ■■■■■■■■■■■■■ Excluir columnas especificas ■■■■■■■■■■■■■
+        columns_to_ignore = exclusions.get('columns_to_ignore', [])
         if columns_to_ignore:
             datos_filtrados = [
                 {k: v for k, v in row.items() if k not in columns_to_ignore}
                 for row in datos_filtrados
             ]
 
-        # Aplicar filtros de filas
-        row_filters = exclusiones.get('row_filters', [])
+        # ■■■■■■■■■■■■■ Aplicar filtros de filas ■■■■■■■■■■■■■
+        row_filters = exclusions.get('row_filters', [])
         for filter_rule in row_filters:
             column = filter_rule.get('column')
             condition = filter_rule.get('condition')
@@ -277,6 +277,10 @@ class DataParser:
                     datos_filtrados = [row for row in datos_filtrados if value not in str(row.get(column, ''))]
                 elif condition == 'not_contains':
                     datos_filtrados = [row for row in datos_filtrados if value in str(row.get(column, ''))]
+
+        # ■■■■■■■■■■■■■ Nota: file_patterns_to_ignore se maneja a nivel de archivos, no de filas ■■■■■■■■■■■■■
+        # Este parámetro debe ser procesado antes de leer los datos del archivo
+        # Ejemplo de uso: archivos que coincidan con patrones como "*_temp.csv", "test_*.csv", etc.
 
         return datos_filtrados
 

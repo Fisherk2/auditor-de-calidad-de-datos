@@ -91,5 +91,20 @@ reporting:
 # Exclusiones
 exclusions:
   columns_to_ignore: []             # Columnas a excluir del análisis
-  file_patterns_to_ignore: []       # Patrones de archivo a ignorar
+  file_patterns_to_ignore: []       # Patrones de archivo a ignorar (ej: ["*_temp.csv", "test_*.csv", "backup_*.csv"])
   row_filters: []                   # Filtros para excluir filas específicas
+    # Reglas disponibles para row_filters:
+    # - column: "nombre_columna"
+    # - condition: "equals" | "not_equals" | "contains" | "not_contains"
+    # - value: "valor_a_filtrar"
+    # 
+    # Ejemplos:
+    # - column: "status"
+    #   condition: "equals"
+    #   value: "DELETED"
+    # - column: "email"
+    #   condition: "contains"
+    #   value: "@test.com"
+    # - column: "id"
+    #   condition: "not_equals"
+    #   value: "0"
