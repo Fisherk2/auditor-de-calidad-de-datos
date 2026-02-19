@@ -66,6 +66,7 @@ class NullAnalyzer:
                 config = QualityRulesReader.load_configs(path_quality_rules)
                 return QualityRulesReader.get_data_type_rules(config, 'null')
             except (FileNotFoundError, ValueError, Exception):
+
                 # ■■■■■■■■■■■■■ Si hay error, usar valores por defecto ■■■■■■■■■■■■■
                 pass
         

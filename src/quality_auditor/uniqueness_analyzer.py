@@ -6,15 +6,14 @@ FECHA:       2026-02-17
 DESCRIPCIÓN: Proporciona funciones para calcular porcentaje de valores únicos por columna
 ■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■
 """
-from typing import Any, Optional, Dict
+from typing import Any, Optional
 from collections import Counter
 from src.readers.quality_rules_reader import QualityRulesReader
-from src.utils.data_parser import DataParser
 
 # ⋮⋮⋮⋮⋮⋮⋮⋮ ALIAS de estructura datos ⋮⋮⋮⋮⋮⋮⋮⋮
 RowDataType = list[dict[str, Any]]
 MetricValuesType = dict[str, dict[str, int]]
-UniquenessResultType = dict[str, Dict[str, Any]]
+UniquenessResultType = dict[str, dict[str, Any]]
 
 
 class UniquenessAnalyzer:
@@ -23,55 +22,7 @@ class UniquenessAnalyzer:
     """
 
     @staticmethod
-    def calculate_uniqueness(datos: RowDataType) -> dict[str, float]:
-        """
-        Calcula el porcentaje de valores únicos por columna en una lista de diccionarios
-        El porcentaje se calcula como: (número de valores únicos / número total de valores) * 100
-        :param datos: Lista de diccionarios representando filas de datos
-        :return: Diccionario con nombre de columna como clave y porcentaje de unicidad como valor
-        """
-        if datos is None or not datos:
-            return dict()
-
-            # ■■■■■■■■■■■■■ Obtener todas las columnas posibles ■■■■■■■■■■■■■
-        all_columns = set()
-        for row in datos:
-            for column in row.keys():
-                all_columns.add(column)
-
-        unique_result = dict()
-
-        for column in all_columns:
-            values = list()
-
-            # ▲▲▲▲▲▲ Recoger todos los valores de la columna ▲▲▲▲▲▲
-            for row in datos:
-                if column in row.keys():
-                    values.append(row[column])
-
-            # ▲▲▲▲▲▲ Salta a la siguiente columna si no hay valores ▲▲▲▲▲▲
-            if not values:
-                unique_result[column] = 0.0
-                continue
-
-            # ▲▲▲▲▲▲ Contar frecuencia de cada valor ▲▲▲▲▲▲
-            counter = Counter(values)
-
-            # ▲▲▲▲▲▲ Contar valores que solo aparecen una sola vez ▲▲▲▲▲▲
-            unique_values = 0
-            for count in counter.values():
-                if count == 1:
-                    unique_values += 1
-
-            # ▁▂▃▄▅▆▇███████ Calculo de porcentaje de unicidad ███████▇▆▅▄▃▂▁
-            total_values = len(values)
-            unique_percent = (unique_values / total_values) * 100.0
-            unique_result[column] = round(unique_percent, 2)
-
-        return unique_result
-
-    @staticmethod
-    def calculate_uniqueness_with_config(datos: RowDataType, path_quality_rules: Optional[str] = None) -> UniquenessResultType:
+    def calculate_uniqueness(datos: RowDataType, path_quality_rules: Optional[str] = None) -> UniquenessResultType:
         """
         Calcula el porcentaje de valores únicos por columna con clasificación basada en configuración
         El porcentaje se calcula como: (número de valores únicos / número total de valores) * 100
@@ -85,76 +36,6 @@ class UniquenessAnalyzer:
 
         # ■■■■■■■■■■■■■ Cargar umbrales de configuración ■■■■■■■■■■■■■
         thresholds = UniquenessAnalyzer._get_uniqueness_thresholds(path_quality_rules)
-
-        # ■■■■■■■■■■■■■ Obtener todas las columnas posibles ■■■■■■■■■■■■■
-        all_columns = set()
-        for row in datos:
-            for column in row.keys():
-                all_columns.add(column)
-
-        unique_result = dict()
-
-        for column in all_columns:
-            values = list()
-
-            # ▲▲▲▲▲▲ Recoger todos los valores de la columna ▲▲▲▲▲▲
-            for row in datos:
-                if column in row.keys():
-                    values.append(row[column])
-
-            # ▲▲▲▲▲▲ Salta a la siguiente columna si no hay valores ▲▲▲▲▲▲
-            if not values:
-                unique_result[column] = {
-                    'uniqueness_percentage': 0.0,
-                    'classification': 'normal',
-                    'unique_values': 0,
-                    'total_values': 0
-                }
-                continue
-
-            # ▲▲▲▲▲▲ Contar frecuencia de cada valor ▲▲▲▲▲▲
-            counter = Counter(values)
-
-            # ▲▲▲▲▲▲ Contar valores que solo aparecen una sola vez ▲▲▲▲▲▲
-            unique_values = 0
-            for count in counter.values():
-                if count == 1:
-                    unique_values += 1
-
-            # ▁▂▃▄▅▆▇███████ Calculo de porcentaje de unicidad ███████▇▆▅▄▃▂▁
-            total_values = len(values)
-            unique_percent = (unique_values / total_values) * 100.0
-            unique_percent_rounded = round(unique_percent, 2)
-
-            # ▲▲▲▲▲▲ Clasificar según umbrales ▲▲▲▲▲▲
-            classification = UniquenessAnalyzer._classify_uniqueness(unique_percent_rounded, thresholds)
-
-            unique_result[column] = {
-                'uniqueness_percentage': unique_percent_rounded,
-                'classification': classification,
-                'unique_values': unique_values,
-                'total_values': total_values
-            }
-
-        return unique_result
-
-    @staticmethod
-    def calculate_uniqueness_with_loaded_config(datos: RowDataType, config: dict[str, Any]) -> UniquenessResultType:
-        """
-        Versión que recibe directamente la configuración cargada
-        :param datos: Lista de diccionarios representando filas de datos
-        :param config: Configuración de reglas de calidad ya cargada
-        :return: Diccionario extendido con unicidad y clasificación por columna
-        """
-        if datos is None or not datos:
-            return dict()
-
-        # ■■■■■■■■■■■■■ Extraer umbrales desde configuración ■■■■■■■■■■■■■
-        general_rules = QualityRulesReader.get_general_rules(config)
-        thresholds = {
-            'min_uniqueness_percentage': general_rules.get('min_uniqueness_percentage', 5.0),
-            'max_uniqueness_percentage': general_rules.get('max_uniqueness_percentage', 95.0)
-        }
 
         # ■■■■■■■■■■■■■ Obtener todas las columnas posibles ■■■■■■■■■■■■■
         all_columns = set()
@@ -238,7 +119,7 @@ class UniquenessAnalyzer:
     @staticmethod
     def _classify_uniqueness(percentage: float, thresholds: dict[str, float]) -> str:
         """
-        Clifica el porcentaje de unicidad según umbrales
+        Clasifica el porcentaje de unicidad según umbrales
         :param percentage: Porcentaje de unicidad
         :param thresholds: Umbrales min y max
         :return: Clasificación: 'baja', 'normal', o 'alta'
