@@ -1,0 +1,73 @@
+# 🮙🮘🮙🮘🮙🮙🮘🮙🮘🮙🮙🮘🮙🮘🮙🮙🮘🮙🮘🮙 Reglas de calidad configurables 🮙🮘🮙🮘🮙🮙🮘🮙🮘🮙🮙🮘🮙🮘🮙🮙🮘🮙🮘🮙
+
+# Define reglas de negocio parametrizables para auditoría de calidad
+
+# Configuración de reglas de calidad de datos
+quality_rules:
+  # Reglas generales de calidad
+  general:
+    max_null_percentage: 50.0        # Porcentaje máximo de valores nulos permitidos
+    min_uniqueness_percentage: 5.0   # Porcentaje mínimo de unicidad requerido
+    max_uniqueness_percentage: 95.0  # Porcentaje máximo de unicidad (posible clave primaria)
+
+  # Reglas específicas por tipo de dato
+  data_type_rules:
+    numeric:
+      allow_negative: true           # Permitir valores negativos
+      min_value: null               # Valor mínimo permitido (null = sin límite)
+      max_value: null               # Valor máximo permitido (null = sin límite)
+      precision: 2                  # Decimales permitidos
+
+    text:
+      min_length: 1                 # Longitud mínima de texto
+      max_length: 1000              # Longitud máxima de texto (null para ilimitado)
+      allow_empty_strings: false    # Permitir cadenas vacías
+      allowed_patterns: []          # Patrones regex permitidos
+
+    date:
+      allow_future_dates: false     # Permitir fechas futuras
+      min_date: null                # Fecha mínima permitida (ISO 8601: YYYY-MM-DD)
+      max_date: null                # Fecha máxima permitida (ISO 8601: YYYY-MM-DD)
+      supported_formats:
+        - "%Y-%m-%d"               # 2023-12-25
+        - "%d/%m/%Y"               # 25/12/2023
+        - "%m/%d/%Y"               # 12/25/2023
+        - "%Y-%m-%d %H:%M:%S"      # 2023-12-25 14:30:00
+
+  # Reglas de coherencia cruzada
+  cross_field_rules:
+    # Ejemplo: si existe fecha_inicio, debe existir fecha_fin y viceversa
+    - rule_name: "date_range_consistency"
+      fields: ["fecha_inicio", "fecha_fin"]
+      condition: "both_exist_or_neither"
+
+    # Ejemplo: edad debe ser coherente con fecha de nacimiento
+    - rule_name: "age_birthdate_consistency"
+      fields: ["edad", "fecha_nacimiento"]
+      condition: "calculate_and_verify_age"
+
+  # Umbrales de alerta
+  thresholds:
+    warning:
+      null_percentage: 25.0         # Porcentaje de nulos que activa advertencia
+      low_uniqueness: 10.0          # Porcentaje bajo de unicidad que activa advertencia
+      high_uniqueness: 90.0         # Porcentaje alto de unicidad que activa advertencia
+
+    critical:
+      null_percentage: 50.0         # Porcentaje de nulos que activa alerta crítica
+      low_uniqueness: 5.0           # Porcentaje bajo de unicidad que activa alerta crítica
+      high_uniqueness: 95.0         # Porcentaje alto de unicidad que activa alerta crítica
+
+# Configuración de informes
+reporting:
+  enabled: true                     # Habilitar generación de informes
+  detailed: false                   # Incluir análisis detallado
+  format: "json"                    # Formato de informe (json, text, detailed)
+  include_statistics: true          # Incluir estadísticas en informe
+  include_alerts: true              # Incluir alertas en informe
+
+# Exclusiones
+exclusions:
+  columns_to_ignore: []             # Columnas a excluir del análisis
+  file_patterns_to_ignore: []       # Patrones de archivo a ignorar
+  row_filters: []                   # Filtros para excluir filas específicas
