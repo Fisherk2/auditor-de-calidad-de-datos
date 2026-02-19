@@ -7,7 +7,7 @@ DESCRIPCIÓN: Clase utilitaria para cargar y validar configuraciones de reglas d
 ■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■
 """
 
-from typing import Any, Dict
+from typing import Any
 import yaml
 import os
 
@@ -18,7 +18,7 @@ class QualityRulesReader:
     """
 
     @staticmethod
-    def load_configs(path_yaml: str) -> Dict[str, Any]:
+    def load_configs(path_yaml: str) -> dict[str, Any]:
         """
         Lee y parsea un archivo YAML de configuración
         :param path_yaml: Ruta al archivo YAML
@@ -45,7 +45,7 @@ class QualityRulesReader:
             raise ValueError(f"Error decodificando archivo YAML {path_yaml}")
 
     @staticmethod
-    def get_general_rules(config: Dict[str, Any]) -> Dict[str, Any]:
+    def get_general_rules(config: dict[str, Any]) -> dict[str, Any]:
         """
         Extrae reglas generales de calidad de la configuración
         :param config: Configuración completa
@@ -56,7 +56,7 @@ class QualityRulesReader:
         
         quality_rules = config['quality_rules']
         general_rules = quality_rules.get('general', {})
-        
+
         # ■■■■■■■■■■■■■ Valores por defecto si no están definidos ■■■■■■■■■■■■■
         return {
             'max_null_percentage': general_rules.get('max_null_percentage', 50.0),
@@ -65,7 +65,7 @@ class QualityRulesReader:
         }
 
     @staticmethod
-    def get_data_type_rules(config: Dict[str, Any], tipo: str) -> Dict[str, Any]:
+    def get_data_type_rules(config: dict[str, Any], tipo: str) -> dict[str, Any]:
         """
         Obtiene reglas específicas por tipo de dato
         :param config: Configuración completa
@@ -79,7 +79,7 @@ class QualityRulesReader:
         return data_type_rules.get(tipo, {})
 
     @staticmethod
-    def get_thresholds(config: Dict[str, Any]) -> Dict[str, Any]:
+    def get_thresholds(config: dict[str, Any]) -> dict[str, Any]:
         """
         Extrae umbrales de alerta de la configuración
         :param config: Configuración completa
@@ -104,7 +104,7 @@ class QualityRulesReader:
         }
 
     @staticmethod
-    def get_exclusions(config: Dict[str, Any]) -> Dict[str, Any]:
+    def get_exclusions(config: dict[str, Any]) -> dict[str, Any]:
         """
         Obtiene reglas de exclusión de la configuración
         :param config: Configuración completa
@@ -122,7 +122,7 @@ class QualityRulesReader:
         }
 
     @staticmethod
-    def check_config_structure(config: Dict[str, Any]) -> bool:
+    def check_config_structure(config: dict[str, Any]) -> bool:
         """
         Verifica que la estructura YAML sea válida
         :param config: Configuración a validar
@@ -164,9 +164,9 @@ class QualityRulesReader:
         return True
 
     @staticmethod
-    def apply_default_rules() -> Dict[str, Any]:
+    def apply_default_rules() -> dict[str, Any]:
         """
-        Devuelve configuración por defecto si falla la lectura
+        TODO: Devuelve configuración por defecto si falla la lectura (Puede sufrir cambios)
         :return: Configuración por defecto
         """
         return {
@@ -231,7 +231,7 @@ class QualityRulesReader:
         }
 
     @staticmethod
-    def _default_thresholds() -> Dict[str, Any]:
+    def _default_thresholds() -> dict[str, Any]:
         """
         Retorna umbrales por defecto
         :return: Umbrales por defecto

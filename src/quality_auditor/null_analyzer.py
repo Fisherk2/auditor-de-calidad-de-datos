@@ -7,8 +7,9 @@ DESCRIPCIÓN: Proporciona función para contar valores nulos por columna
 ■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■
 """
 
-from typing import Any
+from typing import Any, Optional
 from src.utils.data_parser import DataParser
+from src.readers.quality_rules_reader import QualityRulesReader
 
 # ⋮⋮⋮⋮⋮⋮⋮⋮ ALIAS de estructura datos ⋮⋮⋮⋮⋮⋮⋮⋮
 RowDataType = list[dict[str, Any]]
@@ -19,15 +20,19 @@ class NullAnalyzer:
     """
 
     @staticmethod
-    def count_nulls(datos: RowDataType) -> dict[str, int]:
+    def count_nulls(datos: RowDataType, path_quality_rules: Optional[str] = None) -> dict[str, int]:
         """
         Calcula el conteo de valores nulos por columna en una lista de diccionarios
-        Un valor se considera nulo si es None, string vacío, 'null', 'none', 'na', 'n/a', '<null>'
+        Un valor se considera nulo según las reglas de configuración o valores por defecto
         :param datos: Lista de diccionarios representando filas de datos
+        :param path_quality_rules: Ruta opcional al archivo YAML de configuración
         :return: Diccionario con nombre de columna como clave y conteo de nulos como valor
         """
         if datos is None or not datos:
             return dict()
+
+        # ■■■■■■■■■■■■■ Cargar configuración de nulos ■■■■■■■■■■■■■
+        null_rules = NullAnalyzer._get_null_rules(path_quality_rules)
 
         # ■■■■■■■■■■■■■ Obtener todas las columnas posibles ■■■■■■■■■■■■■
         all_columns = set()
@@ -44,7 +49,26 @@ class NullAnalyzer:
         for fila in datos:
             for column in all_columns:
                 value = fila.get(column, None)
-                if DataParser.is_null_value(value):
+                if DataParser.is_null_value(value, null_rules):
                     nulls[column] += 1
 
         return nulls
+
+    @staticmethod
+    def _get_null_rules(path_quality_rules: Optional[str]) -> dict[str, Any]:
+        """
+        Obtiene las reglas de nulos desde configuración o valores por defecto
+        :param path_quality_rules: Ruta opcional al archivo YAML de configuración
+        :return: Diccionario con reglas de nulos
+        """
+        if path_quality_rules:
+            try:
+                config = QualityRulesReader.load_configs(path_quality_rules)
+                return QualityRulesReader.get_data_type_rules(config, 'null')
+            except (FileNotFoundError, ValueError, Exception):
+                # ■■■■■■■■■■■■■ Si hay error, usar valores por defecto ■■■■■■■■■■■■■
+                pass
+        
+        # ■■■■■■■■■■■■■ Valores por defecto si no hay configuración ■■■■■■■■■■■■■
+        default_config = QualityRulesReader.apply_default_rules()
+        return QualityRulesReader.get_data_type_rules(default_config, 'null')
