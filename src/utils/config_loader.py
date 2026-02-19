@@ -42,7 +42,7 @@ class ConfigLoader:
         except PermissionError as e:
             raise PermissionError(f"Sin permisos para leer archivo de configuración: {path_yaml}") from e
         except UnicodeDecodeError as e:
-            raise print(f"Archivo no se pudo decodificar: {e}")
+            raise print(f"El Archivo {path_yaml} no se pudo decodificar: {e}")
 
     @staticmethod
     def get_general_rules(config: Dict[str, Any]) -> Dict[str, Any]:
@@ -179,6 +179,9 @@ class ConfigLoader:
                 'data_type_rules': {
                     'null': {
                         'supported_interpretations': ['', 'null', 'none', 'na', 'n/a', '<null>']
+                    },
+                    'boolean': {
+                        'supported_interpretations': ['true', 'false', '1', '0', 'yes', 'no', 'on', 'off']
                     },
                     'numeric': {
                         'allow_negative': True,

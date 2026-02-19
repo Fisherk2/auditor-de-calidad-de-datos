@@ -22,6 +22,18 @@ quality_rules:
         - "n/a"
         - "<null>"
 
+    # Interpretación de valores booleanos aceptables
+    boolean:
+      supported_interpretations:
+        - "true"
+        - "false"
+        - "1"
+        - "0"
+        - "yes"
+        - "no"
+        - "on"
+        - "off"
+
     numeric:
       allow_negative: true           # Permitir valores negativos
       min_value: null               # Valor mínimo permitido (null = sin límite)
