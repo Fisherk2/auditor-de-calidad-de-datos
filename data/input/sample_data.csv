@@ -1,0 +1,16 @@
+id,nombre,edad,email,fecha_registro,salario,departamento,activo
+1,Juan Pérez,30,juan@example.com,2023-01-15,50000.00,ventas,true
+2,María García,25,maria@example.com,2023-02-20,45000.50,marketing,true
+3,Carlos López,,carlos@example.com,2023-03-10,55000.75,ventas,true
+4,Ana Martínez,28,,2023-04-05,48000.25,recursos_humanos,false
+5,Luis Rodríguez,35,luis@example.com,,60000.00,desarrollo,true
+6,Carmen Sánchez,32,carmen@example.com,2023-06-12,52000.00,marketing,true
+7,Pedro Gómez,29,,2023-07-18,47000.50,ventas,true
+8,Laura Díaz,27,laura@example.com,2023-08-22,51000.75,recursos_humanos,true
+9,Jorge Ruiz,31,jorge@example.com,2023-09-30,53000.00,desarrollo,true
+10,Sofía Fernández,26,,2023-10-15,46000.25,ventas,false
+11,Roberto Castro,33,roberto@example.com,2023-11-25,58000.00,marketing,true
+12,Elena Vargas,24,,2023-12-01,44000.75,desarrollo,true
+13,Miguel Torres,34,miguel@example.com,2024-01-10,61000.00,ventas,true
+14,Isabel Jiménez,23,isabel@example.com,2024-02-14,43000.50,recursos_humanos,true
+15,Francisco Morales,36,francisco@example.com,2024-03-20,59000.25,marketing,false
