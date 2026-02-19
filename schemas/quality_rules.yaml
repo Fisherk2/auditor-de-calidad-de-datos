@@ -12,6 +12,16 @@ quality_rules:
 
   # Reglas específicas por tipo de dato
   data_type_rules:
+    # Interpretación de valores nulos aceptables
+    null:
+      supported_interpretations:
+        - ""
+        - "null"
+        - "none"
+        - "na"
+        - "n/a"
+        - "<null>"
+
     numeric:
       allow_negative: true           # Permitir valores negativos
       min_value: null               # Valor mínimo permitido (null = sin límite)
