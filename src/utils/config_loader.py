@@ -7,10 +7,9 @@ DESCRIPCIÓN: Clase utilitaria para cargar y validar configuraciones de reglas d
 ■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■
 """
 
-from typing import Any, Dict, Optional
+from typing import Any, Dict
 import yaml
 import os
-
 
 class ConfigLoader:
     """
@@ -19,34 +18,34 @@ class ConfigLoader:
     """
 
     @staticmethod
-    def cargarConfiguracion(rutaYaml: str) -> Dict[str, Any]:
+    def load_configs(path_yaml: str) -> Dict[str, Any]:
         """
         Lee y parsea un archivo YAML de configuración
-        :param rutaYaml: Ruta al archivo YAML
+        :param path_yaml: Ruta al archivo YAML
         :return: Diccionario con la configuración cargada
         :raises FileNotFoundError: Si el archivo no existe
         :raises yaml.YAMLError: Si hay error en el formato YAML
         :raises PermissionError: Si no hay permisos de lectura
         """
         try:
-            if not os.path.exists(rutaYaml):
-                raise FileNotFoundError(f"Archivo de configuración no encontrado: {rutaYaml}")
+            if not os.path.exists(path_yaml):
+                raise FileNotFoundError(f"Archivo de configuración no encontrado: {path_yaml}")
             
-            with open(rutaYaml, mode='r', encoding='utf-8') as archivo_yaml:
+            with open(path_yaml, mode='r', encoding='utf-8') as archivo_yaml:
                 configuracion = yaml.safe_load(archivo_yaml)
                 return configuracion if configuracion is not None else {}
                 
         except FileNotFoundError as e:
-            raise FileNotFoundError(f"Archivo de configuración no encontrado: {rutaYaml}") from e
+            raise FileNotFoundError(f"Archivo de configuración no encontrado: {path_yaml}") from e
         except yaml.YAMLError as e:
-            raise yaml.YAMLError(f"Error de formato YAML en archivo {rutaYaml}: {str(e)}") from e
+            raise yaml.YAMLError(f"Error de formato YAML en archivo {path_yaml}: {str(e)}") from e
         except PermissionError as e:
-            raise PermissionError(f"Sin permisos para leer archivo de configuración: {rutaYaml}") from e
+            raise PermissionError(f"Sin permisos para leer archivo de configuración: {path_yaml}") from e
         except UnicodeDecodeError as e:
-            raise UnicodeDecodeError(f"Error de codificación en archivo {rutaYaml}: {str(e)}") from e
+            raise print(f"Archivo no se pudo decodificar: {e}")
 
     @staticmethod
-    def obtenerReglasGenerales(config: Dict[str, Any]) -> Dict[str, Any]:
+    def get_general_rules(config: Dict[str, Any]) -> Dict[str, Any]:
         """
         Extrae reglas generales de calidad de la configuración
         :param config: Configuración completa
@@ -58,7 +57,7 @@ class ConfigLoader:
         quality_rules = config['quality_rules']
         general_rules = quality_rules.get('general', {})
         
-        # Valores por defecto si no están definidos
+        # ■■■■■■■■■■■■■ Valores por defecto si no están definidos ■■■■■■■■■■■■■
         return {
             'max_null_percentage': general_rules.get('max_null_percentage', 50.0),
             'min_uniqueness_percentage': general_rules.get('min_uniqueness_percentage', 5.0),
@@ -66,7 +65,7 @@ class ConfigLoader:
         }
 
     @staticmethod
-    def obtenerReglasPorTipo(config: Dict[str, Any], tipo: str) -> Dict[str, Any]:
+    def get_data_type_rules(config: Dict[str, Any], tipo: str) -> Dict[str, Any]:
         """
         Obtiene reglas específicas por tipo de dato
         :param config: Configuración completa
@@ -80,14 +79,14 @@ class ConfigLoader:
         return data_type_rules.get(tipo, {})
 
     @staticmethod
-    def obtenerUmbrales(config: Dict[str, Any]) -> Dict[str, Any]:
+    def get_thresholds(config: Dict[str, Any]) -> Dict[str, Any]:
         """
         Extrae umbrales de alerta de la configuración
         :param config: Configuración completa
         :return: Diccionario con umbrales de advertencia y críticos
         """
         if not config or 'quality_rules' not in config:
-            return ConfigLoader._umbralesPorDefecto()
+            return ConfigLoader._default_thresholds()
         
         thresholds = config['quality_rules'].get('thresholds', {})
         
@@ -105,7 +104,7 @@ class ConfigLoader:
         }
 
     @staticmethod
-    def obtenerExclusiones(config: Dict[str, Any]) -> Dict[str, Any]:
+    def get_exclusions(config: Dict[str, Any]) -> Dict[str, Any]:
         """
         Obtiene reglas de exclusión de la configuración
         :param config: Configuración completa
@@ -123,7 +122,7 @@ class ConfigLoader:
         }
 
     @staticmethod
-    def validarEstructuraConfig(config: Dict[str, Any]) -> bool:
+    def check_config_structure(config: Dict[str, Any]) -> bool:
         """
         Verifica que la estructura YAML sea válida
         :param config: Configuración a validar
@@ -132,15 +131,15 @@ class ConfigLoader:
         if not isinstance(config, dict):
             return False
         
-        # Verificar estructura principal
+        # ■■■■■■■■■■■■■ Verificar estructura principal ■■■■■■■■■■■■■
         if 'quality_rules' not in config:
             return False
         
         quality_rules = config['quality_rules']
         if not isinstance(quality_rules, dict):
             return False
-        
-        # Verificar secciones requeridas
+
+        # ■■■■■■■■■■■■■ Verificar secciones requeridas ■■■■■■■■■■■■■
         required_sections = ['general', 'data_type_rules']
         for section in required_sections:
             if section not in quality_rules:
@@ -148,7 +147,7 @@ class ConfigLoader:
             if not isinstance(quality_rules[section], dict):
                 return False
         
-        # Validar reglas generales
+        # ■■■■■■■■■■■■■ Validar reglas generales ■■■■■■■■■■■■■
         general = quality_rules['general']
         required_general_keys = ['max_null_percentage', 'min_uniqueness_percentage', 'max_uniqueness_percentage']
         for key in required_general_keys:
@@ -157,7 +156,7 @@ class ConfigLoader:
             if not isinstance(general[key], (int, float)):
                 return False
         
-        # Validar reglas de tipo de dato
+        # ■■■■■■■■■■■■■ Validar reglas de tipo de dato ■■■■■■■■■■■■■
         data_type_rules = quality_rules['data_type_rules']
         if not isinstance(data_type_rules, dict):
             return False
@@ -165,7 +164,7 @@ class ConfigLoader:
         return True
 
     @staticmethod
-    def aplicarReglasPredeterminadas() -> Dict[str, Any]:
+    def apply_default_rules() -> Dict[str, Any]:
         """
         Devuelve configuración por defecto si falla la lectura
         :return: Configuración por defecto
@@ -229,7 +228,7 @@ class ConfigLoader:
         }
 
     @staticmethod
-    def _umbralesPorDefecto() -> Dict[str, Any]:
+    def _default_thresholds() -> Dict[str, Any]:
         """
         Retorna umbrales por defecto
         :return: Umbrales por defecto
