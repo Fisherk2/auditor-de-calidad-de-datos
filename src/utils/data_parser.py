@@ -189,8 +189,11 @@ class DataParser:
         return result
 
     @staticmethod
-    def filter_valid_rows(data: RowDataType, expected_columns: set[str],
-                          rules_config: Dict[str, Any] = None) -> RowDataType:
+    def filter_valid_rows(
+            data: RowDataType,
+            expected_columns: set[str],
+            rules_config: dict[str, Any] = None
+    ) -> RowDataType:
         """
         Filtra filas que contienen todas las columnas esperadas
         Opcionalmente, aplica reglas de calidad desde la configuracion
@@ -318,10 +321,11 @@ class DataParser:
         return datos_filtrados
 
     @staticmethod
-    def transform_data(data: RowDataType, data_types_rules: Dict[str, Any]) -> RowDataType:
+    def transform_data(data: RowDataType, data_types_rules: dict[str, Any]) -> RowDataType:
         """
         Transforma datos según tipos detectados por los métodos de validación
         :param data: Datos a transformar
+        :param data_types_rules: Reglas de configuración para tipos de datos
         :return: Datos transformados con tipos consistentes
         """
         datos_transformados = []
@@ -330,11 +334,15 @@ class DataParser:
             row_transformed = row.copy()
 
             for column, value in row_transformed.items():
+                # Obtener reglas específicas para cada tipo
+                numeric_rules = data_types_rules.get('numeric', {})
+                text_rules = data_types_rules.get('text', {})
+                boolean_rules = data_types_rules.get('boolean', {})
+                null_rules = data_types_rules.get('null', {})
 
                 # ■■■■■■■■■■■■■ Transformar a tipo númerico si es posible ■■■■■■■■■■■■■
-                if DataParser.is_numeric_value(value):
+                if DataParser.is_numeric_value(value, numeric_rules):
                     try:
-
                         # ▲▲▲▲▲▲ Convertir a float, luego a int si no tiene decimales ▲▲▲▲▲▲
                         num_value = float(value)
 
@@ -343,27 +351,30 @@ class DataParser:
                         else:
                             row_transformed[column] = num_value
                     except (ValueError, TypeError):
-
                         # ▲▲▲▲▲▲ Mantener original si falla conversion ▲▲▲▲▲▲
                         pass
 
-                # TODO: ▲▲▲▲▲▲ Transformar a booleano si es posible ▲▲▲▲▲▲
-                elif DataParser.is_bool_value(value):
+                # ▲▲▲▲▲▲ Transformar a booleano si es posible ▲▲▲▲▲▲
+                elif DataParser.is_bool_value(value, boolean_rules):
                     if isinstance(value, bool):
                         row_transformed[column] = value
                     elif isinstance(value, str):
                         lower_value = value.lower().strip()
-                        if lower_value in ["true", "1", "yes", "on"]:
+                        supported_interpretations = boolean_rules.get(
+                            'supported_interpretations',
+                            ['true', 'false', '1', '0', 'yes', 'no', 'on', 'off']
+                        )
+                        if lower_value in supported_interpretations[:len(supported_interpretations) // 2]:
                             row_transformed[column] = True
-                        elif lower_value in ["false", "0", "no", "off"]:
+                        else:
                             row_transformed[column] = False
 
-                # Normalizar valores nulos
-                elif DataParser.is_null_value(value):
+                # ▲▲▲▲▲▲ Normalizar valores nulos ▲▲▲▲▲▲
+                elif DataParser.is_null_value(value, null_rules):
                     row_transformed[column] = None
 
-                # Mantener strings válidos como están
-                elif DataParser.is_string_value(value):
+                # ▲▲▲▲▲▲ Mantener strings válidos como están ▲▲▲▲▲▲
+                elif DataParser.is_string_value(value, text_rules):
                     row_transformed[column] = str(value).strip()
 
             datos_transformados.append(row_transformed)
