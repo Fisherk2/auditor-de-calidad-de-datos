@@ -2,51 +2,54 @@
 ■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■
 MÓDULO:      Utilidades reutilizables para manejo de fechas
 AUTOR:       Fisherk2
-FECHA:       2026-02-16
-DESCRIPCIÓN: Componente de bajo nivel que proporciona funciones auxiliares para conversión y validación de fechas
+FECHA:       2026-02-19
+DESCRIPCIÓN: Componente de bajo nivel que proporciona funciones auxiliares para operaciones con fechas
 ■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■
 """
 import datetime
-from typing import Optional
+from typing import Optional, Any
+from src.readers.quality_rules_reader import QualityRulesReader
 
 class DateHelper:
     """
     Clase de utilidad para operaciones comunes con fechas
+    Integrada con sistema de configuración de reglas de calidad
     """
 
     @staticmethod
-    def is_valid_date_format(date: str, format: str = "%Y-%m-%d") -> bool:
+    def is_valid_date_format(date: str, date_format: str = "%Y-%m-%d") -> bool:
         """
         Valida si un string tiene el formato de fecha especificado
         :param date: Fecha en forma de cadena
-        :param format: Formato de fecha especificado
+        :param date_format: Formato de fecha especificado
         :return: ¿Tiene el formato de fecha especificado correcto?
         """
         try:
-            datetime.datetime.strptime(date, format)
+            datetime.datetime.strptime(date, date_format)
             return True
         except ValueError:
             return False
 
     @staticmethod
-    def parse_date(date: str, format: str = "%Y-%m-%d") -> Optional[datetime.datetime]:
+    def parse_date(date: str, date_format: str = "%Y-%m-%d") -> Optional[datetime.datetime]:
         """
         Convierte un string a objeto datetime segun el formato especificado
         :param date: Fecha en forma de cadena
-        :param format: Formato de fecha especificado
+        :param date_format: Formato de fecha especificado
         :return: datetime o None si hay error
         """
         try:
-            return datetime.datetime.strptime(date, format)
+            return datetime.datetime.strptime(date, date_format)
         except ValueError:
             return None
 
     @staticmethod
     def is_future_date(date: datetime.datetime) -> bool:
         """
-        Verifica si una fecha es futura conparandola con la fecha actual
-        :param date:
-        :return:
+        Verifica si una fecha es futura según configuración
+        :param date: Fecha a evaluar
+        :param path_quality_rules: Ruta opcional al archivo YAML de configuración
+        :return: ¿Es fecha futura y está permitida?
         """
         current_date = datetime.datetime.now()
         return date > current_date
@@ -62,28 +65,41 @@ class DateHelper:
         return first_date < second_date
 
     @staticmethod
-    def format_date(date: datetime.datetime, format: str = "%Y-%m-%d") -> str:
+    def format_date(date: datetime.datetime, date_format: str = "%Y-%m-%d") -> str:
         """
         Formatea un objeto datetime a string según el formato especificado
         :param date: Fecha en forma de cadena
-        :param format: Formato de fecha especificado
+        :param date_format: Formato de fecha especificado
         :return: Fecha en forma de cadena
         """
-        return date.strftime(format)
+        return date.strftime(date_format)
 
     @staticmethod
-    def get_supported_formats() -> list[str]:
+    def get_supported_formats(path_quality_rules: Optional[str] = None) -> list[str]:
         """
-        Retorna lista de formatos de fecha soportados comúnmente
-        :return: Lista de formatos de fecha
+        Retorna lista de formatos de fecha soportados desde configuración
+        :param path_quality_rules: Ruta opcional al archivo YAML de configuración
+        :return: Lista de formatos de fecha configurados
         """
+        date_rules = DateHelper.get_date_rules(path_quality_rules)
+        return date_rules.get('supported_formats', ["%Y-%m-%d"])
 
-        # ▁▂▃▄▅▆▇███████ Formatos disponibles ███████▇▆▅▄▃▂▁
+    @staticmethod
+    def get_date_rules(path_quality_rules: Optional[str]) -> dict[str, Any]:
+        """
+        Obtiene las reglas de fechas desde configuración o valores por defecto
+        :param path_quality_rules: Ruta opcional al archivo YAML de configuración
+        :return: Diccionario con reglas de fechas
+        """
+        if path_quality_rules:
+            try:
+                config = QualityRulesReader.load_configs(path_quality_rules)
+                return QualityRulesReader.get_data_type_rules(config, 'date')
+            except (FileNotFoundError, ValueError, Exception):
 
-        # %Y-%m-%d -> 2025-12-25
-        # %d/%m/%Y -> 25/12/2025
-        # %m/%d/%Y -> 12/25/2025
-        # %Y-%m-%d %H:%M:%S -> 2025-12-25 14:30:00
-        # %d/%m/%Y %H:%M -> 25/12/2025 14:30
-
-        return ["%Y-%m-%d", "%d/%m/%Y", "%m/%d/%Y", "%Y-%m-%d %H:%M:%S", "%d/%m/%Y %H:%M"]
+                # ■■■■■■■■■■■■■ Si hay error, usar valores por defecto ■■■■■■■■■■■■■
+                pass
+        
+        # ■■■■■■■■■■■■■ Valores por defecto si no hay configuración ■■■■■■■■■■■■■
+        default_config = QualityRulesReader.apply_default_rules()
+        return QualityRulesReader.get_data_type_rules(default_config, 'date')
