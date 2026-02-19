@@ -6,14 +6,13 @@ FECHA:       2026-02-18
 DESCRIPCIÓN: Proporciona funciones para generar informes legibles y estructurados
 ■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■
 """
-from typing import Dict, Any, List
+from typing import Dict, Any
 from datetime import datetime
 import json
 
 # ⋮⋮⋮⋮⋮⋮⋮⋮ ALIAS de estructura datos ⋮⋮⋮⋮⋮⋮⋮⋮
 RowDataType = list[dict[str, Any]]
-MetricDataType = dict[str, dict[str, float]]
-ValueListType = dict[str, list[float]]
+
 
 class ReportGenerator:
     """
@@ -21,27 +20,28 @@ class ReportGenerator:
     """
 
     @staticmethod
-    def generate_json_report(results:dict[str, Any]) -> str:
+    def generate_json_report(results: dict[str, Any]) -> str:
         """
         Genera un informe en formato JSON
         :param results: Diccionario con resultados de analisis de validacion y calidad
         :return: String con formato JSON del informe
         """
         try:
-            json_raw:str = json.dumps(results, indent=2, ensure_ascii=False)
+            json_raw: str = json.dumps(results, indent=2, ensure_ascii=False)
             return json_raw
-        except Exception as e: # TODO: Colocar as en toda las excepciones del proyecto
+        except Exception as e:  # TODO: Colocar as en toda las excepciones del proyecto
             return f"Error al generar el informe JSON: {str(e)}"
 
     @staticmethod
-    def generate_summary_report(results:dict[str, Any]) -> str:
+    def generate_summary_report(results: dict[str, Any]) -> str:
         """
         Genera un informe resumido en formato texto
         :param results: Diccionario con resultados de analisis de validacion y calidad
         :return: String con formato de texto del informe resumido
         """
         report = list()
-        report.append("🮙🮘🮙🮘🮙🮙🮘🮙🮘🮙🮙🮘🮙🮘🮙🮙🮘🮙🮘🮙 INFORME DE CALIDAD DE DATOS 🮙🮘🮙🮘🮙🮙🮘🮙🮘🮙🮙🮘🮙🮘🮙🮙🮘🮙🮘🮙")
+        report.append(
+            "🮙🮘🮙🮘🮙🮙🮘🮙🮘🮙🮙🮘🮙🮘🮙🮙🮘🮙🮘🮙 INFORME DE CALIDAD DE DATOS 🮙🮘🮙🮘🮙🮙🮘🮙🮘🮙🮙🮘🮙🮘🮙🮙🮘🮙🮘🮙")
         report.append("")
 
         if "timestamp" in results.keys():
@@ -69,7 +69,7 @@ class ReportGenerator:
                 count = nulls[column]
                 if count > 0:
                     report.append(f"    {column}: {count} valores nulos")
-            if not nulls or report[len(report)-1] != "▏▎▍▌▋▊▉▉▉▉▉▉▉▉ ANÁLISIS DE NULOS ▉▉▉▉▉▉▉▉▉▊▋▌▍▎":
+            if not nulls or report[len(report) - 1] != "▏▎▍▌▋▊▉▉▉▉▉▉▉▉ ANÁLISIS DE NULOS ▉▉▉▉▉▉▉▉▉▊▋▌▍▎":
                 report.append(f"    No se encontraron valores nulos")
             report.append("")
 
@@ -100,14 +100,15 @@ class ReportGenerator:
         return "\n".join(report)
 
     @staticmethod
-    def generate_detail_report(results: dict[str, Any] ) -> str:
+    def generate_detail_report(results: dict[str, Any]) -> str:
         """
         Genera un informe detallado en formato texto
         :param results: Diccionario con resultados de analisis de calidad
         :return: String con formato de texto del informe detallado
         """
         report = list()
-        report.append("🮙🮘🮙🮘🮙🮙🮘🮙🮘🮙🮙🮘🮙🮘🮙🮙🮘🮙🮘🮙 INFORME DETALLADO DE CALIDAD DE DATOS 🮙🮘🮙🮘🮙🮙🮘🮙🮘🮙🮙🮘🮙🮘🮙🮙🮘🮙🮘🮙")
+        report.append(
+            "🮙🮘🮙🮘🮙🮙🮘🮙🮘🮙🮙🮘🮙🮘🮙🮙🮘🮙🮘🮙 INFORME DETALLADO DE CALIDAD DE DATOS 🮙🮘🮙🮘🮙🮙🮘🮙🮘🮙🮙🮘🮙🮘🮙🮙🮘🮙🮘🮙")
         report.append("▢▣" * 20)
         report.append("")
 
@@ -124,7 +125,7 @@ class ReportGenerator:
         seccions["NULL_ANALYSIS"] = "null_analysis"
         seccions["UNIQUENESS_ANALYSIS"] = "uniqueness_analysis"
         seccions["STATISTICAL_ANALYSIS"] = "statistical_analysis"
-        seccions["DATE_ANALYSIS"]= "date_analysis"
+        seccions["DATE_ANALYSIS"] = "date_analysis"
         seccions["STATISTICAL_DETAILS"] = "statistical_details"
         seccions["COUNT_TYPES"] = "count_types"
         for title in seccions.keys():
@@ -135,8 +136,8 @@ class ReportGenerator:
                 if isinstance(data, dict):
                     for key in data.keys():
                         value = data[key]
-                        if isinstance(value,Dict):
-                            report.append(f"■■■■■■■■■■■■■ {key} ■■■■■■■■■■■■■" )
+                        if isinstance(value, Dict):
+                            report.append(f"■■■■■■■■■■■■■ {key} ■■■■■■■■■■■■■")
                             for subkey in value.keys():
                                 report.append(f"    {subkey}: {str(value[subkey])}")
                         else:
@@ -149,7 +150,8 @@ class ReportGenerator:
         if "alerts" in results.keys():
             alerts = results["alerts"]
             if alerts:
-                report.append("🮙🮘🮙🮘🮙🮙🮘🮙🮘🮙🮙🮘🮙🮘🮙🮙🮘🮙🮘🮙 ALERTAS IMPORTANTES 🮙🮘🮙🮘🮙🮙🮘🮙🮘🮙🮙🮘🮙🮘🮙🮙🮘🮙🮘🮙")
+                report.append(
+                    "🮙🮘🮙🮘🮙🮙🮘🮙🮘🮙🮙🮘🮙🮘🮙🮙🮘🮙🮘🮙 ALERTAS IMPORTANTES 🮙🮘🮙🮘🮙🮙🮘🮙🮘🮙🮙🮘🮙🮘🮙🮙🮘🮙🮘🮙")
                 for alert in alerts:
                     report.append(f"# ⋮⋮⋮⋮⋮⋮⋮⋮ {alert} ⋮⋮⋮⋮⋮⋮⋮⋮ ")
                 report.append("")
@@ -160,7 +162,7 @@ class ReportGenerator:
         return "\n".join(report)
 
     @staticmethod
-    def save_report(results:dict[str,Any], path_file:str, format_file:str= "json"):
+    def save_report(results: dict[str, Any], path_file: str, format_file: str = "json"):
         """
         Guarda el informe en un archivo
         :param results: Diccionario con resultados de analisis de calidad
@@ -169,11 +171,11 @@ class ReportGenerator:
         :return:
         """
         content = ""
-        if format_file.lower()== "json":
+        if format_file.lower() == "json":
             content = ReportGenerator.generate_json_report(results)
-        elif format_file.lower()== "summary":
+        elif format_file.lower() == "summary":
             content = ReportGenerator.generate_summary_report(results)
-        elif format_file.lower()== "detailed":
+        elif format_file.lower() == "detailed":
             content = ReportGenerator.generate_detail_report(results)
 
         # ■■■■■■■■■■■■■ Default to JSON ■■■■■■■■■■■■■
@@ -181,72 +183,55 @@ class ReportGenerator:
             content = ReportGenerator.generate_json_report(results)
 
         try:
-            with open(path_file,'w',encoding='utf-8') as file:
+            with open(path_file, 'w', encoding='utf-8') as file:
                 file.write(content)
         except IOError as e:
             print(f"Error al guardar el informe: {e}")
-# ▼△▼△▼△▼△▼△▼△▼△▼△▼△ Pseudocodigo △▼△▼△▼△▼△▼△▼△▼△▼△▼
 
-public
-static
-Dict[String, Any]
-consolidarResultados(List[Dict[String, Any]]
-listaResultados)
-"""
-Consolida múltiples resultados de análisis en uno solo
+    @staticmethod
+    def consolidate_results(result_list: RowDataType) -> dict[str, Any]:
+        """
+        Consolida multiples resultados de analisis en uno solo
+        :param result_list: Lista de diccionarios con resultados de analisis
+        :return: Diccionario consolidado con todoslos resultados
+        """
+        if result_list is None or not result_list:
+            return dict()
+        consolidate_result = dict()
+        consolidate_result["timestamp"] = datetime.now().isoformat()
+        consolidate_result["total_analysis"] = len(result_list)
+        consolidate_result["individual_results"] = result_list
 
-Args:
-    listaResultados: Lista de diccionarios con resultados de análisis
+        # ■■■■■■■■■■■■■ Consolidar analisis de nulos ■■■■■■■■■■■■■
+        nulls_consolidate = dict()
+        for result in result_list:
+            if "nulls_analysis" in result.keys():
+                nulls = result["nulls_analysis"]
+                for column in nulls.keys():
+                    if not column in nulls_consolidate.keys():
+                        nulls_consolidate[column] = 0
+                    nulls_consolidate[column] += nulls[column]
 
-Returns:
-    Diccionario consolidado con todos los resultados
-"""
-if listaResultados == null | | listaResultados.isEmpty()
-    return dict()
+        consolidate_result["nulls_analysis_consolidate"] = nulls_consolidate
 
-var
-resultadoConsolidado = dict()
-resultadoConsolidado["timestamp"] = datetime.now().isoformat()
-resultadoConsolidado["total_analisis"] = listaResultados.size()
-resultadoConsolidado["resultados_individuales"] = listaResultados
+        # TODO: Investigar llave su nombre correcto ■■■■■■■■■■■■■ Consolidar analisis de unicidad (promedio) ■■■■■■■■■■■■■
+        uniqueness_consolidate = dict()
+        uniqueness_count = dict()
+        for result in result_list:
+            if "uniqueness_analysis" in result.keys():
+                uniqueness = result["uniqueness_analysis"]
+                for column in uniqueness.keys():
+                    if not column in uniqueness_consolidate.keys():
+                        uniqueness_consolidate[column] = 0
+                        uniqueness_count = 0
+                    uniqueness_consolidate[column] += uniqueness[column]
+                    uniqueness_count[column] += 1
 
-# Consolidar análisis de nulos
-var
-consolidadoNulos = dict()
-for Dict[String, Any] resultado in listaResultados
-    if resultado.containsKey("analisis_nulos")
-        var
-        nulos = resultado["analisis_nulos"]
-        for String columna in nulos.keySet()
-            if !consolidadoNulos.containsKey(columna)
-            consolidadoNulos[columna] = 0
-        consolidadoNulos[columna] += nulos[columna]
+        # TODO: Investigar llave su nombre correcto ■■■■■■■■■■■■■ Calcular promedios ■■■■■■■■■■■■■
+        for column in uniqueness_consolidate.keys():
+            if column in uniqueness_count.keys() and uniqueness_count[column] > 0:
+                uniqueness_consolidate[column] = uniqueness_consolidate[column] / uniqueness_count[column]
 
-resultadoConsolidado["analisis_nulos_consolidado"] = consolidadoNulos
+            consolidate_result["uniqueness_analysis_consolidate"] = uniqueness_consolidate
 
-# Consolidar análisis de unicidad (promedio)
-var
-consolidadoUnicidad = dict()
-var
-conteoUnicidad = dict()
-
-for Dict[String, Any] resultado in listaResultados
-    if resultado.containsKey("analisis_unicidad")
-        var
-        unicidad = resultado["analisis_unicidad"]
-        for String columna in unicidad.keySet()
-            if !consolidadoUnicidad.containsKey(columna)
-            consolidadoUnicidad[columna] = 0.0
-            conteoUnicidad[columna] = 0
-
-        consolidadoUnicidad[columna] += unicidad[columna]
-        conteoUnicidad[columna] + +
-
-# Calcular promedios
-for String columna in consolidadoUnicidad.keySet()
-    if conteoUnicidad.containsKey(columna) & & conteoUnicidad[columna] > 0
-        consolidadoUnicidad[columna] = consolidadoUnicidad[columna] / conteoUnicidad[columna]
-
-resultadoConsolidado["analisis_unicidad_consolidado"] = consolidadoUnicidad
-
-return resultadoConsolidado
+        return consolidate_result
