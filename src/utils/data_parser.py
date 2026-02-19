@@ -7,7 +7,9 @@ DESCRIPCIÓN: Capa de acceso a datos que proporciona funciones para validar y tr
 ■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■
 """
 
-from typing import Any
+from typing import Any, List, Dict
+import yaml
+import csv
 
 # ⋮⋮⋮⋮⋮⋮⋮⋮ ALIAS de estructura datos ⋮⋮⋮⋮⋮⋮⋮⋮
 RowDataType = list[dict[str, Any]]
@@ -154,12 +156,14 @@ class DataParser:
         return result
 
     @staticmethod
-    def filter_valid_rows(data: RowDataType, expected_columns: set[str]) -> RowDataType:
+    def filter_valid_rows(data: RowDataType, expected_columns: set[str], rules_config: Dict[str, Any] = None) -> RowDataType:
         """
         Filtra filas que contienen todas las columnas esperadas
-        :param data:
-        :param expected_columns:
-        :return:
+        Optionally applies quality rules from configuration
+        :param data: Datos a filtrar
+        :param expected_columns: Columnas esperadas
+        :param rules_config: Configuración de reglas opcional
+        :return: Filas válidas filtradas
         """
         valid_rows = list()
         for row in data:
@@ -168,6 +172,183 @@ class DataParser:
                 expected_columns=expected_columns
             )
             if validation["valid"]:
-                valid_rows.append(row)
+                # Apply quality rules if provided
+                if rules_config:
+                    if DataParser.validarContraReglas([row], rules_config):
+                        valid_rows.append(row)
+                else:
+                    valid_rows.append(row)
 
         return valid_rows
+
+    @staticmethod
+    def leerCsv(rutaArchivo: str) -> List[Dict[str, Any]]:
+        """
+        Lee un archivo CSV y retorna una lista de diccionarios
+        :param rutaArchivo: Ruta al archivo CSV
+        :return: Lista de diccionarios con los datos del CSV
+        :raises FileNotFoundError: Si el archivo no existe
+        :raises csv.Error: Si hay error en el formato CSV
+        :raises PermissionError: Si no hay permisos de lectura
+        """
+        try:
+            with open(rutaArchivo, mode='r', encoding='utf-8') as archivo_csv:
+                lector = csv.DictReader(archivo_csv)
+                datos = list(lector)
+                return datos
+        except FileNotFoundError as e:
+            raise FileNotFoundError(f"Archivo no encontrado: {rutaArchivo}") from e
+        except csv.Error as e:
+            raise csv.Error(f"Error de formato CSV en archivo {rutaArchivo}: {str(e)}") from e
+        except PermissionError as e:
+            raise PermissionError(f"Sin permisos para leer archivo: {rutaArchivo}") from e
+        except UnicodeDecodeError as e:
+            raise UnicodeDecodeError(f"Error de codificación en archivo {rutaArchivo}: {str(e)}") from e
+
+    @staticmethod
+    def validarContraReglas(datos: List[Dict[str, Any]], reglasConfig: Dict[str, Any]) -> bool:
+        """
+        Aplica reglas de validación desde configuración YAML
+        :param datos: Datos a validar
+        :param reglasConfig: Configuración de reglas desde YAML
+        :return: True si los datos cumplen las reglas, False otherwise
+        """
+        if not reglasConfig or 'quality_rules' not in reglasConfig:
+            return True
+
+        quality_rules = reglasConfig['quality_rules']
+        general_rules = quality_rules.get('general', {})
+        data_type_rules = quality_rules.get('data_type_rules', {})
+
+        # Validar reglas generales
+        for row in datos:
+            # Verificar porcentaje de nulos
+            null_count = sum(1 for value in row.values() if DataParser.is_null_value(value))
+            null_percentage = (null_count / len(row)) * 100 if len(row) > 0 else 0
+            
+            max_null_percentage = general_rules.get('max_null_percentage', 50.0)
+            if null_percentage > max_null_percentage:
+                return False
+
+            # Validar tipos de datos específicos
+            for column, value in row.items():
+                if DataParser.is_null_value(value):
+                    continue
+
+                # Determinar tipo de dato y aplicar reglas
+                if DataParser.is_numeric_value(value):
+                    numeric_rules = data_type_rules.get('numeric', {})
+                    if not numeric_rules.get('allow_negative', True) and float(value) < 0:
+                        return False
+                    
+                    min_value = numeric_rules.get('min_value')
+                    if min_value is not None and float(value) < min_value:
+                        return False
+                        
+                    max_value = numeric_rules.get('max_value')
+                    if max_value is not None and float(value) > max_value:
+                        return False
+
+                elif DataParser.is_string_value(value):
+                    text_rules = data_type_rules.get('text', {})
+                    str_value = str(value)
+                    
+                    min_length = text_rules.get('min_length', 1)
+                    if len(str_value) < min_length:
+                        return False
+                        
+                    max_length = text_rules.get('max_length')
+                    if max_length is not None and len(str_value) > max_length:
+                        return False
+
+        return True
+
+    @staticmethod
+    def filtrarSegunExclusiones(datos: List[Dict[str, Any]], exclusiones: Dict[str, Any]) -> List[Dict[str, Any]]:
+        """
+        Aplica reglas de exclusión a los datos
+        :param datos: Datos a filtrar
+        :param exclusiones: Configuración de exclusiones
+        :return: Datos filtrados según exclusiones
+        """
+        if not exclusiones:
+            return datos
+
+        datos_filtrados = datos.copy()
+        
+        # Excluir columnas específicas
+        columns_to_ignore = exclusiones.get('columns_to_ignore', [])
+        if columns_to_ignore:
+            datos_filtrados = [
+                {k: v for k, v in row.items() if k not in columns_to_ignore}
+                for row in datos_filtrados
+            ]
+
+        # Aplicar filtros de filas
+        row_filters = exclusiones.get('row_filters', [])
+        for filter_rule in row_filters:
+            column = filter_rule.get('column')
+            condition = filter_rule.get('condition')
+            value = filter_rule.get('value')
+            
+            if column and condition and value is not None:
+                if condition == 'equals':
+                    datos_filtrados = [row for row in datos_filtrados if row.get(column) != value]
+                elif condition == 'not_equals':
+                    datos_filtrados = [row for row in datos_filtrados if row.get(column) == value]
+                elif condition == 'contains':
+                    datos_filtrados = [row for row in datos_filtrados if value not in str(row.get(column, ''))]
+                elif condition == 'not_contains':
+                    datos_filtrados = [row for row in datos_filtrados if value in str(row.get(column, ''))]
+
+        return datos_filtrados
+
+    @staticmethod
+    def aplicarTransformaciones(datos: List[Dict[str, Any]], transformaciones: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+        """
+        Aplica reglas de transformación a los datos
+        :param datos: Datos a transformar
+        :param transformaciones: Lista de reglas de transformación
+        :return: Datos transformados
+        """
+        if not transformaciones:
+            return datos
+
+        datos_transformados = []
+        
+        for row in datos:
+            row_transformed = row.copy()
+            
+            for transform in transformaciones:
+                column = transform.get('column')
+                operation = transform.get('operation')
+                params = transform.get('params', {})
+                
+                if column in row_transformed and operation:
+                    original_value = row_transformed[column]
+                    
+                    try:
+                        if operation == 'uppercase':
+                            row_transformed[column] = str(original_value).upper()
+                        elif operation == 'lowercase':
+                            row_transformed[column] = str(original_value).lower()
+                        elif operation == 'trim':
+                            row_transformed[column] = str(original_value).strip()
+                        elif operation == 'replace':
+                            old = params.get('old', '')
+                            new = params.get('new', '')
+                            row_transformed[column] = str(original_value).replace(old, new)
+                        elif operation == 'normalize_null':
+                            if DataParser.is_null_value(original_value):
+                                row_transformed[column] = None
+                        elif operation == 'round_numeric':
+                            if DataParser.is_numeric_value(original_value):
+                                decimals = params.get('decimals', 2)
+                                row_transformed[column] = round(float(original_value), decimals)
+                    except (ValueError, TypeError):
+                        # Keep original value if transformation fails
+                        pass
+            
+            datos_transformados.append(row_transformed)
+        
+        return datos_transformados
