@@ -7,9 +7,7 @@ DESCRIPCIÓN: Capa de acceso a datos que proporciona funciones para validar y tr
 ■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■
 """
 
-from typing import Any, List, Dict
-import yaml
-import csv
+from typing import Any
 
 # ⋮⋮⋮⋮⋮⋮⋮⋮ ALIAS de estructura datos ⋮⋮⋮⋮⋮⋮⋮⋮
 RowDataType = list[dict[str, Any]]
@@ -211,7 +209,7 @@ class DataParser:
 
                 # ■■■■■■■■■■■■■ Aplicar reglas de calidad (OPCIONAL) ■■■■■■■■■■■■■
                 if rules_config:
-                    if DataParser.is_quality_rules_passed([row], rules_config):
+                    if DataParser.is_quality_rules_ready([row], rules_config):
                         valid_rows.append(row)
                 else:
                     valid_rows.append(row)
@@ -219,7 +217,7 @@ class DataParser:
         return valid_rows
 
     @staticmethod
-    def is_quality_rules_passed(data: RowDataType, rules_config: Dict[str, Any]) -> bool:
+    def is_quality_rules_ready(data: RowDataType, rules_config: dict[str, Any]) -> bool:
         """
         Aplica reglas de validación desde configuración YAML
         :param data: Datos a validar
@@ -237,48 +235,46 @@ class DataParser:
         for row in data:
 
             # ▲▲▲▲▲▲ Verificar porcentaje de nulos ▲▲▲▲▲▲
-            null_count = sum(1 for value in row.values() if DataParser.is_null_value(value))
+            null_rules = data_type_rules.get('null', {})
+            null_count = sum(1 for value in row.values() if DataParser.is_null_value(value, null_rules))
             null_percentage = (null_count / len(row)) * 100 if len(row) > 0 else 0
-
             max_null_percentage = general_rules.get('max_null_percentage', 50.0)
             if null_percentage > max_null_percentage:
                 return False
 
             # ▲▲▲▲▲▲ Validar tipos de datos específicos ▲▲▲▲▲▲
             for column, value in row.items():
-                if DataParser.is_null_value(value):
+
+                # ▲▲▲▲▲▲ Obtener reglas específicas para cada tipo ▲▲▲▲▲▲
+                numeric_rules = data_type_rules.get('numeric', {})
+                text_rules = data_type_rules.get('text', {})
+                boolean_rules = data_type_rules.get('boolean', {})
+                null_rules = data_type_rules.get('null', {})
+
+                # ▲▲▲▲▲▲ Si es nulo, continuar al siguiente valor ▲▲▲▲▲▲
+                if DataParser.is_null_value(value, null_rules):
                     continue
 
-                # ▲▲▲▲▲▲ Determinar tipo de dato y aplicar reglas ▲▲▲▲▲▲
-                if DataParser.is_numeric_value(value):
-                    numeric_rules = data_type_rules.get('numeric', {})
-                    if not numeric_rules.get('allow_negative', True) and float(value) < 0:
-                        return False
+                # ▲▲▲▲▲▲ Intentar validar como numérico primero ▲▲▲▲▲▲
+                if DataParser.is_numeric_value(value, numeric_rules):
+                    continue
 
-                    min_value = numeric_rules.get('min_value')
-                    if min_value is not None and float(value) < min_value:
-                        return False
+                # ▲▲▲▲▲▲ Intentar validar como booleano ▲▲▲▲▲▲
+                elif DataParser.is_bool_value(value, boolean_rules):
+                    continue
 
-                    max_value = numeric_rules.get('max_value')
-                    if max_value is not None and float(value) > max_value:
-                        return False
+                # ▲▲▲▲▲▲ Intentar validar como texto ▲▲▲▲▲▲
+                elif DataParser.is_string_value(value, text_rules):
+                    continue
 
-                elif DataParser.is_string_value(value):
-                    text_rules = data_type_rules.get('text', {})
-                    str_value = str(value)
-
-                    min_length = text_rules.get('min_length', 1)
-                    if len(str_value) < min_length:
-                        return False
-
-                    max_length = text_rules.get('max_length')
-                    if max_length is not None and len(str_value) > max_length:
-                        return False
+                # ▲▲▲▲▲▲ Si no cumple ninguna regla de tipo, rechazar ▲▲▲▲▲▲
+                else:
+                    return False
 
         return True
 
     @staticmethod
-    def thresholds_filter(data: RowDataType, exclusions: Dict[str, Any]) -> RowDataType:
+    def thresholds_filter(data: RowDataType, exclusions: dict[str, Any]) -> RowDataType:
         """
         Aplica reglas de exclusión a los datos
         :param data: Datos a filtrar

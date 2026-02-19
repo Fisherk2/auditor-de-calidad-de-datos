@@ -83,7 +83,7 @@ quality_rules:
 # Configuración de informes
 reporting:
   enabled: true                     # Habilitar generación de informes
-  detailed: false                   # Incluir análisis detallado
+  detailed: true                   # Incluir análisis detallado
   format: "json"                    # Formato de informe (json, text, detailed)
   include_statistics: true          # Incluir estadísticas en informe
   include_alerts: true              # Incluir alertas en informe
