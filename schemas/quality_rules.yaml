@@ -43,7 +43,7 @@ quality_rules:
     text:
       min_length: 1                 # Longitud mínima de texto
       max_length: 1000              # Longitud máxima de texto (null para ilimitado)
-      allow_empty_strings: false    # Permitir cadenas vacías
+      allow_empty_strings: true    # Permitir cadenas vacías
       allowed_patterns: []          # Patrones regex permitidos
 
     date:

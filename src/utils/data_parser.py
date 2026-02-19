@@ -22,43 +22,82 @@ class DataParser:
     """
 
     @staticmethod
-    def is_numeric_value(value: Any) -> bool:
+    def is_numeric_value(value: Any, numeric_rules: dict[str, Any]) -> bool:
         """
-        Verifica si un valor puede ser convertido a número
-        :param value:
-        :return: ¿Es un valor numérico?
+        Verifica si un valor puede ser convertido a número según reglas
+        :param value: Valor a evaluar
+        :param numeric_rules: Reglas de configuración para tipo numérico
+        :return: ¿Es un valor numérico válido según reglas?
         """
         if value is None:
             return False
         if isinstance(value, (int, float)):
+
+            # ■■■■■■■■■■■■■ Verificar reglas de valores permitidos ■■■■■■■■■■■■■
+            num_value = float(value)
+            if not numeric_rules.get('allow_negative', True) and num_value < 0:
+                return False
+            min_value = numeric_rules.get('min_value')
+            if min_value is not None and num_value < min_value:
+                return False
+            max_value = numeric_rules.get('max_value')
+            if max_value is not None and num_value > max_value:
+                return False
             return True
+
         if isinstance(value, str):
             try:
-                float(value)
+                num_value = float(value)
+
+                # ■■■■■■■■■■■■■ Verificar reglas de valores permitidos ■■■■■■■■■■■■■
+                if not numeric_rules.get('allow_negative', True) and num_value < 0:
+                    return False
+                min_value = numeric_rules.get('min_value')
+                if min_value is not None and num_value < min_value:
+                    return False
+                max_value = numeric_rules.get('max_value')
+                if max_value is not None and num_value > max_value:
+                    return False
                 return True
             except ValueError:
                 return False
         return False
 
     @staticmethod
-    def is_string_value(value: Any) -> bool:
+    def is_string_value(value: Any, text_rules: dict[str, Any]) -> bool:
         """
-        Verifica si un valor es una cadena valida (no vacia)
-        :param value:
-        :return: ¿Es una cadena valida?
+        Verifica si un valor es una cadena válida según reglas
+        :param value: Valor a evaluar
+        :param text_rules: Reglas de configuración para tipo texto
+        :return: ¿Es una cadena válida según reglas?
         """
         if value is None:
             return False
         if isinstance(value, str):
-            return len(value.strip()) > 0
+            str_value = str(value)
+
+            # ■■■■■■■■■■■■■ Verificar reglas de longitud ■■■■■■■■■■■■■
+            min_length = text_rules.get('min_length', 1)
+            if len(str_value) < min_length:
+                return False
+            max_length = text_rules.get('max_length')
+            if max_length is not None and len(str_value) > max_length:
+                return False
+
+            # ■■■■■■■■■■■■■ Verificar si permite cadenas vacias ■■■■■■■■■■■■■
+            if not text_rules.get('allow_empty_strings', False) and len(str_value.strip()) == 0:
+                return False
+            return len(str_value.strip()) > 0
+
         return False
 
     @staticmethod
-    def is_bool_value(value: Any) -> bool:
+    def is_bool_value(value: Any, boolean_rules: dict[str, Any]) -> bool:
         """
-        Verifica si un valor puede ser interpretado como booleano
-        :param value:
-        :return: ¿Es un valor booleano?
+        Verifica si un valor puede ser interpretado como booleano según reglas
+        :param value: Valor a evaluar
+        :param boolean_rules: Reglas de configuración para tipo booleano
+        :return: ¿Es un valor booleano válido según reglas?
         """
         if value is None:
             return False
@@ -67,34 +106,30 @@ class DataParser:
         if isinstance(value, str):
             lower_value = value.lower().strip()
 
-            # TODO: ▁▂▃▄▅▆▇███████ Interpretaciones aceptadas ███████▇▆▅▄▃▂▁
-            return (
-                    lower_value == "true" or lower_value == "false" or
-                    lower_value == "1" or lower_value == "0" or
-                    lower_value == "yes" or lower_value == "no" or
-                    lower_value == "on" or lower_value == "off"
-            )
+            # ■■■■■■■■■■■■■ Usar interpretaciones configuradas ■■■■■■■■■■■■■
+            supported_interpretations = boolean_rules.get('supported_interpretations',
+                                                          ['true', 'false', '1', '0', 'yes', 'no', 'on', 'off'])
+            return lower_value in supported_interpretations
 
         return False
 
     @staticmethod
-    def is_null_value(value: Any) -> bool:
+    def is_null_value(value: Any, null_rules: dict[str, Any]) -> bool:
         """
-        Verifica si un valor es nulo o representa un valor nulo
-        :param value:
-        :return: ¿Es un valor nulo?
+        Verifica si un valor es nulo o representa un valor nulo según reglas
+        :param value: Valor a evaluar
+        :param null_rules: Reglas de configuración para tipo nulo
+        :return: ¿Es un valor nulo según reglas?
         """
         if value is None:
             return True
         if isinstance(value, str):
             trimmed = value.lower().strip()
 
-            # TODO: ▁▂▃▄▅▆▇███████ Interpretaciones aceptadas ███████▇▆▅▄▃▂▁
-            return (
-                    trimmed == "" or trimmed == "null" or
-                    trimmed == "none" or trimmed == "na" or
-                    trimmed == "n/a" or trimmed == "<null>"
-            )
+            # ■■■■■■■■■■■■■ Usar interpretaciones configuradas ■■■■■■■■■■■■■
+            supported_interpretations = null_rules.get('supported_interpretations',
+                                                       ['', 'null', 'none', 'na', 'n/a', '<null>'])
+            return trimmed in supported_interpretations
 
         return False
 
@@ -156,7 +191,8 @@ class DataParser:
         return result
 
     @staticmethod
-    def filter_valid_rows(data: RowDataType, expected_columns: set[str], rules_config: Dict[str, Any] = None) -> RowDataType:
+    def filter_valid_rows(data: RowDataType, expected_columns: set[str],
+                          rules_config: Dict[str, Any] = None) -> RowDataType:
         """
         Filtra filas que contienen todas las columnas esperadas
         Opcionalmente, aplica reglas de calidad desde la configuracion
@@ -199,29 +235,30 @@ class DataParser:
 
         # ■■■■■■■■■■■■■ Validar reglas generales ■■■■■■■■■■■■■
         for row in data:
-            # Verificar porcentaje de nulos
+
+            # ▲▲▲▲▲▲ Verificar porcentaje de nulos ▲▲▲▲▲▲
             null_count = sum(1 for value in row.values() if DataParser.is_null_value(value))
             null_percentage = (null_count / len(row)) * 100 if len(row) > 0 else 0
-            
+
             max_null_percentage = general_rules.get('max_null_percentage', 50.0)
             if null_percentage > max_null_percentage:
                 return False
 
-            # Validar tipos de datos específicos
+            # ▲▲▲▲▲▲ Validar tipos de datos específicos ▲▲▲▲▲▲
             for column, value in row.items():
                 if DataParser.is_null_value(value):
                     continue
 
-                # Determinar tipo de dato y aplicar reglas
+                # ▲▲▲▲▲▲ Determinar tipo de dato y aplicar reglas ▲▲▲▲▲▲
                 if DataParser.is_numeric_value(value):
                     numeric_rules = data_type_rules.get('numeric', {})
                     if not numeric_rules.get('allow_negative', True) and float(value) < 0:
                         return False
-                    
+
                     min_value = numeric_rules.get('min_value')
                     if min_value is not None and float(value) < min_value:
                         return False
-                        
+
                     max_value = numeric_rules.get('max_value')
                     if max_value is not None and float(value) > max_value:
                         return False
@@ -229,11 +266,11 @@ class DataParser:
                 elif DataParser.is_string_value(value):
                     text_rules = data_type_rules.get('text', {})
                     str_value = str(value)
-                    
+
                     min_length = text_rules.get('min_length', 1)
                     if len(str_value) < min_length:
                         return False
-                        
+
                     max_length = text_rules.get('max_length')
                     if max_length is not None and len(str_value) > max_length:
                         return False
@@ -267,7 +304,7 @@ class DataParser:
             column = filter_rule.get('column')
             condition = filter_rule.get('condition')
             value = filter_rule.get('value')
-            
+
             if column and condition and value is not None:
                 if condition == 'equals':
                     datos_filtrados = [row for row in datos_filtrados if row.get(column) != value]
@@ -278,58 +315,61 @@ class DataParser:
                 elif condition == 'not_contains':
                     datos_filtrados = [row for row in datos_filtrados if value in str(row.get(column, ''))]
 
-        # ■■■■■■■■■■■■■ Nota: file_patterns_to_ignore se maneja a nivel de archivos, no de filas ■■■■■■■■■■■■■
+        # TODO: ■■■■■■■■■■■■■ Nota: file_patterns_to_ignore se maneja a nivel de archivos, no de filas ■■■■■■■■■■■■■
         # Este parámetro debe ser procesado antes de leer los datos del archivo
         # Ejemplo de uso: archivos que coincidan con patrones como "*_temp.csv", "test_*.csv", etc.
 
         return datos_filtrados
 
     @staticmethod
-    def aplicarTransformaciones(datos: List[Dict[str, Any]], transformaciones: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+    def transform_data(data: RowDataType, data_types_rules: Dict[str, Any]) -> RowDataType:
         """
-        Aplica reglas de transformación a los datos
-        :param datos: Datos a transformar
-        :param transformaciones: Lista de reglas de transformación
-        :return: Datos transformados
+        Transforma datos según tipos detectados por los métodos de validación
+        :param data: Datos a transformar
+        :return: Datos transformados con tipos consistentes
         """
-        if not transformaciones:
-            return datos
-
         datos_transformados = []
-        
-        for row in datos:
+
+        for row in data:
             row_transformed = row.copy()
-            
-            for transform in transformaciones:
-                column = transform.get('column')
-                operation = transform.get('operation')
-                params = transform.get('params', {})
-                
-                if column in row_transformed and operation:
-                    original_value = row_transformed[column]
-                    
+
+            for column, value in row_transformed.items():
+
+                # ■■■■■■■■■■■■■ Transformar a tipo númerico si es posible ■■■■■■■■■■■■■
+                if DataParser.is_numeric_value(value):
                     try:
-                        if operation == 'uppercase':
-                            row_transformed[column] = str(original_value).upper()
-                        elif operation == 'lowercase':
-                            row_transformed[column] = str(original_value).lower()
-                        elif operation == 'trim':
-                            row_transformed[column] = str(original_value).strip()
-                        elif operation == 'replace':
-                            old = params.get('old', '')
-                            new = params.get('new', '')
-                            row_transformed[column] = str(original_value).replace(old, new)
-                        elif operation == 'normalize_null':
-                            if DataParser.is_null_value(original_value):
-                                row_transformed[column] = None
-                        elif operation == 'round_numeric':
-                            if DataParser.is_numeric_value(original_value):
-                                decimals = params.get('decimals', 2)
-                                row_transformed[column] = round(float(original_value), decimals)
+
+                        # ▲▲▲▲▲▲ Convertir a float, luego a int si no tiene decimales ▲▲▲▲▲▲
+                        num_value = float(value)
+
+                        if num_value.is_integer():
+                            row_transformed[column] = int(num_value)
+                        else:
+                            row_transformed[column] = num_value
                     except (ValueError, TypeError):
-                        # Keep original value if transformation fails
+
+                        # ▲▲▲▲▲▲ Mantener original si falla conversion ▲▲▲▲▲▲
                         pass
-            
+
+                # TODO: ▲▲▲▲▲▲ Transformar a booleano si es posible ▲▲▲▲▲▲
+                elif DataParser.is_bool_value(value):
+                    if isinstance(value, bool):
+                        row_transformed[column] = value
+                    elif isinstance(value, str):
+                        lower_value = value.lower().strip()
+                        if lower_value in ["true", "1", "yes", "on"]:
+                            row_transformed[column] = True
+                        elif lower_value in ["false", "0", "no", "off"]:
+                            row_transformed[column] = False
+
+                # Normalizar valores nulos
+                elif DataParser.is_null_value(value):
+                    row_transformed[column] = None
+
+                # Mantener strings válidos como están
+                elif DataParser.is_string_value(value):
+                    row_transformed[column] = str(value).strip()
+
             datos_transformados.append(row_transformed)
-        
+
         return datos_transformados
