@@ -8,8 +8,8 @@ DESCRIPCIÓN: Proporciona función para contar valores nulos por columna
 """
 
 from typing import Any, Optional
-from src.utils.data_parser import DataParser
-from src.readers.quality_rules_reader import QualityRulesReader
+from utils.data_parser import DataParser
+from readers.quality_rules_reader import QualityRulesReader
 
 # ⋮⋮⋮⋮⋮⋮⋮⋮ ALIAS de estructura datos ⋮⋮⋮⋮⋮⋮⋮⋮
 RowDataType = list[dict[str, Any]]

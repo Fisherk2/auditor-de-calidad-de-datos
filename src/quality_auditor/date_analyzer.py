@@ -9,8 +9,8 @@ DESCRIPCIÓN: Proporciona funciones para verificar coherencia de fechas (ej: fec
 
 from typing import Any, Optional
 from datetime import datetime
-from src.utils.date_helper import DateHelper
-from src.readers.quality_rules_reader import QualityRulesReader
+from utils.date_helper import DateHelper
+from readers.quality_rules_reader import QualityRulesReader
 
 # ⋮⋮⋮⋮⋮⋮⋮⋮ ALIAS de estructura datos ⋮⋮⋮⋮⋮⋮⋮⋮
 RowDataType = list[dict[str, Any]]

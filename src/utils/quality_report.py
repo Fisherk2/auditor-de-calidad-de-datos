@@ -11,7 +11,7 @@ from datetime import datetime
 import json
 import os
 
-from src.quality_auditor.main_auditor import QualityAuditor
+from quality_auditor.main_auditor import QualityAuditor
 
 # ⋮⋮⋮⋮⋮⋮⋮⋮ ALIAS de estructura datos ⋮⋮⋮⋮⋮⋮⋮⋮
 RowDataType = list[dict[str, Any]]

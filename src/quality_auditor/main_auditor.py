@@ -10,12 +10,12 @@ import math
 from typing import Any, Optional
 from datetime import datetime
 
-from src.quality_auditor.null_analyzer import NullAnalyzer
-from src.quality_auditor.uniqueness_analyzer import UniquenessAnalyzer
-from src.quality_auditor.date_analyzer import DateAnalyzer
-from src.quality_auditor.statistical_analyzer import StatisticalAnalyzer
-from src.readers.quality_rules_reader import QualityRulesReader
-from src.utils.data_parser import DataParser
+from quality_auditor.null_analyzer import NullAnalyzer
+from quality_auditor.uniqueness_analyzer import UniquenessAnalyzer
+from quality_auditor.date_analyzer import DateAnalyzer
+from quality_auditor.statistical_analyzer import StatisticalAnalyzer
+from readers.quality_rules_reader import QualityRulesReader
+from utils.data_parser import DataParser
 
 # ⋮⋮⋮⋮⋮⋮⋮⋮ ALIAS de estructura datos ⋮⋮⋮⋮⋮⋮⋮⋮
 RowDataType = list[dict[str, Any]]
@@ -38,7 +38,7 @@ class QualityAuditor:
         # ■■■■■■■■■■■■■ Agregar timestamp del análisis ■■■■■■■■■■■■■
         results = dict()
         results["timestamp"] = datetime.now().isoformat()
-        results["total_rows"] = len(data) if data else 0
+        results["total_rows"] = len(data) if data is not None else 0
 
         # ■■■■■■■■■■■■■ Cargar configuración y aplicar exclusiones ■■■■■■■■■■■■■
         config = QualityAuditor._load_configuration(path_quality_rules)
@@ -46,9 +46,9 @@ class QualityAuditor:
 
         results["config_applied"] = {
             "path_quality_rules": path_quality_rules,
-            "exclusions_applied": len(data) != len(filtered_data),
-            "original_rows": len(data),
-            "filtered_rows": len(filtered_data)
+            "exclusions_applied": len(data) != len(filtered_data) if data is not None else False,
+            "original_rows": len(data) if data is not None else 0,
+            "filtered_rows": len(filtered_data) if filtered_data is not None else 0
         }
 
         # ■■■■■■■■■■■■■ Analisis de nulos con configuración ■■■■■■■■■■■■■
@@ -202,7 +202,7 @@ class QualityAuditor:
 
         # ■■■■■■■■■■■■■ Obtener informacion basica ■■■■■■■■■■■■■
         nulls_count = NullAnalyzer.count_nulls(data)
-        rows_total_count = len(data)
+        rows_total_count = len(data) if data is not None else 0
 
         # ■■■■■■■■■■■■■ Calcular metricas ■■■■■■■■■■■■■
         metrics["total_rows"] = rows_total_count
@@ -391,6 +391,9 @@ class QualityAuditor:
         if not exclude_columns and not exclude_values:
             return data
 
+        if data is None or not data:
+            return data
+        
         filtered_data = list()
 
         for row in data:

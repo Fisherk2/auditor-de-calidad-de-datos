@@ -8,7 +8,7 @@ DESCRIPCIÓN: Componente de bajo nivel que proporciona funciones auxiliares para
 """
 import datetime
 from typing import Optional, Any
-from src.readers.quality_rules_reader import QualityRulesReader
+from readers.quality_rules_reader import QualityRulesReader
 
 class DateHelper:
     """

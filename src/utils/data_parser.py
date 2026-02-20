@@ -342,6 +342,9 @@ class DataParser:
         :param data_types_rules: Reglas de configuración para tipos de datos
         :return: Datos transformados con tipos consistentes
         """
+        if data is None or not data:
+            return []
+        
         datos_transformados = []
 
         for row in data:

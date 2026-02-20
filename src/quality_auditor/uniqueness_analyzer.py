@@ -8,7 +8,7 @@ DESCRIPCIÓN: Proporciona funciones para calcular porcentaje de valores únicos 
 """
 from typing import Any, Optional
 from collections import Counter
-from src.readers.quality_rules_reader import QualityRulesReader
+from readers.quality_rules_reader import QualityRulesReader
 
 # ⋮⋮⋮⋮⋮⋮⋮⋮ ALIAS de estructura datos ⋮⋮⋮⋮⋮⋮⋮⋮
 RowDataType = list[dict[str, Any]]
