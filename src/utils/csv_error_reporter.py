@@ -7,7 +7,7 @@ DESCRIPCIÓN: Generador de mensajes de error consistentes para el validador de C
 ■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■
 """
 
-class ErrorReporter:
+class CSVErrorReporter:
     """
     Generador de mensajes de error consistentes para el validador CSV
     """

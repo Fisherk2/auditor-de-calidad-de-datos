@@ -13,7 +13,7 @@ from src.validators.csv_validator import CSVValidator
 from src.readers.csv_reader import CSVReader
 from src.validators.type_validator import TypeValidator
 from src.validators.schema_validator import SchemaValidator
-from src.utils.error_reporter import ErrorReporter
+from src.utils.csv_error_reporter import CSVErrorReporter
 
 # ⋮⋮⋮⋮⋮⋮⋮⋮ Declaración de módulos disponibles para importación ⋮⋮⋮⋮⋮⋮⋮⋮
 __all__ = [
@@ -21,5 +21,5 @@ __all__ = [
     'CSVReader',
     'TypeValidator',
     'SchemaValidator',
-    'ErrorReporter'
+    'CSVErrorReporter'
 ]

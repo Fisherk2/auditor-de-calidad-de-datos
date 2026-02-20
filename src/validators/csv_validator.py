@@ -11,7 +11,7 @@ from typing import Any
 from src.readers.csv_reader import CSVReader
 from src.validators.type_validator import TypeValidator
 from src.validators.schema_validator import SchemaValidator
-from src.utils.error_reporter import ErrorReporter
+from src.utils.csv_error_reporter import CSVErrorReporter
 
 
 class CSVValidator:
@@ -26,7 +26,7 @@ class CSVValidator:
         self.csv_reader = CSVReader()
         self.type_validator = TypeValidator()
         self.schema_validator = SchemaValidator()
-        self.error_reporter = ErrorReporter()
+        self.error_reporter = CSVErrorReporter()
 
     def validate_file(self, filepath: str, schema: SchemaDefinition) -> list[str]:
         """
