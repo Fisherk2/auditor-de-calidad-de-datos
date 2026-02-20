@@ -582,6 +582,7 @@ class TestQualityAuditor:
             print(f"⚠️  {total - passed} tests failed. Please review the issues above.")
             return False
 
+# ▣▢▣▢▣▢▣▢▣▢▣▢▣▢▣▢▣▢▣▢▣▢▣▢▣  SUT ▣▢▣▢▣▢▣▢▣▢▣▢▣▢▣▢▣▢▣▢▣▢▣▢▣
 
 if __name__ == "__main__":
     success = TestQualityAuditor.run_all_tests()

@@ -1,0 +1,312 @@
+# 🮙🮘🮙🮘🮙🮙🮘🮙🮘🮙🮙🮘🮙🮘🮙🮙🮘🮙🮘🮙 PIPELINE DE PROCESAMIENTO DE DATOS INTEGRADO 🮙🮘🮙🮘🮙🮙🮘🮙🮘🮙🮙🮘🮙🮘🮙🮙🮘🮙🮘🮙
+#
+# Este archivo define un flujo de trabajo completo que combina validación de esquema
+# y auditoría de calidad de datos. Sirve como plantilla para pipelines de datos
+# que integran ambos sistemas del proyecto.
+#
+# Uso:
+#   python -c "from src import PipelineExecutor; PipelineExecutor.run('pipeline.yaml')"
+#
+# Autor: Fisherk2
+# Fecha: 2026-02-20
+# Versión: 1.1.0
+#
+# ■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■
+# METADATOS DEL PIPELINE
+# ■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■
+metadata:
+  name: "Pipeline Integrado de Validación y Auditoría"
+  description: "Flujo completo que valida esquema CSV y audita calidad de datos"
+  author: "Fisherk2"
+  created_date: "2026-02-20"
+  version: "1.1.0"
+  tags: ["validation", "quality", "csv", "pipeline"]
+
+# ■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■
+# VARIABLES GLOBALES Y PARÁMETROS
+# ■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■
+variables:
+  # Rutas base que pueden ser reutilizadas en el pipeline
+  base_input_dir: "data/input"
+  base_output_dir: "data/output"
+  base_schemas_dir: "schemas"
+  
+  # Parámetros de procesamiento
+  strict_mode: true
+  max_error_percentage: 5.0
+  date_format: "%Y-%m-%d"
+  
+  # Nombres de archivos por defecto
+  default_input_file: "sample_data.csv"
+  default_schema_file: "default_schema.yaml"
+  default_quality_rules_file: "quality_rules.yaml"
+
+# ■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■
+# CONFIGURACIÓN DE ENTRADA DE DATOS
+# ■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■
+input:
+  # Fuente principal de datos
+  primary_source:
+    type: "csv"
+    path: "${base_input_dir}/${default_input_file}"
+    encoding: "utf-8"
+    delimiter: ","
+    has_headers: true
+    
+  # Fuentes adicionales (opcional)
+  additional_sources:
+    # - type: "csv"
+    #   path: "data/input/secondary_data.csv"
+    #   description: "Datos complementarios para validación cruzada"
+    
+  # Configuración de lectura
+  reader_config:
+    skip_empty_rows: true
+    trim_whitespace: true
+    handle_quotes: true
+
+# ■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■
+# CONFIGURACIÓN DE VALIDACIÓN DE ESQUEMA
+# ■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■
+validation:
+  enabled: true
+  execution_order: 1  # Primero en el pipeline
+  
+  # Ruta al archivo de esquema o reglas definidas directamente
+  schema_config:
+    # Opción 1: Usar archivo de esquema
+    schema_path: "${base_schemas_dir}/${default_schema_file}"
+    
+    # Opción 2: Definir reglas directamente (alternativa a schema_path)
+    # schema_rules:
+    #   required_fields: ["id", "name", "email"]
+    #   field_types:
+    #     id: "integer"
+    #     name: "string"
+    #     email: "email"
+    #   field_constraints:
+    #     id: {"min": 1, "max": 999999}
+    #     name: {"min_length": 2, "max_length": 50}
+    #     email: {"pattern": "^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$"}
+  
+  # Configuración de validación
+  validation_config:
+    strict_mode: "${strict_mode}"
+    stop_on_first_error: false
+    collect_all_errors: true
+    max_errors_before_stop: 100
+    
+  # Reporte de errores de validación
+  error_reporting:
+    enabled: true
+    output_path: "${base_output_dir}/validation_errors.txt"
+    format: "detailed"  # options: "summary", "detailed", "json"
+    include_line_numbers: true
+
+# ■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■
+# CONFIGURACIÓN DE AUDITORÍA DE CALIDAD
+# ■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■
+quality_audit:
+  enabled: true
+  execution_order: 2  # Segundo en el pipeline
+  
+  # Ruta al archivo de reglas de calidad o reglas definidas directamente
+  rules_config:
+    # Opción 1: Usar archivo de reglas de calidad
+    rules_path: "${base_schemas_dir}/${default_quality_rules_file}"
+    
+    # Opción 2: Definir reglas directamente (alternativa a rules_path)
+    # quality_rules:
+    #   data_types:
+    #     numeric:
+    #       type: "number"
+    #       allow_decimals: true
+    #     text:
+    #       type: "string"
+    #       max_length: 255
+    #     date:
+    #       type: "date"
+    #       format: "${date_format}"
+    #   null_rules:
+    #     null_values: ["", "NULL", "N/A", "null", "None"]
+    #   general_rules:
+    #     min_uniqueness_percentage: 5.0
+    #     max_uniqueness_percentage: 95.0
+    #   exclusion_rules:
+    #     exclude_columns: ["temp_field", "internal_id"]
+    #     exclude_values:
+    #       status: ["DELETED", "ARCHIVED"]
+  
+  # Configuración de análisis
+  analysis_config:
+    include_null_analysis: true
+    include_uniqueness_analysis: true
+    include_statistical_analysis: true
+    include_date_analysis: true
+    include_text_analysis: true
+    
+  # Umbrales para alertas
+  alert_thresholds:
+    null_percentage:
+      warning: 10.0
+      critical: 25.0
+    uniqueness_percentage:
+      warning: 20.0
+      critical: 5.0
+    statistical_outliers:
+      warning: 2.0  # desviaciones estándar
+      critical: 3.0
+
+# ■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■
+# CONFIGURACIÓN DE PROCESAMIENTO (PRE/POST)
+# ■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■
+processing:
+  enabled: true
+  
+  # Pre-procesamiento antes de validación/auditoría
+  preprocessing:
+    # Transformación de tipos de datos
+    data_transformation:
+      enabled: true
+      apply_before_validation: true
+      rules_from_quality_config: true  # Usar mismas reglas que quality_audit
+      
+    # Limpieza de datos
+    data_cleaning:
+      enabled: true
+      steps:
+        - name: "remove_duplicates"
+          config: {"subset": ["id"], "keep": "first"}
+        - name: "standardize_text"
+          config: {"case": "lower", "trim": true}
+        - name: "normalize_dates"
+          config: {"target_format": "${date_format}"}
+    
+    # Filtrado de datos
+    filtering:
+      enabled: false
+      # rules:
+      #   - field: "status"
+      #     operator: "not_in"
+      #     values: ["DELETED", "ARCHIVED"]
+  
+  # Post-procesamiento después de validación/auditoría
+  postprocessing:
+    enabled: false
+    # steps:
+    #   - name: "enrich_data"
+    #     config: {"source": "external_api"}
+
+# ■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■
+# CONFIGURACIÓN DE SALIDA
+# ■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■
+output:
+  # Directorios base
+  base_dir: "${base_output_dir}"
+  
+  # Resultados de validación
+  validation_results:
+    enabled: true
+    formats: ["json", "txt"]
+    files:
+      summary: "validation_summary.json"
+      detailed_errors: "validation_errors.txt"
+      error_report: "validation_error_report.csv"
+  
+  # Resultados de auditoría de calidad
+  quality_results:
+    enabled: true
+    formats: ["json", "txt", "html"]
+    files:
+      summary: "quality_summary.json"
+      detailed: "quality_detailed.txt"
+      alerts: "quality_alerts.txt"
+      report: "quality_report.html"
+  
+  # Dataset procesado
+  processed_data:
+    enabled: true
+    formats: ["csv", "parquet"]  # parquet opcional si está disponible
+    files:
+      cleaned: "processed_data.csv"
+      with_metadata: "processed_with_metadata.csv"
+  
+  # Configuración de archivos de salida
+  output_config:
+    include_timestamp: true
+    timestamp_format: "%Y%m%d_%H%M%S"
+    overwrite_existing: false
+    create_directories: true
+    compression: "none"  # options: "none", "gzip", "zip"
+
+# ■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■
+# CONFIGURACIÓN DE EJECUCIÓN
+# ■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■
+execution:
+  # Orden de ejecución de los componentes principales
+  pipeline_order:
+    - "preprocessing"
+    - "validation"
+    - "quality_audit"
+    - "postprocessing"
+    - "output"
+  
+  # Configuración de ejecución
+  execution_config:
+    strict_mode: "${strict_mode}"
+    continue_on_error: false
+    log_level: "INFO"  # options: "DEBUG", "INFO", "WARNING", "ERROR"
+    parallel_processing: false
+    
+  # Manejo de errores
+  error_handling:
+    max_retries: 3
+    retry_delay: 1.0  # segundos
+    fail_fast_on_validation_errors: false
+    fail_fast_on_quality_critical: true
+    
+  # Logging y monitoreo
+  logging:
+    enabled: true
+    log_file: "${base_output_dir}/pipeline_execution.log"
+    log_format: "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+    include_performance_metrics: true
+
+# ■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■
+# EJEMPLOS DE CONFIGURACIONES ADICIONALES
+# ■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■
+
+# Ejemplo de configuración para múltiples fuentes de datos
+# multiple_sources_example:
+#   input:
+#     sources:
+#       - name: "primary_data"
+#         path: "data/input/primary.csv"
+#         type: "csv"
+#       - name: "secondary_data"
+#         path: "data/input/secondary.csv"
+#         type: "csv"
+#     merge_strategy: "concat"  # options: "concat", "join", "union"
+
+# Ejemplo de configuración para diferentes entornos
+# environment_configs:
+#   development:
+#     strict_mode: false
+#     log_level: "DEBUG"
+#     max_error_percentage: 10.0
+#   production:
+#     strict_mode: true
+#     log_level: "ERROR"
+#     max_error_percentage: 1.0
+#   testing:
+#     strict_mode: true
+#     log_level: "INFO"
+#     max_error_percentage: 5.0
+
+# ◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤ ⎡ NOTAS ADICIONALES ⎦ ◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤
+#
+# 1. Las variables definidas en la sección 'variables' pueden ser referenciadas usando ${variable_name}
+# 2. Los paths pueden ser relativos al directorio raíz del proyecto o absolutos
+# 3. Los formatos de salida soportados dependen de los componentes disponibles
+# 4. Para ejecutar el pipeline: python -c "from src import PipelineExecutor; PipelineExecutor.run('pipeline.yaml')"
+# 5. El pipeline es extensible y puede incluir pasos personalizados adicionales
