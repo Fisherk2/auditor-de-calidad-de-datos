@@ -69,7 +69,7 @@ class QualityRulesReader:
         """
         Obtiene reglas específicas por tipo de dato
         :param config: Configuración completa
-        :param tipo: Tipo de dato (null, numeric, text, date)
+        :param tipo: Tipo de dato en específico (null, numeric, text, date)
         :return: Diccionario con reglas para el tipo especificado
         """
         if not config or 'quality_rules' not in config:
@@ -163,10 +163,12 @@ class QualityRulesReader:
         
         return True
 
+    # TODO:◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤ ⎡ Advertencia ⎦ ◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤
+
     @staticmethod
     def apply_default_rules() -> dict[str, Any]:
         """
-        TODO: Devuelve configuración por defecto si falla la lectura (Puede sufrir cambios)
+        Devuelve configuración por defecto si falla la lectura (Puede sufrir cambios)
         :return: Configuración por defecto
         """
         return {

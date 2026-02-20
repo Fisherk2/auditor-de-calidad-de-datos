@@ -174,6 +174,8 @@ class DataParser:
 
         return column_index
 
+    # ▏▎▍▌▋▊▉▉▉▉▉▉▉▉ TODO: Eliminar funciones que validen esquemas ▉▉▉▉▉▉▉▉▉▊▋▌▍▎▏
+
     @staticmethod
     def validate_row_structure(row: dict[str, Any], expected_columns: set[str]) -> dict[str, Any]:
         """
