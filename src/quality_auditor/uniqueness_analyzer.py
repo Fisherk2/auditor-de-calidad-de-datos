@@ -90,51 +90,6 @@ class UniquenessAnalyzer:
         return unique_result
 
     @staticmethod
-    def _get_uniqueness_thresholds(path_quality_rules: Optional[str]) -> dict[str, float]:
-        """
-        Obtiene los umbrales de unicidad desde configuración o valores por defecto
-        :param path_quality_rules: Ruta opcional al archivo YAML de configuración
-        :return: Diccionario con umbrales min y max
-        """
-        if path_quality_rules:
-            try:
-                config = QualityRulesReader.load_configs(path_quality_rules)
-                general_rules = QualityRulesReader.get_general_rules(config)
-                return {
-                    'min_uniqueness_percentage': general_rules.get('min_uniqueness_percentage', 5.0),
-                    'max_uniqueness_percentage': general_rules.get('max_uniqueness_percentage', 95.0)
-                }
-            except (FileNotFoundError, ValueError, Exception):
-                # ■■■■■■■■■■■■■ Si hay error, usar valores por defecto ■■■■■■■■■■■■■
-                pass
-        
-        # ■■■■■■■■■■■■■ Valores por defecto si no hay configuración ■■■■■■■■■■■■■
-        default_config = QualityRulesReader.apply_default_rules()
-        general_rules = QualityRulesReader.get_general_rules(default_config)
-        return {
-            'min_uniqueness_percentage': general_rules.get('min_uniqueness_percentage', 5.0),
-            'max_uniqueness_percentage': general_rules.get('max_uniqueness_percentage', 95.0)
-        }
-
-    @staticmethod
-    def _classify_uniqueness(percentage: float, thresholds: dict[str, float]) -> str:
-        """
-        Clasifica el porcentaje de unicidad según umbrales
-        :param percentage: Porcentaje de unicidad
-        :param thresholds: Umbrales min y max
-        :return: Clasificación: 'baja', 'normal', o 'alta'
-        """
-        min_threshold = thresholds.get('min_uniqueness_percentage', 5.0)
-        max_threshold = thresholds.get('max_uniqueness_percentage', 95.0)
-        
-        if percentage < min_threshold:
-            return 'baja'
-        elif percentage > max_threshold:
-            return 'alta'
-        else:
-            return 'normal'
-
-    @staticmethod
     def get_unique_details(datos: RowDataType) -> MetricValuesType:
         """
         Obtiene detalles adicionales sobre unicidad: conteo de únicos, duplicados y total por columna
@@ -187,3 +142,48 @@ class UniquenessAnalyzer:
             details[column]["porcentajeUnicidad"] = round((uniques / total) * 100.0, 2)
 
         return details
+
+    @staticmethod
+    def _get_uniqueness_thresholds(path_quality_rules: Optional[str]) -> dict[str, float]:
+        """
+        Obtiene los umbrales de unicidad desde configuración o valores por defecto
+        :param path_quality_rules: Ruta opcional al archivo YAML de configuración
+        :return: Diccionario con umbrales min y max
+        """
+        if path_quality_rules:
+            try:
+                config = QualityRulesReader.load_configs(path_quality_rules)
+                general_rules = QualityRulesReader.get_general_rules(config)
+                return {
+                    'min_uniqueness_percentage': general_rules.get('min_uniqueness_percentage', 5.0),
+                    'max_uniqueness_percentage': general_rules.get('max_uniqueness_percentage', 95.0)
+                }
+            except (FileNotFoundError, ValueError, Exception):
+                # ■■■■■■■■■■■■■ Si hay error, usar valores por defecto ■■■■■■■■■■■■■
+                pass
+
+        # ■■■■■■■■■■■■■ Valores por defecto si no hay configuración ■■■■■■■■■■■■■
+        default_config = QualityRulesReader.apply_default_rules()
+        general_rules = QualityRulesReader.get_general_rules(default_config)
+        return {
+            'min_uniqueness_percentage': general_rules.get('min_uniqueness_percentage', 5.0),
+            'max_uniqueness_percentage': general_rules.get('max_uniqueness_percentage', 95.0)
+        }
+
+    @staticmethod
+    def _classify_uniqueness(percentage: float, thresholds: dict[str, float]) -> str:
+        """
+        Clasifica el porcentaje de unicidad según umbrales
+        :param percentage: Porcentaje de unicidad
+        :param thresholds: Umbrales min y max
+        :return: Clasificación: 'baja', 'normal', o 'alta'
+        """
+        min_threshold = thresholds.get('min_uniqueness_percentage', 5.0)
+        max_threshold = thresholds.get('max_uniqueness_percentage', 95.0)
+
+        if percentage < min_threshold:
+            return 'baja'
+        elif percentage > max_threshold:
+            return 'alta'
+        else:
+            return 'normal'

@@ -23,7 +23,7 @@ class StatisticalAnalyzer:
     """
 
     @staticmethod
-    def summary_stadistic_with_config(data: RowDataType, path_quality_rules: Optional[str] = None) -> dict[str, Any]:
+    def summary_stadistic(data: RowDataType, path_quality_rules: Optional[str] = None) -> dict[str, Any]:
         """
         Calcula metricas estadisticas basicas para columnas numericas usando configuración
         :param data: Lista de diccionarios representando filas de datos
@@ -39,7 +39,7 @@ class StatisticalAnalyzer:
         min_value = numeric_rules.get('min_value')
         max_value = numeric_rules.get('max_value')
         allow_negative = numeric_rules.get('allow_negative', True)
-        
+
         # ■■■■■■■■■■■■ Guardar reglas aplicadas ■■■■■■■■■■■■■
         rules_applied = {
             "precision": precision,
@@ -68,13 +68,14 @@ class StatisticalAnalyzer:
                     if DataParser.is_numeric_value(value, numeric_rules):
                         numeric_value = float(value)
                         numeric_values.append(numeric_value)
-                        
+
                         # ▲▲▲▲▲▲ Verificar si está fuera de rango ▲▲▲▲▲▲
                         if StatisticalAnalyzer._is_out_of_range(numeric_value, min_value, max_value):
                             out_of_range_values.append({
                                 "row_index": data.index(row),
                                 "value": numeric_value,
-                                "reason": StatisticalAnalyzer._get_out_of_range_reason(numeric_value, min_value, max_value)
+                                "reason": StatisticalAnalyzer._get_out_of_range_reason(numeric_value, min_value,
+                                                                                       max_value)
                             })
 
             # ▁▂▃▄▅▆▇███████ Calculo de estadisticos ███████▇▆▅▄▃▂▁
@@ -117,92 +118,21 @@ class StatisticalAnalyzer:
                 stadistics["sum"] = round(suma, precision)
                 stadistics["count"] = count
                 stadistics["standard_deviation"] = round(standard_deviation, precision)
-                
+
                 # ▲▲▲▲▲▲ Agregar información adicional ▲▲▲▲▲▲
                 stadistics["has_negatives"] = any(num < 0 for num in numeric_values)
                 stadistics["negative_count"] = sum(1 for num in numeric_values if num < 0)
 
                 results[column] = stadistics
-                
+
                 if out_of_range_values:
                     out_of_range[column] = out_of_range_values
 
         return {
-            "statistics": results, 
-            "out_of_range": out_of_range, 
+            "statistics": results,
+            "out_of_range": out_of_range,
             "rules_applied": rules_applied
         }
-
-    @staticmethod
-    def _get_numeric_rules(path_quality_rules: Optional[str]) -> dict[str, Any]:
-        """
-        Obtiene las reglas de números desde configuración o valores por defecto
-        :param path_quality_rules: Ruta opcional al archivo YAML de configuración
-        :return: Diccionario con reglas de números
-        """
-        if path_quality_rules:
-            try:
-                config = QualityRulesReader.load_configs(path_quality_rules)
-                return QualityRulesReader.get_data_type_rules(config, 'numeric')
-            except (FileNotFoundError, ValueError, Exception):
-
-                # ■■■■■■■■■■■■■ Si hay error, usar valores por defecto ■■■■■■■■■■■■■
-                pass
-        
-        # ■■■■■■■■■■■■■ Valores por defecto si no hay configuración ■■■■■■■■■■■■■
-        default_config = QualityRulesReader.apply_default_rules()
-        return QualityRulesReader.get_data_type_rules(default_config, 'numeric')
-
-    @staticmethod
-    def _is_out_of_range(value: float, min_value: Optional[float], max_value: Optional[float]) -> bool:
-        """
-        Verifica si un valor está fuera del rango configurado
-        :param value: Valor a verificar
-        :param min_value: Valor mínimo permitido
-        :param max_value: Valor máximo permitido
-        :return: ¿Está fuera de rango?
-        """
-        if min_value is not None and value < min_value:
-            return True
-        if max_value is not None and value > max_value:
-            return True
-        return False
-
-    @staticmethod
-    def _get_out_of_range_reason(value: float, min_value: Optional[float], max_value: Optional[float]) -> str:
-        """
-        Determina la razón por la que un valor está fuera de rango
-        :param value: Valor fuera de rango
-        :param min_value: Valor mínimo permitido
-        :param max_value: Valor máximo permitido
-        :return: Razón del error
-        """
-        if min_value is not None and value < min_value:
-            return f"below minimum ({min_value})"
-        if max_value is not None and value > max_value:
-            return f"above maximum ({max_value})"
-        return "unknown"
-
-    @staticmethod
-    def _get_all_data_type_rules(path_quality_rules: Optional[str] = None) -> dict[str, dict[str, Any]]:
-        """
-        Obtiene todas las reglas de tipos de datos desde configuración o valores por defecto
-        :param path_quality_rules: Ruta opcional al archivo YAML de configuración
-        :return: Diccionario con reglas para cada tipo de dato
-        """
-        if path_quality_rules:
-            try:
-                config = QualityRulesReader.load_configs(path_quality_rules)
-                data_type_rules = config.get('quality_rules', {}).get('data_type_rules', {})
-                return data_type_rules
-            except (FileNotFoundError, ValueError, Exception):
-
-                # ■■■■■■■■■■■■■ Si hay error, usar valores por defecto ■■■■■■■■■■■■■
-                pass
-        
-        # ■■■■■■■■■■■■■ Valores por defecto si no hay configuración ■■■■■■■■■■■■■
-        default_config = QualityRulesReader.apply_default_rules()
-        return default_config.get('quality_rules', {}).get('data_type_rules', {})
 
     @staticmethod
     def count_by_type(data: RowDataType, path_quality_rules: Optional[str] = None) -> dict[str, int]:
@@ -302,3 +232,74 @@ class StatisticalAnalyzer:
                 numerics_values[column] = numeric_list
 
         return numerics_values
+
+    @staticmethod
+    def _get_numeric_rules(path_quality_rules: Optional[str]) -> dict[str, Any]:
+        """
+        Obtiene las reglas de números desde configuración o valores por defecto
+        :param path_quality_rules: Ruta opcional al archivo YAML de configuración
+        :return: Diccionario con reglas de números
+        """
+        if path_quality_rules:
+            try:
+                config = QualityRulesReader.load_configs(path_quality_rules)
+                return QualityRulesReader.get_data_type_rules(config, 'numeric')
+            except (FileNotFoundError, ValueError, Exception):
+
+                # ■■■■■■■■■■■■■ Si hay error, usar valores por defecto ■■■■■■■■■■■■■
+                pass
+
+        # ■■■■■■■■■■■■■ Valores por defecto si no hay configuración ■■■■■■■■■■■■■
+        default_config = QualityRulesReader.apply_default_rules()
+        return QualityRulesReader.get_data_type_rules(default_config, 'numeric')
+
+    @staticmethod
+    def _is_out_of_range(value: float, min_value: Optional[float], max_value: Optional[float]) -> bool:
+        """
+        Verifica si un valor está fuera del rango configurado
+        :param value: Valor a verificar
+        :param min_value: Valor mínimo permitido
+        :param max_value: Valor máximo permitido
+        :return: ¿Está fuera de rango?
+        """
+        if min_value is not None and value < min_value:
+            return True
+        if max_value is not None and value > max_value:
+            return True
+        return False
+
+    @staticmethod
+    def _get_out_of_range_reason(value: float, min_value: Optional[float], max_value: Optional[float]) -> str:
+        """
+        Determina la razón por la que un valor está fuera de rango
+        :param value: Valor fuera de rango
+        :param min_value: Valor mínimo permitido
+        :param max_value: Valor máximo permitido
+        :return: Razón del error
+        """
+        if min_value is not None and value < min_value:
+            return f"below minimum ({min_value})"
+        if max_value is not None and value > max_value:
+            return f"above maximum ({max_value})"
+        return "unknown"
+
+    @staticmethod
+    def _get_all_data_type_rules(path_quality_rules: Optional[str] = None) -> dict[str, dict[str, Any]]:
+        """
+        Obtiene todas las reglas de tipos de datos desde configuración o valores por defecto
+        :param path_quality_rules: Ruta opcional al archivo YAML de configuración
+        :return: Diccionario con reglas para cada tipo de dato
+        """
+        if path_quality_rules:
+            try:
+                config = QualityRulesReader.load_configs(path_quality_rules)
+                data_type_rules = config.get('quality_rules', {}).get('data_type_rules', {})
+                return data_type_rules
+            except (FileNotFoundError, ValueError, Exception):
+
+                # ■■■■■■■■■■■■■ Si hay error, usar valores por defecto ■■■■■■■■■■■■■
+                pass
+
+        # ■■■■■■■■■■■■■ Valores por defecto si no hay configuración ■■■■■■■■■■■■■
+        default_config = QualityRulesReader.apply_default_rules()
+        return default_config.get('quality_rules', {}).get('data_type_rules', {})
