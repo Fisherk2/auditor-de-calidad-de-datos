@@ -46,10 +46,9 @@ class DateHelper:
     @staticmethod
     def is_future_date(date: datetime.datetime) -> bool:
         """
-        Verifica si una fecha es futura según configuración
+        Verifica si una fecha es futura
         :param date: Fecha a evaluar
-        :param path_quality_rules: Ruta opcional al archivo YAML de configuración
-        :return: ¿Es fecha futura y está permitida?
+        :return: ¿Es fecha futura?
         """
         current_date = datetime.datetime.now()
         return date > current_date

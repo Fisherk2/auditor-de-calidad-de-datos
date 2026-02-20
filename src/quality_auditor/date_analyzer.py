@@ -2,7 +2,7 @@
 ■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■
 MÓDULO:      Análisis de fechas
 AUTOR:       Fisherk2
-FECHA:       2026-02-17
+FECHA:       2026-02-19
 DESCRIPCIÓN: Proporciona funciones para verificar coherencia de fechas (ej: fecha_nacimiento > fecha_actual)
 ■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■
 """
@@ -10,6 +10,7 @@ DESCRIPCIÓN: Proporciona funciones para verificar coherencia de fechas (ej: fec
 from typing import Any, Optional
 from datetime import datetime
 from src.utils.date_helper import DateHelper
+from src.readers.quality_rules_reader import QualityRulesReader
 
 # ⋮⋮⋮⋮⋮⋮⋮⋮ ALIAS de estructura datos ⋮⋮⋮⋮⋮⋮⋮⋮
 RowDataType = list[dict[str, Any]]
@@ -21,24 +22,53 @@ class DateAnalyzer:
     """
 
     @staticmethod
-    def check_date_coherence(datos: RowDataType, birth_column_name: str) -> list[str]:
+    def check_date_coherence(datos: RowDataType, birth_column_name: str, path_quality_rules: Optional[str] = None) -> dict[str, Any]:
         """
-        Verifica la coherencia de fechas comparando contra la fecha actual
-        Detecta fechas de nacimiento futuras o fechas imposibles
+        Verifica la coherencia de fechas usando configuración
+        Detecta fechas de nacimiento futuras o fechas imposibles según reglas configuradas
         :param datos: Lista de diccionarios representando filas de datos
         :param birth_column_name: Nombre de la columna que contiene fechas de nacimiento
-        :return: Lista de mensajes de error indicando inconsistencias encontradas
+        :param path_quality_rules: Ruta opcional al archivo YAML de configuración
+        :return: Diccionario con errores y reglas aplicadas
         """
         if datos is None or not datos:
-            return list()
+            return {"errors": [], "rules_applied": {}}
 
         errors = list()
+        rules_applied = dict()
 
         if birth_column_name is None or not birth_column_name.strip():
             errors.append("Error en encabezado: Nombre de columna de fecha inválido o vacío")
-            return errors
+            return {"errors": errors, "rules_applied": rules_applied}
 
-        supported_formats = DateHelper.get_supported_formats()
+        # ■■■■■■■■■■■■ Cargar configuración de fechas ■■■■■■■■■■■■■
+        date_rules = DateAnalyzer._get_date_rules(path_quality_rules)
+        supported_formats = date_rules.get('supported_formats', ["%Y-%m-%d"])
+        allow_future = date_rules.get('allow_future_dates', False)
+        min_date_str = date_rules.get('min_date')
+        max_date_str = date_rules.get('max_date')
+        
+        # ■■■■■■■■■■■■ Guardar reglas aplicadas ■■■■■■■■■■■■■
+        rules_applied["supported_formats"] = supported_formats
+        rules_applied["allow_future_dates"] = allow_future
+        rules_applied["min_date"] = min_date_str
+        rules_applied["max_date"] = max_date_str
+
+        # ■■■■■■■■■■■■ Parsear fechas de rango si existen ■■■■■■■■■■■■■
+        min_date = None
+        max_date = None
+        
+        if min_date_str:
+            try:
+                min_date = datetime.strptime(min_date_str, '%Y-%m-%d')
+            except ValueError:
+                errors.append(f"Advertencia: Fecha mínima inválida en configuración: {min_date_str}")
+        
+        if max_date_str:
+            try:
+                max_date = datetime.strptime(max_date_str, '%Y-%m-%d')
+            except ValueError:
+                errors.append(f"Advertencia: Fecha máxima inválida en configuración: {max_date_str}")
 
         for i in range(len(datos)):
             row = datos[i]
@@ -73,9 +103,10 @@ class DateAnalyzer:
             if date_parsed is None:
                 errors.append(f"Fila {i + 1}: Fecha invalida en columna '{birth_column_name}': {date}")
 
-            # ■■■■■■■■■■■■■ Verificar si la fecha es futura ■■■■■■■■■■■■■
+            # ■■■■■■■■■■■■■ Verificar reglas adicionales ■■■■■■■■■■■■■
             else:
-                if DateHelper.is_future_date(date_parsed):
+                # ▲▲▲▲▲ Verificar si la fecha es futura ▲▲▲▲▲▲
+                if not allow_future and DateHelper.is_date_before(datetime.now(), date_parsed):
                     mensaje = f"""
                     Fila {i + 1}: 
                     Fecha futura en columna '{birth_column_name}': {DateHelper.format_date(date_parsed, "%Y-%m-%d")} 
@@ -83,7 +114,43 @@ class DateAnalyzer:
                     """
                     errors.append(mensaje)
 
-        return errors
+                # ▲▲▲▲▲ Verificar rango minimo ▲▲▲▲▲▲
+                if min_date is not None and DateHelper.is_date_before(date_parsed, min_date):
+                    message = f"""
+                    Fila {i + 1}: Fecha fuera de rango minimo en '{birth_column_name}': {DateHelper.format_date(date_parsed, "%Y-%m-%d")}
+                    (minimo permitido: {DateHelper.format_date(min_date, "%Y-%m-%d")})
+                    """
+                    errors.append(message)
+
+                # ▲▲▲▲▲ Verificar rango maximo ▲▲▲▲▲▲
+                if max_date is not None and DateHelper.is_date_before(max_date, date_parsed):
+                    message = f"""
+                    Fila {i + 1}: Fecha fuera de rango maximo en '{birth_column_name}': {DateHelper.format_date(date_parsed, "%Y-%m-%d")}
+                    (maximo permitido: {DateHelper.format_date(max_date, "%Y-%m-%d")})
+                    """
+                    errors.append(message)
+
+        return {"errors": errors, "rules_applied": rules_applied}
+
+    @staticmethod
+    def _get_date_rules(path_quality_rules: Optional[str]) -> dict[str, Any]:
+        """
+        Obtiene las reglas de fechas desde configuración o valores por defecto
+        :param path_quality_rules: Ruta opcional al archivo YAML de configuración
+        :return: Diccionario con reglas de fechas
+        """
+        if path_quality_rules:
+            try:
+                config = QualityRulesReader.load_configs(path_quality_rules)
+                return QualityRulesReader.get_data_type_rules(config, 'date')
+            except (FileNotFoundError, ValueError, Exception):
+
+                # ■■■■■■■■■■■■■ Si hay error, usar valores por defecto ■■■■■■■■■■■■■
+                pass
+        
+        # ■■■■■■■■■■■■■ Valores por defecto si no hay configuración ■■■■■■■■■■■■■
+        default_config = QualityRulesReader.apply_default_rules()
+        return QualityRulesReader.get_data_type_rules(default_config, 'date')
 
     @staticmethod
     def check_date_range(

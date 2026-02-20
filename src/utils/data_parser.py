@@ -212,7 +212,7 @@ class DataParser:
 
                 # ■■■■■■■■■■■■■ Aplicar reglas de calidad (OPCIONAL) ■■■■■■■■■■■■■
                 if rules_config:
-                    if DataParser.is_quality_rules_ready([row], rules_config):
+                    if DataParser.check_quality_rules([row], rules_config):
                         valid_rows.append(row)
                 else:
                     valid_rows.append(row)
@@ -220,7 +220,7 @@ class DataParser:
         return valid_rows
 
     @staticmethod
-    def is_quality_rules_ready(data: RowDataType, rules_config: dict[str, Any]) -> bool:
+    def check_quality_rules(data: RowDataType, rules_config: dict[str, Any]) -> bool:
         """
         Aplica reglas de validación desde configuración YAML
         :param data: Datos a validar
