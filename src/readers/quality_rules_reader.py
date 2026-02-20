@@ -163,12 +163,12 @@ class QualityRulesReader:
         
         return True
 
-    # TODO:◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤ ⎡ Advertencia ⎦ ◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤
+    # ◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤ ⎡ Advertencia ⎦ ◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤
 
     @staticmethod
     def apply_default_rules() -> dict[str, Any]:
         """
-        Devuelve configuración por defecto si falla la lectura (Puede sufrir cambios)
+        TODO: Devuelve configuración por defecto si falla la lectura (Puede sufrir cambios)
         :return: Configuración por defecto
         """
         return {
