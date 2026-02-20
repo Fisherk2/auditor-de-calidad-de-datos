@@ -20,34 +20,20 @@ class DataParser:
     """
 
     @staticmethod
-    def is_numeric_value(value: Any, numeric_rules: dict[str, Any]) -> bool:
+    def is_numeric_value(value: Any, numeric_rules: dict[str, Any] = None) -> bool:
         """
         Verifica si un valor puede ser convertido a número según reglas
         :param value: Valor a evaluar
-        :param numeric_rules: Reglas de configuración para tipo numérico
+        :param numeric_rules: Reglas de configuración para tipo numérico (opcional)
         :return: ¿Es un valor numérico válido según reglas?
         """
         if value is None:
             return False
         if isinstance(value, (int, float)):
-
-            # ■■■■■■■■■■■■■ Verificar reglas de valores permitidos ■■■■■■■■■■■■■
             num_value = float(value)
-            if not numeric_rules.get('allow_negative', True) and num_value < 0:
-                return False
-            min_value = numeric_rules.get('min_value')
-            if min_value is not None and num_value < min_value:
-                return False
-            max_value = numeric_rules.get('max_value')
-            if max_value is not None and num_value > max_value:
-                return False
-            return True
-
-        if isinstance(value, str):
-            try:
-                num_value = float(value)
-
-                # ■■■■■■■■■■■■■ Verificar reglas de valores permitidos ■■■■■■■■■■■■■
+            
+            # ■■■■■■■■■■■■■ Verificar reglas de valores permitidos ■■■■■■■■■■■■■
+            if numeric_rules:
                 if not numeric_rules.get('allow_negative', True) and num_value < 0:
                     return False
                 min_value = numeric_rules.get('min_value')
@@ -56,17 +42,33 @@ class DataParser:
                 max_value = numeric_rules.get('max_value')
                 if max_value is not None and num_value > max_value:
                     return False
+            return True
+
+        if isinstance(value, str):
+            try:
+                num_value = float(value)
+                
+                # ■■■■■■■■■■■■■ Verificar reglas de valores permitidos ■■■■■■■■■■■■■
+                if numeric_rules:
+                    if not numeric_rules.get('allow_negative', True) and num_value < 0:
+                        return False
+                    min_value = numeric_rules.get('min_value')
+                    if min_value is not None and num_value < min_value:
+                        return False
+                    max_value = numeric_rules.get('max_value')
+                    if max_value is not None and num_value > max_value:
+                        return False
                 return True
             except ValueError:
                 return False
         return False
 
     @staticmethod
-    def is_string_value(value: Any, text_rules: dict[str, Any]) -> bool:
+    def is_string_value(value: Any, text_rules: dict[str, Any] = None) -> bool:
         """
         Verifica si un valor es una cadena válida según reglas
         :param value: Valor a evaluar
-        :param text_rules: Reglas de configuración para tipo texto
+        :param text_rules: Reglas de configuración para tipo texto (opcional)
         :return: ¿Es una cadena válida según reglas?
         """
         if value is None:
@@ -75,26 +77,30 @@ class DataParser:
             str_value = str(value)
 
             # ■■■■■■■■■■■■■ Verificar reglas de longitud ■■■■■■■■■■■■■
-            min_length = text_rules.get('min_length', 1)
-            if len(str_value) < min_length:
-                return False
-            max_length = text_rules.get('max_length')
-            if max_length is not None and len(str_value) > max_length:
-                return False
+            if text_rules:
+                min_length = text_rules.get('min_length', 1)
+                if len(str_value) < min_length:
+                    return False
+                max_length = text_rules.get('max_length')
+                if max_length is not None and len(str_value) > max_length:
+                    return False
 
-            # ■■■■■■■■■■■■■ Verificar si permite cadenas vacias ■■■■■■■■■■■■■
-            if not text_rules.get('allow_empty_strings', False) and len(str_value.strip()) == 0:
-                return False
-            return len(str_value.strip()) > 0
+                # ■■■■■■■■■■■■■ Verificar si permite cadenas vacias ■■■■■■■■■■■■■
+                if not text_rules.get('allow_empty_strings', False) and len(str_value.strip()) == 0:
+                    return False
+                return len(str_value.strip()) > 0
+            else:
+                # Sin reglas: cualquier string no vacío es válido
+                return len(str_value.strip()) > 0
 
         return False
 
     @staticmethod
-    def is_bool_value(value: Any, boolean_rules: dict[str, Any]) -> bool:
+    def is_bool_value(value: Any, boolean_rules: dict[str, Any] = None) -> bool:
         """
         Verifica si un valor puede ser interpretado como booleano según reglas
         :param value: Valor a evaluar
-        :param boolean_rules: Reglas de configuración para tipo booleano
+        :param boolean_rules: Reglas de configuración para tipo booleano (opcional)
         :return: ¿Es un valor booleano válido según reglas?
         """
         if value is None:
@@ -105,18 +111,21 @@ class DataParser:
             lower_value = value.lower().strip()
 
             # ■■■■■■■■■■■■■ Usar interpretaciones configuradas ■■■■■■■■■■■■■
-            supported_interpretations = boolean_rules.get('supported_interpretations',
-                                                          ['true', 'false', '1', '0', 'yes', 'no', 'on', 'off'])
-            return lower_value in supported_interpretations
+            if boolean_rules:
+                supported_interpretations = boolean_rules.get('supported_interpretations',
+                                                              ['true', 'false', '1', '0', 'yes', 'no', 'on', 'off'])
+                return lower_value in supported_interpretations
+            else:
+                return lower_value in ['true', 'false', '1', '0', 'yes', 'no', 'on', 'off']
 
         return False
 
     @staticmethod
-    def is_null_value(value: Any, null_rules: dict[str, Any]) -> bool:
+    def is_null_value(value: Any, null_rules: dict[str, Any] = None) -> bool:
         """
         Verifica si un valor es nulo o representa un valor nulo según reglas
         :param value: Valor a evaluar
-        :param null_rules: Reglas de configuración para tipo nulo
+        :param null_rules: Reglas de configuración para tipo nulo (opcional)
         :return: ¿Es un valor nulo según reglas?
         """
         if value is None:
@@ -125,9 +134,12 @@ class DataParser:
             trimmed = value.lower().strip()
 
             # ■■■■■■■■■■■■■ Usar interpretaciones configuradas ■■■■■■■■■■■■■
-            supported_interpretations = null_rules.get('supported_interpretations',
-                                                       ['', 'null', 'none', 'na', 'n/a', '<null>'])
-            return trimmed in supported_interpretations
+            if null_rules:
+                supported_interpretations = null_rules.get('supported_interpretations',
+                                                           ['', 'null', 'none', 'na', 'n/a', '<null>'])
+                return trimmed in supported_interpretations
+            else:
+                return trimmed in ['', 'null', 'none', 'na', 'n/a', '<null>']
 
         return False
 
