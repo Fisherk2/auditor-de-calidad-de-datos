@@ -249,16 +249,25 @@ class QualityAuditor:
 
         # ■■■■■■■■■■■■■ Cargar umbrales desde configuración ■■■■■■■■■■■■■
         config = QualityAuditor._load_configuration(path_quality_rules)
-        thresholds = QualityAuditor._get_thresholds(config)
+        thresholds = QualityRulesReader.get_thresholds(config)
 
-        null_threshold = thresholds.get('max_null_percentage', 50.0)
-        low_uniqueness_threshold = thresholds.get('min_uniqueness_percentage', 10.0)
-        high_uniqueness_threshold = thresholds.get('max_uniqueness_percentage', 95.0)
+        # ■■■■■■■■■■■■■ Extraer umbrales para alertas ■■■■■■■■■■■■■
+        warning_thresholds = thresholds.get('warning', {})
+        critical_thresholds = thresholds.get('critical', {})
 
         thresholds_applied = {
-            "max_null_percentage": null_threshold,
-            "min_uniqueness_percentage": low_uniqueness_threshold,
-            "max_uniqueness_percentage": high_uniqueness_threshold
+            "null_percentage": {
+                "warning": warning_thresholds.get('null_percentage', 25.0),
+                "critical": critical_thresholds.get('null_percentage', 50.0)
+            },
+            "low_uniqueness": {
+                "warning": warning_thresholds.get('low_uniqueness', 10.0),
+                "critical": critical_thresholds.get('low_uniqueness', 5.0)
+            },
+            "high_uniqueness": {
+                "warning": warning_thresholds.get('high_uniqueness', 90.0),
+                "critical": critical_thresholds.get('high_uniqueness', 95.0)
+            }
         }
 
         # ■■■■■■■■■■■■■ Aplicar exclusiones antes de análisis ■■■■■■■■■■■■■
@@ -272,13 +281,21 @@ class QualityAuditor:
         for column in count_nulls.keys():
             nulls = count_nulls[column]
             percent_nulls = (nulls / total_rows) * 100.0
-            if percent_nulls >= null_threshold:
-                alert_level = "CRÍTICA" if percent_nulls >= null_threshold * 1.5 else "ADVERTENCIA"
-                message = f"""
+
+            # ▲▲▲▲▲▲ Determinar nivel de alerta para nulos ▲▲▲▲▲▲
+            if percent_nulls >= critical_thresholds.get('null_percentage', 50.0):
+                alert_level = "CRÍTICA"
+            elif percent_nulls >= warning_thresholds.get('null_percentage', 25.0):
+                alert_level = "ADVERTENCIA"
+            else:
+                continue
+
+            message = f"""
                 {alert_level}: Columna '{column}' tiene {round(percent_nulls, 2)}% de valores nulos
-                (umbral: {null_threshold}%)
+                (umbral crítica: {critical_thresholds.get('null_percentage', 50.0)}%, 
+                umbral advertencia: {warning_thresholds.get('null_percentage', 25.0)}%)
                 """
-                alerts.append(message)
+            alerts.append(message)
 
         # ■■■■■■■■■■■■■ Analisis de unicidad con umbrales configurados ■■■■■■■■■■■■■
         uniqueness_result = UniquenessAnalyzer.calculate_uniqueness(filtered_data, path_quality_rules)
@@ -286,20 +303,33 @@ class QualityAuditor:
 
         for column in uniqueness.keys():
             percent_uniqueness = uniqueness[column]
-            if percent_uniqueness <= low_uniqueness_threshold:
-                alert_level = "CRÍTICA" if percent_uniqueness <= low_uniqueness_threshold * 0.5 else "ADVERTENCIA"
+
+            # ▲▲▲▲▲ Determinar nivel de alerta para unicidad baja ▲▲▲▲▲
+            if percent_uniqueness <= critical_thresholds.get('low_uniqueness', 5.0):
+                alert_level = "CRÍTICA"
+            elif percent_uniqueness <= warning_thresholds.get('low_uniqueness', 10.0):
+                alert_level = "ADVERTENCIA"
+            # ▲▲▲▲▲ Determinar nivel de alerta para unicidad alta ▲▲▲▲▲
+            elif percent_uniqueness >= critical_thresholds.get('high_uniqueness', 95.0):
+                alert_level = "INFO"
+            elif percent_uniqueness >= warning_thresholds.get('high_uniqueness', 90.0):
+                alert_level = "ADVERTENCIA"
+            else:
+                continue
+
+            if percent_uniqueness <= warning_thresholds.get('low_uniqueness', 10.0):
                 message = f"""
                 {alert_level}: Columna '{column}' tiene baja unicidad: {round(percent_uniqueness, 2)}%
-                (umbral bajo: {low_uniqueness_threshold}%)
+                (umbral crítica: {critical_thresholds.get('low_uniqueness', 5.0)}%, 
+                umbral advertencia: {warning_thresholds.get('low_uniqueness', 10.0)}%)
                 """
-                alerts.append(message)
-            elif percent_uniqueness >= high_uniqueness_threshold:
-                alert_level = "INFO" if percent_uniqueness >= high_uniqueness_threshold * 1.1 else "ADVERTENCIA"
+            else:
                 message = f"""
                 {alert_level}: Columna '{column}' tiene alta unicidad: {round(percent_uniqueness, 2)}%
-                (umbral alto: {high_uniqueness_threshold}%)
+                (umbral advertencia: {warning_thresholds.get('high_uniqueness', 90.0)}%, 
+                umbral crítica: {critical_thresholds.get('high_uniqueness', 95.0)}%)
                 """
-                alerts.append(message)
+            alerts.append(message)
 
         # ■■■■■■■■■■■■■ Alertas adicionales basadas en análisis estadístico ■■■■■■■■■■■■■
         statistical_result = StatisticalAnalyzer.summary_stadistic(filtered_data, path_quality_rules)
@@ -383,20 +413,3 @@ class QualityAuditor:
                 filtered_data.append(row)
 
         return filtered_data
-
-    @staticmethod
-    def _get_thresholds(config: dict[str, Any]) -> dict[str, float]:
-        """
-        Obtiene umbrales de alerta desde configuración
-        :param config: Configuración cargada
-        :return: Diccionario con umbrales
-        """
-        thresholds_config = config.get('quality_rules', {}).get('thresholds', {})
-
-        return {
-            'max_null_percentage': thresholds_config.get('max_null_percentage', 50.0),
-            'min_uniqueness_percentage': thresholds_config.get('min_uniqueness_percentage', 10.0),
-            'max_uniqueness_percentage': thresholds_config.get('max_uniqueness_percentage', 95.0),
-            'warning_threshold': thresholds_config.get('warning_threshold', 0.1),
-            'critical_threshold': thresholds_config.get('critical_threshold', 0.05)
-        }
