@@ -1,12 +1,3 @@
-# Validador de CSV para Pipelines de Datos
+# Auditor de calidad Validador de CSV para Pipelines de Datos
 # Este proyecto utiliza únicamente bibliotecas estándar de Python
 # No requiere dependencias externas adicionales
-
-# Bibliotecas estándar utilizadas:
-# - csv: Para lectura de archivos CSV
-# - typing: Para anotaciones de tipo
-# - os: Para operaciones con archivos
-# - sys: Para manipulación del sistema
-# - logging: Para registro de eventos
-# - io: Para operaciones de entrada/salida
-# - collections: Para estructuras de datos avanzadas
